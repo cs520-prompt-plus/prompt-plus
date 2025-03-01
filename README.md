@@ -1,4 +1,4 @@
-#Overview 
+## Project Overview 
 
 For our project, we want to create a website that enhances user prompts that are meant for LLM’s. We plan to follow prompt patterns that dictate an optimal prompt design. This tool can give users feedback in core areas, explaining how the prompt can be improved and incorporating these changes into a new prompt. This process will be an iterative one, as the user can continue to highlight sections they would like to rephrase or add additional context to.
 
