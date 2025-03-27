@@ -1,47 +1,37 @@
-# Prisma FastApi
+## First Time Install
 
-[![CI](https://github.com/prisma-korea/prisma-fastapi/actions/workflows/main.yml/badge.svg)](https://github.com/prisma-korea/prisma-fastapi/actions/workflows/main.yml)
+Create your `.env` file in the root project directory, you can copy `.env.sample` as the base for this.
 
-## Blog post
-- [Medium](https://medium.com/dooboolab/prisma-with-python-and-fastapi-33bf25bb20c0)
+`docker compose up --build`
 
-## Setup virtual environment
+A sample User schema has been created to allow the prisma client to generate upon project creation. This should be
+modified or deleted to fit your app's needs prior to creating any migrations.
 
-```sh
-python -m venv .venv
-source .venv/bin/activate
+## Migrations
+
+This project is using [prisma](https://www.prisma.io/) as the ORM
+
+### Pushing migrations to the database
+
+The migrations can be pushed to the running postgresql container using the
+schema and migrations found in `./prisma/migrations`.
+
+```shell
+prisma db push --schema prisma/schema.prisma
 ```
 
-## Install requirements
+### Creating migrations
 
-```sh
-pip install -r requirements.txt
+Migrations can be created by using this command, while the database is running.
+
+```shell
+prisma migrate dev --schema prisma/schema.prisma --name "what this change does"
 ```
 
-## Setup environment
-1. cp `.env.sample` `.env`
-2. Include `DATABASE_URL`
-   ```
-   DATABASE_URL="postgresql://<user>:<password>@<url>:5432/postgres?schema=<scheme>"
-   ```
-   > Note that you should change appropriate values in `user`, `password`, `url`, `scheme` fields. Or you can even use other database. More about [connection urls](https://www.prisma.io/docs/reference/database-connectors/connection-urls)
+## Pre-commit
 
-## Generate Prisma Client and Nexus
+Install pre-commit to make sure you never fail linting in CI.
 
-```sh
-prisma generate
-```
-
-## Start server
-
-```sh
-uvicorn main:app --reload
-```
-
-## Notes
-
-> After installing packages
-
-```sh
-pip freeze > requirements.txt
+```shell
+poetry run pre-commit install
 ```

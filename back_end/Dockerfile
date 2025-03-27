@@ -1,21 +1,19 @@
-# Use official Python image
-FROM python:3.12
+FROM ghcr.io/owl-corp/python-poetry-base:3.11-slim
 
-# Set the working directory
+ADD poetry.lock pyproject.toml ./
+RUN poetry install --no-root \
+    && poetry run prisma generate
+
 WORKDIR /app
+ADD ./app ./app
+ADD ./prisma ./prisma
 
-# Copy requirements first for better caching
-COPY requirements.txt .
+EXPOSE 80
 
-# Install dependencies
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# Pull the uvicorn_extra build arg and ave it as an env var.
+# The CMD instruction is ran at execution time, so it also needs to be an env var, so that it is available at that time.
+ARG uvicorn_extras=""
+ENV uvicorn_extras=$uvicorn_extras
 
-# Copy application files
-COPY . .
-
-# Expose FastAPI default port
-EXPOSE 8000
-
-# Command to run the FastAPI app
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+ENTRYPOINT ["/bin/bash", "-c"]
+CMD ["poetry run prisma db push --schema prisma/schema.prisma && poetry run uvicorn app:app --host 0.0.0.0 --port 80 $uvicorn_extras"]
