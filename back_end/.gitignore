@@ -1,0 +1,49 @@
+__pycache__
+.venv
+.env
+.idea
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.env/
+.venv/
+
+# FastAPI environment variables
+.env
+*.env
+
+# Editor & IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs and databases
+*.log
+logs/
+*.sqlite3
+*.db
+
+# Python dependency management
+Pipfile
+Pipfile.lock
+poetry.lock
+
+# Docker & CI/CD
+docker-compose.override.yml
+.envrc
+*.bak
+
+# Pytest and coverage
+.coverage
+htmlcov/
+*.cover
+.cache/
+nosetests.xml
+coverage.xml
+pytest_cache/
