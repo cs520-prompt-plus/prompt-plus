@@ -17,7 +17,7 @@ Navigate to the frontend directory, install dependencies, and start the developm
 ```
 2. Navigate to the frontend directory and start the services:
 ```sh
-    cd front_end
-    npm install
-    npm run dev
+cd front_end
+npm install
+npm run dev
 ```
