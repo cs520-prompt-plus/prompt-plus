@@ -10,12 +10,12 @@ they should include in future prompts.
 ## Running the Project
 
 1. Navigate to the backend directory and start the services:
-   ```sh
-   cd back_end
-   docker compose up -d
-   Navigate to the frontend directory, install dependencies, and start the development server:
-   ```
-
+```sh
+cd back_end
+docker compose up -d
+Navigate to the frontend directory, install dependencies, and start the development server:
+```
+2. Navigate to the frontend directory and start the services:
 ```sh
     cd front_end
     npm install
