@@ -16,9 +16,8 @@ they should include in future prompts.
    Navigate to the frontend directory, install dependencies, and start the development server:
    ```
 
-sh
-Copy
-Edit
-cd front_end
-npm install
-npm run dev
+```sh
+    cd front_end
+    npm install
+    npm run dev
+```
