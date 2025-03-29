@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "fastapi-template"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.92.0"
+uvicorn = "^0.20.0"
+prisma = "^0.8.1"
+pydantic = {extras = ["dotenv"], version = "^1.10.5"}
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^6.0.0"
+pre-commit = "^3.0.4"
+pyright = "^1.1.294"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
