@@ -9,12 +9,13 @@ they should include in future prompts.
 
 ## Running the Project
 
-1. Navigate to the backend directory and start the services:
+1. Navigate to the back_end directory and start the services:
+Create your `.env` file in the backend project directory, you can copy `.env.sample` as the base for this.
 ```sh
 cd back_end
 docker compose up -d
 ```
-2. Navigate to the frontend directory and start the services:
+2. Navigate to the front_end directory and start the services:
 ```sh
 cd front_end
 npm install
