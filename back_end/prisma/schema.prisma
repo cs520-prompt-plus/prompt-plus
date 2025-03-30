@@ -6,7 +6,33 @@ generator client {
   provider             = "prisma-client-py"
   recursive_type_depth = -1
 }
+
 model User {
-  id       Int    @id @default(autoincrement())
-  username String @unique
+  user_id   String   @id @default(uuid())
+  name      String
+  email     String  
+  password  String
+  responses Response[]
+  components ResponseComponent[]
+}
+
+model Response {
+  response_id String   @id @default(uuid())
+  input       String
+  output      String
+  created_at  DateTime @default(now())
+  user        User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user_id     String
+  components  ResponseComponent[]
+}
+
+model ResponseComponent {
+  component_id String   @id @default(uuid())
+  subject      String
+  input        String
+  output       String
+  user         User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user_id      String
+  response     Response @relation(fields: [response_id], references: [response_id], onDelete: Cascade)
+  response_id  String
 }
