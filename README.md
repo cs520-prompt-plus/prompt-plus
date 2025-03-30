@@ -10,6 +10,7 @@ they should include in future prompts.
 ## Running the Project
 
 1. Navigate to the back_end directory and start the services:
+   
 Create your `.env` file in the backend project directory, you can copy `.env.sample` as the base for this.
 ```sh
 cd back_end
