@@ -13,7 +13,6 @@ they should include in future prompts.
 ```sh
 cd back_end
 docker compose up -d
-Navigate to the frontend directory, install dependencies, and start the development server:
 ```
 2. Navigate to the frontend directory and start the services:
 ```sh
