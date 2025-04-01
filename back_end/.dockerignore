@@ -3,5 +3,6 @@
 # Ignore all and make exceptions
 !app
 !prisma
+!prisma/schema.prisma
 !poetry.lock
 !pyproject.toml

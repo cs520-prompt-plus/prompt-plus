@@ -5,6 +5,7 @@ from typing import List
 from app.dependencies import use_logging
 from app.middleware import LoggingMiddleware
 from app.types.response import ResponseCreate, ResponseRead, ResponseComponentCreate, ResponseComponentRead, ResponseComponentUpdate, ResponseUpdate
+from app.generation_pipeline import generate_response
 
 app = FastAPI(prefix="/api/v1")
 app.add_middleware(LoggingMiddleware, fastapi=app)
@@ -26,7 +27,7 @@ async def create_response(response: ResponseCreate):
         data={
             "user_id": response.user_id,
             "input": response.input,
-            "output": response.output,
+            "output": await generate_response(response.input),
         }
     )
     return new_response
