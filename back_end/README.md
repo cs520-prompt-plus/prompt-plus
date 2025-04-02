@@ -35,3 +35,10 @@ Install pre-commit to make sure you never fail linting in CI.
 ```shell
 poetry run pre-commit install
 ```
+
+### Testing
+
+To run tests, make sure you are in back_end directory. Then run the following command.
+```shell
+python -m  pytest -s ./app/test/db_test.py
+```
