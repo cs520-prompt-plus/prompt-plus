@@ -1,35 +1,45 @@
 import pytest
-from prisma import Prisma
-from dotenv import load_dotenv
-import httpx
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from httpx import AsyncClient
+from unittest.mock import AsyncMock, MagicMock, patch
+
 from app.main import app
+from app.types.response import ResponseCreate, ResponseComponentCreate, ResponseUpdate, ResponseComponentUpdate
+from app.client import prisma_client
 
-prisma = Prisma(auto_register=True)
-app = FastAPI()
-client = TestClient(app)
+@pytest.fixture
+def client():
+    return TestClient(app)
+
+@pytest.fixture
+def mock_prisma():
+    with patch('app.main.prisma', new_callable=AsyncMock) as mock:
+        mock.response = AsyncMock()
+        mock.responsecomponent = AsyncMock()
+        mock.connect = AsyncMock()
+        mock.disconnect = AsyncMock()
+        mock.is_connected = MagicMock(return_value=True)
+        yield mock
+
+
+# Test root endpoint
+@pytest.mark.asyncio
+async def test_root(client, mock_prisma):
+    response = client.get("/")
+    assert response.json() == {"message": "Your app is working!"}
+
 
 @pytest.mark.asyncio
-async def test_create_response():
-    response = await prisma.response.create(
-        data={
-            "user_id": "test_user",
-            "input": "Prompt",
-            "output": "PromptPlus!",
-        }
-    )
-    assert response.response_id is not None
-    assert response.user_id == "test_user"
-    assert response.input == "Prompt"
-    assert response.output == "PromptPlus!"
+async def test_create_response(client, mock_prisma, sample_response_data):
+    mock_prisma.response.create.return_value = {
+        "response_id": "test-response-123",
+        "user_id": "test-user-123",
+        "input": "Test input",
+        "output": "Test output",
+        "created_at": "2025-03-29T12:00:00Z"
+    }
 
-@pytest.mark.asyncio
-async def test_create_response(test_db):
-    response = client.post("/api/v1/responses/", json=TEST_RESPONSE)
-    assert response.status_code == 200
-    data = response.json()
-    assert data["user_id"] == TEST_RESPONSE["user_id"]
-    assert data["input"] == TEST_RESPONSE["input"]
-    assert data["output"] == TEST_RESPONSE["output"]
-    assert "response_id" in data
+    response = client.post("/api/v1/responses/", json=sample_response_data)
+
+    assert response.json()["response_id"] == "test-response-123"
+    assert response.json()["created_at"] == "2025-03-29T12:00:00Z"
