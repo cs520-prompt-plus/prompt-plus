@@ -5,7 +5,6 @@ from typing import Optional
 class ResponseCreate(BaseModel):
     user_id: str
     input: str
-    output: str
 
 class ResponseRead(BaseModel):
     response_id: str
