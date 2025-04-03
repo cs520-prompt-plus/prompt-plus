@@ -5,11 +5,11 @@ from typing import List
 from app.dependencies import use_logging
 from app.middleware import LoggingMiddleware
 from app.types.response import ResponseCreate, ResponseRead, ResponseComponentCreate, ResponseComponentRead, ResponseComponentUpdate, ResponseUpdate
-
+from app.client import prisma_client as prisma, connect_db, disconnect_db
 app = FastAPI(prefix="/api/v1")
 app.add_middleware(LoggingMiddleware, fastapi=app)
 
-prisma = Prisma(auto_register=True)
+# prisma = Prisma(auto_register=True)
 
 @app.get("/")
 async def root(logger=Depends(use_logging)):
@@ -156,3 +156,4 @@ async def startup() -> None:
 async def shutdown() -> None:
     if prisma.is_connected():
         await prisma.disconnect()
+
