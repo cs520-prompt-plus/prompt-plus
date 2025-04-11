@@ -2,6 +2,21 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
+class UserCreate(BaseModel):
+    name: str
+    email: str
+    password: str
+
+class UserRead(BaseModel):
+    user_id: str
+    name: str
+    email: str
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None
+
 class ResponseCreate(BaseModel):
     user_id: str
     input: str
