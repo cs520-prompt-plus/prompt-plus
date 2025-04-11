@@ -34,6 +34,9 @@ class LoggingMiddleware:
 
         # Steal log handler and log level from uvicorn
         uvicorn_logger = logging.getLogger("uvicorn.access")
+        
+        if not uvicorn_logger.handlers:
+            return
         app_logger.setLevel(uvicorn_logger.level)
         # This should always exist as we only use uvicorn
         use_color = uvicorn_logger.handlers[0].formatter.use_colors  # type: ignore[reportOptionalMemberAccess]

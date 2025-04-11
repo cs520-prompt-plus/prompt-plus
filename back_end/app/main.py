@@ -4,12 +4,14 @@ from typing import List
 
 from app.dependencies import use_logging
 from app.middleware import LoggingMiddleware
-from app.types.response import ResponseCreate, ResponseRead, ResponseComponentCreate, ResponseComponentRead, ResponseComponentUpdate, ResponseUpdate
+from app.types.response import ResponseCreate, ResponseRead, ResponseComponentCreate, ResponseComponentRead, ResponseComponentUpdate, ResponseUpdate, UserRead, UserCreate, UserUpdate
+from app.generation_pipeline import generate_response
+from app.client import prisma_client as prisma, connect_db, disconnect_db
 
 app = FastAPI(prefix="/api/v1")
 app.add_middleware(LoggingMiddleware, fastapi=app)
 
-prisma = Prisma(auto_register=True)
+# prisma = Prisma(auto_register=True)
 
 @app.get("/")
 async def root(logger=Depends(use_logging)):
@@ -26,7 +28,7 @@ async def create_response(response: ResponseCreate):
         data={
             "user_id": response.user_id,
             "input": response.input,
-            "output": response.output,
+            "output": await generate_response(response.input),
         }
     )
     return new_response
@@ -148,6 +150,58 @@ async def delete_response_component(component_id: str):
     return {"message": "ResponseComponent deleted successfully"}
 
 
+# User CRUD
+
+# Endpoint to create a User
+@app.post("/api/v1/users/", response_model=UserRead)
+async def create_user(user: UserCreate):
+    new_user = await prisma.user.create(
+        data={
+            "name": user.name,
+            "email": user.email,
+            "password": user.password,
+        }
+    )
+    return new_user
+
+# Endpoint to retrieve all Users
+@app.get("/api/v1/users/", response_model=List[UserRead])
+async def get_all_users():
+    users = await prisma.user.find_many()
+    return users
+
+# Endpoint to retrieve a User by user_id
+@app.get("/api/v1/users/{user_id}", response_model=UserRead)
+async def get_user(user_id: str):
+    user = await prisma.user.find_unique(where={"user_id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+# Endpoint to update a User by user_id
+@app.put("/api/v1/users/{user_id}", response_model=UserRead)
+async def update_user(user_id: str, user: UserUpdate):
+    existing_user = await prisma.user.find_unique(where={"user_id": user_id})
+    if not existing_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    updated_user = await prisma.user.update(
+        where={"user_id": user_id},
+        data=user.dict(exclude_unset=True)
+    )
+    return updated_user
+
+# Endpoint to delete a User by user_id
+@app.delete("/api/v1/users/{user_id}")
+async def delete_user(user_id: str):
+    user = await prisma.user.find_unique(where={"user_id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    await prisma.user.delete(where={"user_id": user_id})
+    return {"message": "User deleted successfully"}
+
+
 @app.on_event("startup")
 async def startup() -> None:
     await prisma.connect()
@@ -156,3 +210,4 @@ async def startup() -> None:
 async def shutdown() -> None:
     if prisma.is_connected():
         await prisma.disconnect()
+
