@@ -256,7 +256,8 @@ export default function PlaygroundPage() {
                 <TabsContent value="complete" className="mt-0 border-0 p-0">
                   <div className="flex h-full flex-col space-y-4">
                     <Textarea
-                      placeholder="Write a tagline for an ice cream shop"
+                      placeholder="Enhance my prompt for building a web application: 
+                      I want to build a web application that allows users to create and share their own recipes."
                       className="min-h-[400px]  flex-1 p-4 md:min-h-[700px] lg:min-h-[700px]"
                     />
                     <div className="flex items-center space-x-2">
@@ -272,7 +273,7 @@ export default function PlaygroundPage() {
                   <div className="flex flex-col space-y-4">
                     <div className="grid h-full grid-rows-2 gap-6 lg:grid-cols-2 lg:grid-rows-1">
                       <Textarea
-                        placeholder="We're writing to [inset]. Congrats from OpenAI!"
+                        placeholder="Here is my prompt: I want to build a web application that allows users to create and share their own recipes."
                         className="h-full min-h-[300px] lg:min-h-[700px] xl:min-h-[700px]"
                       />
                       <div className="rounded-md border bg-muted"></div>
@@ -294,7 +295,7 @@ export default function PlaygroundPage() {
                           <Label htmlFor="input">Input</Label>
                           <Textarea
                             id="input"
-                            placeholder="We is going to the market."
+                            placeholder="Here is my prompt: I want to build a web application that allows users to create and share their own recipes."
                             className="flex-1 lg:min-h-[580px]"
                           />
                         </div>

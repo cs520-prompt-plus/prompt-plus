@@ -19,8 +19,7 @@ export function PresetShare() {
         <div className="flex flex-col space-y-2 text-center sm:text-left">
           <h3 className="text-lg font-semibold">Share preset</h3>
           <p className="text-sm text-muted-foreground">
-            Anyone who has this link and an OpenAI account will be able to view
-            this.
+            Anyone who has this link and an account will be able to view this.
           </p>
         </div>
         <div className="flex items-center space-x-2 pt-4">
@@ -30,7 +29,7 @@ export function PresetShare() {
             </Label>
             <Input
               id="link"
-              defaultValue="https://platform.openai.com/playground/p/7bbKYQvsVkNmVb8NGcdUOLae?model=text-davinci-003"
+              defaultValue="https://promptplus.com/preset/1234567890"
               readOnly
               className="h-9"
             />
