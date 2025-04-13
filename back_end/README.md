@@ -40,5 +40,5 @@ poetry run pre-commit install
 
 To run tests, make sure you are in back_end directory. Then run the following command.
 ```shell
-python -m  pytest -s ./app/test/db_test.py
+python -m  pytest ./app/test/db_test.py
 ```
