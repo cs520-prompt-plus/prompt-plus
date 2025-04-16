@@ -1,8 +1,19 @@
 "use client";
+import { Edit, RotateCcw } from "lucide-react";
 import { Metadata } from "next";
 import Image from "next/image";
-import { Edit, RotateCcw } from "lucide-react";
 
+import { models, types, Model } from "@/components/data/models";
+import { presets } from "@/components/data/presets";
+import { CodeViewer } from "@/components/pages/main/code-viewer";
+import { MaxLengthSelector } from "@/components/pages/main/maxlength-selector";
+import { ModelSelector } from "@/components/pages/main/model-selector";
+import { PresetActions } from "@/components/pages/main/preset-actions";
+import { PresetSave } from "@/components/pages/main/preset-save";
+import { PresetSelector } from "@/components/pages/main/preset-selector";
+import { PresetShare } from "@/components/pages/main/preset-share";
+import { TemperatureSelector } from "@/components/pages/main/temperature-selector";
+import { TopPSelector } from "@/components/pages/main/top-p-selector";
 import { Button } from "@/components/ui/button";
 import {
   HoverCard,
@@ -13,21 +24,10 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { CodeViewer } from "@/components/pages/main/code-viewer";
-import { MaxLengthSelector } from "@/components/pages/main/maxlength-selector";
-import { ModelSelector } from "@/components/pages/main/model-selector";
-import { PresetActions } from "@/components/pages/main/preset-actions";
-import { PresetSave } from "@/components/pages/main/preset-save";
-import { PresetSelector } from "@/components/pages/main/preset-selector";
-import { PresetShare } from "@/components/pages/main/preset-share";
-import { TemperatureSelector } from "@/components/pages/main/temperature-selector";
-import { TopPSelector } from "@/components/pages/main/top-p-selector";
-import { models, types } from "@/components/data/models";
-import { presets } from "@/components/data/presets";
-import { Complete } from "../icons/Complete";
-import { Insert } from "../icons/Insert";
-import { VerticalStepper } from "./main/stepper";
 import React from "react";
+import { Complete } from "../icons/Complete";
+import { ChatDemo } from "./main/chatBot";
+import { VerticalStepper } from "./main/stepper";
 
 export const metadata: Metadata = {
   title: "Playground",
@@ -36,8 +36,9 @@ export const metadata: Metadata = {
 
 export default function PlaygroundPage() {
   const [step, setStep] = React.useState(0);
+  const [selectedModel, setSelectedModel] = React.useState<Model>(models[0]);
   return (
-    <>
+    <div className="p-10 h-full w-full ">
       <div className="md:hidden">
         <Image
           src="/examples/playground-light.png"
@@ -68,7 +69,7 @@ export default function PlaygroundPage() {
           </div>
         </div>
         <Separator />
-        <div className="container flex w-full items-center justify-between space-x-2 h-full flex-col py-4">
+        <div className="container flex w-full items-center justify-between space-x-2 h-full py-4">
           <Tabs
             defaultValue="complete"
             className="flex-1 h-full w-full justify-center items-center"
@@ -98,29 +99,31 @@ export default function PlaygroundPage() {
                         <span className="sr-only">Complete</span>
                         <Complete />
                       </TabsTrigger>
-                      <TabsTrigger value="insert">
-                        <span className="sr-only">Insert</span>
-                        <Insert />
-                      </TabsTrigger>
                       <TabsTrigger value="edit">
                         <span className="sr-only">Edit</span>
                         <Edit />
                       </TabsTrigger>
                     </TabsList>
                   </div>
-                  <ModelSelector types={types} models={models} />
+                  <ModelSelector
+                    types={types}
+                    models={models}
+                    selectedModel={selectedModel}
+                    setSelectedModel={setSelectedModel}
+                  />
                   <TemperatureSelector defaultValue={[0.56]} />
                   <MaxLengthSelector defaultValue={[256]} />
                   <TopPSelector defaultValue={[0.9]} />
                 </div>
-                <div className="md:order-1 h-full w-full flex flex-col ">
+                <div className="md:order-1 h-full w-full flex flex-col gap-2 ">
                   <VerticalStepper step={step} handleStep={setStep} />
+
                   <TabsContent value="complete" className="mt-0 border-0 p-0">
                     <div className="flex h-full flex-col space-y-4">
                       <Textarea
                         placeholder="Enhance my prompt for building a web application: 
                       I want to build a web application that allows users to create and share their own recipes."
-                        className="min-h-[400px]  flex-1 p-4 md:min-h-[700px] lg:min-h-[700px]"
+                        className="p-4 flex-1"
                       />
                       <div className="flex items-center space-x-2">
                         <Button>Submit</Button>
@@ -131,34 +134,22 @@ export default function PlaygroundPage() {
                       </div>
                     </div>
                   </TabsContent>
-                  <TabsContent value="insert" className="mt-0 border-0 p-0">
+                  <TabsContent
+                    value="edit"
+                    className="mt-0 border-0 p-0 flex gap-2"
+                  >
                     <div className="flex flex-col space-y-4">
-                      <div className="grid h-full grid-rows-2 gap-6 lg:grid-cols-2 lg:grid-rows-1">
-                        <Textarea
-                          placeholder="Here is my prompt: I want to build a web application that allows users to create and share their own recipes."
-                          className="h-full min-h-[300px] lg:min-h-[700px] xl:min-h-[700px]"
-                        />
-                        <div className="rounded-md border bg-muted"></div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button>Submit</Button>
-                        <Button variant="secondary">
-                          <span className="sr-only">Show history</span>
-                          <RotateCcw />
-                        </Button>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="edit" className="mt-0 border-0 p-0">
-                    <div className="flex flex-col space-y-4">
-                      <div className="grid h-full gap-6 lg:grid-cols-2">
+                      <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
+                        System Prompt
+                      </h2>
+                      <div className="grid h-full gap-6 ">
                         <div className="flex flex-col space-y-4">
                           <div className="flex flex-1 flex-col space-y-2">
                             <Label htmlFor="input">Input</Label>
                             <Textarea
                               id="input"
                               placeholder="Here is my prompt: I want to build a web application that allows users to create and share their own recipes."
-                              className="flex-1 lg:min-h-[580px]"
+                              className="flex-1 h-[40vh]"
                             />
                           </div>
                           <div className="flex flex-col space-y-2">
@@ -169,7 +160,6 @@ export default function PlaygroundPage() {
                             />
                           </div>
                         </div>
-                        <div className="mt-[21px] min-h-[400px] rounded-md border bg-muted lg:min-h-[700px]" />
                       </div>
                       <div className="flex items-center space-x-2">
                         <Button>Submit</Button>
@@ -179,6 +169,7 @@ export default function PlaygroundPage() {
                         </Button>
                       </div>
                     </div>
+                    <ChatDemo model={selectedModel.name} />
                   </TabsContent>
                 </div>
               </div>
@@ -186,6 +177,6 @@ export default function PlaygroundPage() {
           </Tabs>
         </div>
       </div>
-    </>
+    </div>
   );
 }

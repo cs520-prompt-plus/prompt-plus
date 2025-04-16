@@ -1,4 +1,4 @@
-export const types = ["GPT-3", "Codex"] as const;
+export const types = ["OpenAI", "DeepSeek", "Meta LLaMA", "xAI Grok"] as const;
 
 export type ModelType = (typeof types)[number];
 
@@ -12,51 +12,73 @@ export interface Model<Type = string> {
 
 export const models: Model<ModelType>[] = [
   {
-    id: "c305f976-8e38-42b1-9fb7-d21b2e34f0da",
-    name: "text-davinci-003",
+    id: "dfb3c6f4-92e7-4b9f-9c64-df11d7f6e9d2",
+    name: "deepseek-coder",
     description:
-      "Most capable GPT-3 model. Can do any task the other models can do, often with higher quality, longer output and better instruction-following. Also supports inserting completions within text.",
-    type: "GPT-3",
+      "DeepSeek Coder excels at translating complex instructions into optimized code. Strong at long-context reasoning, debugging, and structured output generation.",
+    type: "DeepSeek",
     strengths:
-      "Complex intent, cause and effect, creative generation, search, summarization for audience",
+      "Code synthesis, long-context reasoning, debugging, data structure transformation",
   },
   {
-    id: "464a47c3-7ab5-44d7-b669-f9cb5a9e8465",
-    name: "text-curie-001",
-    description: "Very capable, but faster and lower cost than Davinci.",
-    type: "GPT-3",
+    id: "f2b1ce90-1111-4d7e-8f20-8f9ddfa6f39c",
+    name: "llama-3-70b",
+    description:
+      "Meta's LLaMA 3, 70B parameter model, excels in open-ended dialogue and instruction following. Strong balance between reasoning and speed.",
+    type: "Meta LLaMA",
+    strengths: "Chatbots, summarization, instruction following, few-shot tasks",
+  },
+  {
+    id: "d7b58a97-2ea1-4205-9c99-fb2a99dc23b4",
+    name: "grok-1",
+    description:
+      "xAI's Grok model tuned for conversational intelligence and wit. Strong reasoning engine with a personality. Well-integrated with real-time knowledge (X).",
+    type: "xAI Grok",
     strengths:
-      "Language translation, complex classification, sentiment, summarization",
+      "Conversational reasoning, pop culture, dynamic knowledge, real-time integration",
   },
   {
-    id: "ac0797b0-7e31-43b6-a494-da7e2ab43445",
-    name: "text-babbage-001",
-    description: "Capable of straightforward tasks, very fast, and lower cost.",
-    type: "GPT-3",
-    strengths: "Moderate classification, semantic search",
-  },
-  {
-    id: "be638fb1-973b-4471-a49c-290325085802",
-    name: "text-ada-001",
+    id: "a1b2c3d4-e5f6-7890-a1b2-c3d4e5f67890",
+    name: "gpt-4.1",
     description:
-      "Capable of very simple tasks, usually the fastest model in the GPT-3 series, and lowest cost.",
-    type: "GPT-3",
+      "Advanced multimodal model excelling in coding, instruction following, and long-context comprehension. Supports up to 1 million tokens and outperforms GPT-4o in coding tasks.",
+    type: "OpenAI",
     strengths:
-      "Parsing text, simple classification, address correction, keywords",
+      "Coding, complex instruction following, long-context tasks, building AI agents",
   },
   {
-    id: "b43c0ea9-5ad4-456a-ae29-26cd77b6d0fb",
-    name: "code-davinci-002",
+    id: "b2c3d4e5-f6a7-8901-b2c3-d4e5f6789012",
+    name: "gpt-4.1-mini",
     description:
-      "Most capable Codex model. Particularly good at translating natural language to code. In addition to completing code, also supports inserting completions within code.",
-    type: "Codex",
+      "Efficient version of GPT-4.1, matching or exceeding GPT-4o performance with lower latency and cost. Ideal for rapid coding and instruction tasks.",
+    type: "OpenAI",
+    strengths: "Fast coding, instruction following, cost-efficient processing",
   },
   {
-    id: "bbd57291-4622-4a21-9eed-dd6bd786fdd1",
-    name: "code-cushman-001",
+    id: "c3d4e5f6-a7b8-9012-c3d4-e5f678901234",
+    name: "gpt-4.1-nano",
     description:
-      "Almost as capable as Davinci Codex, but slightly faster. This speed advantage may make it preferable for real-time applications.",
-    type: "Codex",
-    strengths: "Real-time application where low-latency is preferable",
+      "Fastest and cheapest GPT-4.1 variant, optimized for classification, autocompletion, and lightweight tasks with minimal latency.",
+    type: "OpenAI",
+    strengths:
+      "Classification, autocompletion, lightweight tasks, low-latency applications",
+  },
+  {
+    id: "d4e5f6a7-b8c9-0123-d4e5-f67890123456",
+    name: "o3",
+    description:
+      "Advanced reasoning model designed for complex multistep problems in coding, math, science, and visual tasks. Integrates image analysis and tool usage for agentic workflows.",
+    type: "OpenAI",
+    strengths:
+      "Complex reasoning, coding, visual reasoning, multistep problem-solving",
+  },
+  {
+    id: "f6a7b8c9-d0e1-2345-f6a7-b89012345678",
+    name: "llama-3-8b",
+    description:
+      "Meta's LLaMA 3, 8B parameter model, optimized for lightweight tasks and rapid inference. Ideal for resource-constrained environments and efficient processing.",
+    type: "Meta LLaMA",
+    strengths:
+      "Fast inference, lightweight tasks, text classification, few-shot learning",
   },
 ];
