@@ -38,7 +38,6 @@ class ResponseComponentCreate(BaseModel):
     user_id: str
     subject: str
     input: str
-    output: str
 
 class ResponseComponentRead(BaseModel):
     component_id: str
