@@ -31,15 +31,42 @@ import { Model, ModelType } from "@/components/data/models";
 interface ModelSelectorProps extends PopoverProps {
   types: readonly ModelType[];
   models: Model[];
+  selectedModel: Model;
+  setSelectedModel: (model: Model) => void;
 }
 
-export function ModelSelector({ models, types, ...props }: ModelSelectorProps) {
+export function ModelSelector({
+  models,
+  types,
+  selectedModel,
+  setSelectedModel,
+  ...props
+}: ModelSelectorProps) {
   const [open, setOpen] = React.useState(false);
-  const [selectedModel, setSelectedModel] = React.useState<Model>(models[0]);
   const [peekedModel, setPeekedModel] = React.useState<Model>(models[0]);
 
   return (
     <div className="grid gap-2">
+      <HoverCard>
+        <HoverCardTrigger asChild>
+          <Button variant="link">@nextjs</Button>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-80">
+          <div className="flex justify-between space-x-4">
+            <div className="space-y-1">
+              <h4 className="text-sm font-semibold">@nextjs</h4>
+              <p className="text-sm">
+                The React Framework – created and maintained by @vercel.
+              </p>
+              <div className="flex items-center pt-2">
+                <span className="text-xs text-muted-foreground">
+                  Joined December 2021
+                </span>
+              </div>
+            </div>
+          </div>
+        </HoverCardContent>
+      </HoverCard>
       <HoverCard openDelay={200}>
         <HoverCardTrigger asChild>
           <Label htmlFor="model">Model</Label>
@@ -95,25 +122,28 @@ export function ModelSelector({ models, types, ...props }: ModelSelectorProps) {
               <CommandList className="h-[var(--cmdk-list-height)] max-h-[400px]">
                 <CommandInput placeholder="Search Models..." />
                 <CommandEmpty>No Models found.</CommandEmpty>
-                <HoverCardTrigger />
-                {types.map((type) => (
-                  <CommandGroup key={type} heading={type}>
-                    {models
-                      .filter((model) => model.type === type)
-                      .map((model) => (
-                        <ModelItem
-                          key={model.id}
-                          model={model}
-                          isSelected={selectedModel?.id === model.id}
-                          onPeek={(model) => setPeekedModel(model)}
-                          onSelect={() => {
-                            setSelectedModel(model);
-                            setOpen(false);
-                          }}
-                        />
-                      ))}
-                  </CommandGroup>
-                ))}
+                <HoverCardTrigger asChild>
+                  <div>
+                    {types.map((type) => (
+                      <CommandGroup key={type} heading={type}>
+                        {models
+                          .filter((model) => model.type === type)
+                          .map((model) => (
+                            <ModelItem
+                              key={model.id}
+                              model={model}
+                              isSelected={selectedModel?.id === model.id}
+                              onPeek={(model) => setPeekedModel(model)}
+                              onSelect={() => {
+                                setSelectedModel(model);
+                                setOpen(false);
+                              }}
+                            />
+                          ))}
+                      </CommandGroup>
+                    ))}
+                  </div>
+                </HoverCardTrigger>
               </CommandList>
             </Command>
           </HoverCard>
