@@ -99,7 +99,7 @@ async def bulk_create_response_components(response_components: List[ResponseComp
             "response_id": component.response_id,
             "subject": component.subject,
             "input": component.input,
-            "output": await improve_prompt(response_component.input, response_component.subject)
+            "output": await improve_prompt(component.input, component.subject)
         } for component in response_components]
     )
     created_ids = [component.response_id for component in response_components]
