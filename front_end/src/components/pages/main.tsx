@@ -28,6 +28,8 @@ import React from "react";
 import { Complete } from "../icons/Complete";
 import { ChatDemo } from "./main/chatBot";
 import { VerticalStepper } from "./main/stepper";
+import { toast } from "sonner";
+import { createResponse } from '@/app/api/backend-service';
 
 export const metadata: Metadata = {
   title: "Playground",
@@ -37,6 +39,37 @@ export const metadata: Metadata = {
 export default function PlaygroundPage() {
   const [step, setStep] = React.useState(0);
   const [selectedModel, setSelectedModel] = React.useState<Model>(models[0]);
+  const [input, setInput] = React.useState('')
+
+  const handleSubmit = async () => {
+    try {
+      const payload = {
+        user_id: "3a99b221-3570-40bc-9b1a-0633e7c8c676", // dummy user;
+        input: input,
+      }
+
+      const res = await createResponse(payload);
+
+      toast({
+        title: 'Success!',
+        description: 'Response created successfully.',
+        variant: 'default',
+      });
+
+      const response = res.data;
+      console.log(response);
+
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to submit input. Please try again.',
+        variant: 'destructive',
+      });
+      console.error('Submission failed', error);
+    }
+  }
+
+
   return (
     <div className="p-10 h-full w-full ">
       <div className="md:hidden">
@@ -126,7 +159,7 @@ export default function PlaygroundPage() {
                         className="p-4 flex-1"
                       />
                       <div className="flex items-center space-x-2">
-                        <Button>Submit</Button>
+                        <Button onClick = {handleSubmit()}>Submit</Button>
                         <Button variant="secondary">
                           <span className="sr-only">Show history</span>
                           <RotateCcw />
@@ -150,6 +183,7 @@ export default function PlaygroundPage() {
                               id="input"
                               placeholder="Here is my prompt: I want to build a web application that allows users to create and share their own recipes."
                               className="flex-1 h-[40vh]"
+                              onChange={(e) => setInput(e.target.value)}
                             />
                           </div>
                           <div className="flex flex-col space-y-2">
