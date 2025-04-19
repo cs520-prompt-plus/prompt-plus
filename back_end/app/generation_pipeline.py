@@ -29,7 +29,7 @@ async def _generate_response(query, history=[]):
     return response.content
 
 def _extract_prompt(response):
-    match = re.search(r"<PROMPT>(.*?)</PROMPT>", text, re.DOTALL)
+    match = re.search(r"<PROMPT>(.*?)</PROMPT>", response, re.DOTALL)
 
     if not match:
         raise Exception("Error Generating New Prompt")
@@ -61,4 +61,4 @@ async def _improve_prompt(base_prompt, user_input):
     output["feedback"] = feedback_response
     output["new_prompt"] = _extract_prompt(improvement_response)
 
-    return output
+    return output['new_prompt'] # Must return a string to match db schema
