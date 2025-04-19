@@ -5,7 +5,7 @@ from typing import List
 from app.dependencies import use_logging
 from app.middleware import LoggingMiddleware
 from app.types.response import ResponseCreate, ResponseRead, ResponseComponentCreate, ResponseComponentRead, ResponseComponentUpdate, ResponseUpdate, UserRead, UserCreate, UserUpdate
-from app.generation_pipeline import generate_response
+from app.generation_pipeline import improve_prompt
 from app.client import prisma_client as prisma, connect_db, disconnect_db
 
 app = FastAPI(prefix="/api/v1")
@@ -28,7 +28,7 @@ async def create_response(response: ResponseCreate):
         data={
             "user_id": response.user_id,
             "input": response.input,
-            "output": await generate_response(response.input),
+            "output": "Generation In Progress.",
         }
     )
     return new_response
@@ -85,7 +85,7 @@ async def create_response_component(response_component: ResponseComponentCreate)
             "response_id": response_component.response_id,
             "subject": response_component.subject,
             "input": response_component.input,
-            "output": response_component.output,
+            "output": await improve_prompt(response_component.input, response_component.subject)
         }
     )
     return new_component
@@ -99,7 +99,7 @@ async def bulk_create_response_components(response_components: List[ResponseComp
             "response_id": component.response_id,
             "subject": component.subject,
             "input": component.input,
-            "output": component.output
+            "output": await improve_prompt(component.input, component.subject)
         } for component in response_components]
     )
     created_ids = [component.response_id for component in response_components]
