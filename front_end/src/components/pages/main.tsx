@@ -29,7 +29,7 @@ import { Complete } from "../icons/Complete";
 import { ChatDemo } from "./main/chatBot";
 import { VerticalStepper } from "./main/stepper";
 import { toast } from "sonner";
-import { createResponse } from '@/app/api/backend-service';
+import { createResponse } from '@/app/api/responses/backend-service';
 
 export const metadata: Metadata = {
   title: "Playground",
@@ -157,9 +157,10 @@ export default function PlaygroundPage() {
                         placeholder="Enhance my prompt for building a web application: 
                       I want to build a web application that allows users to create and share their own recipes."
                         className="p-4 flex-1"
+                        onChange={(e) => setInput(e.target.value)}
                       />
                       <div className="flex items-center space-x-2">
-                        <Button onClick = {handleSubmit()}>Submit</Button>
+                        <Button onClick = {handleSubmit}>Submit</Button>
                         <Button variant="secondary">
                           <span className="sr-only">Show history</span>
                           <RotateCcw />
@@ -183,8 +184,7 @@ export default function PlaygroundPage() {
                               id="input"
                               placeholder="Here is my prompt: I want to build a web application that allows users to create and share their own recipes."
                               className="flex-1 h-[40vh]"
-                              onChange={(e) => setInput(e.target.value)}
-                            />
+                             />
                           </div>
                           <div className="flex flex-col space-y-2">
                             <Label htmlFor="instructions">Instructions</Label>

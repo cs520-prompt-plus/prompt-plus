@@ -1,4 +1,4 @@
-import backendAgent from './http-client';
+import backendAgent from '../http-client';
 import { AxiosResponse } from 'axios';
 import {
     ResponseCreatePayload,
