@@ -5,7 +5,7 @@ from typing import List
 from app.dependencies import use_logging
 from app.middleware import LoggingMiddleware
 from app.types.response import ResponseCreate, ResponseRead, ResponseComponentCreate, ResponseComponentRead, ResponseComponentUpdate, ResponseUpdate, UserRead, UserCreate, UserUpdate
-from app.generation_pipeline import improve_prompt
+from app.generation_pipeline import improve_prompt, apply_category
 from app.client import prisma_client as prisma, connect_db, disconnect_db
 
 app = FastAPI(prefix="/api/v1")
@@ -24,11 +24,13 @@ async def root(logger=Depends(use_logging)):
 # Endpoint to create Response
 @app.post("/api/v1/responses/", response_model=ResponseRead)
 async def create_response(response: ResponseCreate):
+    improvement = await improve_prompt(response.input)
+
     new_response = await prisma.response.create(
         data={
             "user_id": response.user_id,
             "input": response.input,
-            "output": "Generation In Progress.",
+            "output": improvement["new_prompt"],
         }
     )
     return new_response
@@ -79,13 +81,15 @@ async def delete_response(response_id: str):
 # Endpoint to create a ResponseComponent
 @app.post("/api/v1/response-components/", response_model=ResponseComponentRead)
 async def create_response_component(response_component: ResponseComponentCreate):
+    improvement = await apply_category(response_component.input, response_component.subject)
+
     new_component = await prisma.responsecomponent.create(
         data={
             "user_id" :response_component.user_id,
             "response_id": response_component.response_id,
             "subject": response_component.subject,
             "input": response_component.input,
-            "output": await improve_prompt(response_component.input, response_component.subject)
+            "output": improvement["new_prompt"]
         }
     )
     return new_component
@@ -93,14 +97,16 @@ async def create_response_component(response_component: ResponseComponentCreate)
 # Endpoint to bulk create ResponseComponents
 @app.post("/api/v1/response-components/bulk", response_model=List[ResponseComponentRead])
 async def bulk_create_response_components(response_components: List[ResponseComponentCreate]):
+    improvements = [await apply_category(component.input, component.subject) for component in response_components]
+
     components = await prisma.responsecomponent.create_many(
         data=[{
             "user_id" : component.user_id,
             "response_id": component.response_id,
             "subject": component.subject,
             "input": component.input,
-            "output": await improve_prompt(component.input, component.subject)
-        } for component in response_components]
+            "output": improvements[i]["new_prompt"]
+        } for i, component in enumerate(response_components)]
     )
     created_ids = [component.response_id for component in response_components]
     stored_components = await prisma.responsecomponent.find_many(
@@ -129,12 +135,14 @@ async def update_response_component(component_id: str, response_component: Respo
     if not existing_component:
         raise HTTPException(status_code=404, detail="ResponseComponent not found")
     
+    improvement = await apply_category(response_component.input, response_component.subject)
+
     updated_component = await prisma.responsecomponent.update(
         where={"component_id": component_id},
         data={
             "subject": response_component.subject,
             "input": response_component.input,
-            "output": response_component.output,
+            "output": improvement["new_prompt"]
         }
     )
     return updated_component
