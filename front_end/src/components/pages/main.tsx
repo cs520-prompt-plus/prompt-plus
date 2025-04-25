@@ -1,9 +1,5 @@
 "use client";
-import { Edit, RotateCcw } from "lucide-react";
-import { Metadata } from "next";
-import Image from "next/image";
-
-import { models, types, Model } from "@/components/data/models";
+import { Model, models, types } from "@/components/data/models";
 import { presets } from "@/components/data/presets";
 import { CodeViewer } from "@/components/pages/main/code-viewer";
 import { MaxLengthSelector } from "@/components/pages/main/maxlength-selector";
@@ -14,7 +10,14 @@ import { PresetSelector } from "@/components/pages/main/preset-selector";
 import { PresetShare } from "@/components/pages/main/preset-share";
 import { TemperatureSelector } from "@/components/pages/main/temperature-selector";
 import { TopPSelector } from "@/components/pages/main/top-p-selector";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   HoverCard,
   HoverCardContent,
@@ -24,52 +27,95 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { Edit, RotateCcw } from "lucide-react";
+import { Metadata } from "next";
+import Image from "next/image";
 import React from "react";
+import { toast } from "sonner";
 import { Complete } from "../icons/Complete";
 import { ChatDemo } from "./main/chatBot";
 import { VerticalStepper } from "./main/stepper";
-import { toast } from "sonner";
-import { createResponse } from "@/app/api/responses/backend-service";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Playground",
   description: "The OpenAI Playground built using the components.",
 };
 
+interface Pattern {
+  name: string;
+  description: string;
+  example: string;
+}
+
+interface Category {
+  preview: string;
+  patterns: Pattern[];
+  category: string;
+}
+
+interface Response {
+  id: string;
+  user_id: string;
+  input: string;
+  output: string;
+  categories: Category[];
+}
+
 export default function PlaygroundPage() {
   const [step, setStep] = React.useState(0);
   const [selectedModel, setSelectedModel] = React.useState<Model>(models[0]);
   const [input, setInput] = React.useState("");
+  const [tab, setTab] = React.useState("edit");
+  const [unlock, setUnlock] = React.useState(false);
+  const [data, setData] = React.useState<Response>({
+    id: "",
+    user_id: "",
+    input: "",
+    output: "",
+    categories: [
+      {
+        preview: "",
+        patterns: [],
+        category: "",
+      },
+    ],
+  });
+  const fetchData = async () => {
+    return mockData;
+  };
+
+  // useEffect(() => {
+  //   const fetchDataAsync = async () => {
+  //     const response = await fetchData();
+  //     setData(response);
+  //     setInput(response.input);
+  //   };
+  //   fetchDataAsync();
+  // },[]);
 
   const handleSubmit = async () => {
     try {
-      const payload = {
-        user_id: "3a99b221-3570-40bc-9b1a-0633e7c8c676", // dummy user;
-        input: input,
-      };
+      // const payload = {
+      //   user_id: "3a99b221-3570-40bc-9b1a-0633e7c8c676", // dummy user;
+      //   input: input,
+      // };
+      console.log("Input submitted:", input);
 
-      const res = await createResponse(payload);
-
-      toast({
-        title: "Success!",
-        description: "Response created successfully.",
-        variant: "default",
-      });
-
-      const response = res.data;
-      console.log(response);
+      // const res = await createResponse(payload);
+      toast.success("Response created successfully!");
+      setUnlock(true);
+      const newData = await fetchData();
+      setData(newData);
+      setInput(newData.input);
+      // const response = res.data;
+      // console.log(response);
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to submit input. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Error creating response. Please try again.");
       console.error("Submission failed", error);
     }
   };
 
-  const [tab, setTab] = React.useState("complete");
   return (
     <div className="p-10 h-full w-full ">
       <div className="md:hidden">
@@ -136,10 +182,8 @@ export default function PlaygroundPage() {
 
                       <TabsTrigger
                         value="edit"
-                        className={cn(
-                          tab !== "edit" ? "bg-muted" : "bg-transparent"
-                        )}
-                        disabled={tab === "edit"}
+                        className={cn(!unlock ? "bg-muted" : "bg-transparent")}
+                        disabled={!unlock}
                       >
                         <span className="sr-only">Edit</span>
                         <Edit />
@@ -157,34 +201,11 @@ export default function PlaygroundPage() {
                   <TopPSelector defaultValue={[0.9]} />
                 </div>
                 <div className="md:order-1 h-full w-full flex flex-col gap-2 ">
-                  {tab !== "complete" && (
-                    <VerticalStepper step={step} handleStep={setStep} />
-                  )}
-                  <TabsContent value="complete" className="mt-0 border-0 p-0">
-                    <div className="flex h-full flex-col space-y-4">
-                      <Textarea
-                        placeholder="Enhance my prompt for building a web application: 
-                      I want to build a web application that allows users to create and share their own recipes."
-                        className="p-4 flex-1"
-                        onChange={(e) => setInput(e.target.value)}
-                      />
-                      <div className="flex items-center space-x-2">
-                        <Button onClick={handleSubmit}>Submit</Button>
-                        <Button variant="secondary">
-                          <span className="sr-only">Show history</span>
-                          <RotateCcw />
-                        </Button>
-                      </div>
-                    </div>
-                  </TabsContent>
                   <TabsContent
-                    value="edit"
+                    value="complete"
                     className="mt-0 border-0 p-0 flex gap-2"
                   >
                     <div className="flex flex-col space-y-4">
-                      <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
-                        System Prompt
-                      </h2>
                       <div className="grid h-full gap-6 ">
                         <div className="flex flex-col space-y-4">
                           <div className="flex flex-1 flex-col space-y-2">
@@ -192,11 +213,13 @@ export default function PlaygroundPage() {
                             <Textarea
                               id="input"
                               placeholder="Here is my prompt: I want to build a web application that allows users to create and share their own recipes."
-                              className="flex-1 h-[40vh]"
+                              className="flex-1 min-h-[40vh] w-[30vw]"
+                              onChange={(e) => setInput(e.target.value)}
+                              value={input}
                             />
                           </div>
                           <div className="flex flex-col space-y-2">
-                            <Label htmlFor="instructions">Instructions</Label>
+                            <Label htmlFor="instructions">System Prompt</Label>
                             <Textarea
                               id="instructions"
                               placeholder="Fix the grammar."
@@ -205,14 +228,87 @@ export default function PlaygroundPage() {
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Button>Submit</Button>
+                        <Button onClick={handleSubmit}>Submit</Button>{" "}
                         <Button variant="secondary">
                           <span className="sr-only">Show history</span>
                           <RotateCcw />
                         </Button>
                       </div>
                     </div>
-                    <ChatDemo model={selectedModel.name} />
+                    <div className="flex flex-1 flex-col space-y-2">
+                      <Label htmlFor="input">Output</Label>
+                      <ChatDemo model={selectedModel.name} />
+                    </div>
+                  </TabsContent>
+                  <TabsContent
+                    value="edit"
+                    className="mt-0 border-0 p-0 flex gap-2 flex-col"
+                  >
+                    <VerticalStepper step={step} handleStep={setStep} />
+                    <div className="flex w-full space-x-9 h-full">
+                      <div className="flex h-full w-full flex-col space-y-4">
+                        <Accordion type="single" collapsible className="w-full">
+                          {data.categories[step].patterns.map(
+                            (pattern, index) => {
+                              return (
+                                <AccordionItem
+                                  key={index}
+                                  value={`item-${index}`}
+                                >
+                                  <AccordionTrigger>
+                                    {pattern.name}
+                                  </AccordionTrigger>
+                                  <AccordionContent>
+                                    <div className="space-y-4">
+                                      <Card>
+                                        <CardHeader>
+                                          <CardTitle className="text-sm text-muted-foreground">
+                                            Description
+                                          </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                          <p className="text-base">
+                                            {pattern.description}
+                                          </p>
+                                        </CardContent>
+                                      </Card>
+
+                                      <Card>
+                                        <CardHeader>
+                                          <CardTitle className="text-sm text-muted-foreground">
+                                            Example
+                                          </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                          <pre className="whitespace-pre-wrap break-words rounded-md bg-background p-2 text-sm">
+                                            {pattern.example}
+                                          </pre>
+                                        </CardContent>
+                                      </Card>
+                                    </div>
+                                  </AccordionContent>
+                                </AccordionItem>
+                              );
+                            }
+                          )}
+                        </Accordion>
+                        <div className="flex items-center space-x-2">
+                          <Button>Apply</Button>
+                          <Button variant="secondary">
+                            <span className="sr-only">Show history</span>
+                            <RotateCcw />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="flex w-full h-full flex-col space-y-2">
+                        <Label htmlFor="input">Preview</Label>
+                        <Textarea
+                          id="preview"
+                          placeholder="Here is the preview of the output for this step."
+                          className="flex-1 min-h-[40vh] w-[30vw]"
+                        />
+                      </div>
+                    </div>
                   </TabsContent>
                 </div>
               </div>
@@ -223,3 +319,91 @@ export default function PlaygroundPage() {
     </div>
   );
 }
+const mockData = {
+  id: "1",
+  user_id: "3a99b221-3570-40bc-9b1a-0633e7c8c676",
+  input: "Here is the input from backend",
+  output: "Here is the output from backend",
+  categories: [
+    {
+      preview: "Here is the preview from backend for Category 1",
+      patterns: [
+        {
+          name: "Pattern 1",
+          description: "Description of pattern 1",
+          example: "Example of pattern 1",
+        },
+        {
+          name: "Pattern 2",
+          description: "Description of pattern 2",
+          example: "Example of pattern 2",
+        },
+      ],
+      category: "Category 1",
+    },
+    {
+      preview: "Backend preview for Category 2",
+      patterns: [
+        {
+          name: "Pattern A",
+          description: "This is the description for pattern A",
+          example: "Example usage of pattern A",
+        },
+        {
+          name: "Pattern B",
+          description: "Detailed description of pattern B",
+          example: "Example for pattern B here",
+        },
+      ],
+      category: "Category 2",
+    },
+    {
+      preview: "Preview from backend for Category 3",
+      patterns: [
+        {
+          name: "Regex Matcher",
+          description: "Matches any digits in a string",
+          example: "Input: 'abc123' → Output: '123'",
+        },
+        {
+          name: "Date Extractor",
+          description: "Extracts dates from sentences",
+          example: "Input: 'Today is 2025-04-25' → Output: '2025-04-25'",
+        },
+      ],
+      category: "Category 3",
+    },
+    {
+      preview: "Preview data for Category 4 from backend",
+      patterns: [
+        {
+          name: "Lowercase Converter",
+          description: "Converts text to lowercase",
+          example: "Input: 'HELLO' → Output: 'hello'",
+        },
+        {
+          name: "Uppercase Converter",
+          description: "Converts text to uppercase",
+          example: "Input: 'hello' → Output: 'HELLO'",
+        },
+      ],
+      category: "Category 4",
+    },
+    {
+      preview: "Latest preview from backend for Category 5",
+      patterns: [
+        {
+          name: "Trim Whitespace",
+          description: "Removes leading and trailing spaces",
+          example: "Input: '  hello  ' → Output: 'hello'",
+        },
+        {
+          name: "Replace Tabs",
+          description: "Replaces tab characters with spaces",
+          example: "Input: 'a\\tb' → Output: 'a  b'",
+        },
+      ],
+      category: "Category 5",
+    },
+  ],
+};
