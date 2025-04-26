@@ -36,6 +36,7 @@ import { toast } from "sonner";
 import { Complete } from "../icons/Complete";
 import { ChatDemo } from "./main/chatBot";
 import { VerticalStepper } from "./main/stepper";
+import { Checkbox } from "../ui/checkbox";
 
 export const metadata: Metadata = {
   title: "Playground",
@@ -46,6 +47,7 @@ interface Pattern {
   name: string;
   description: string;
   example: string;
+  applied?: boolean;
 }
 
 interface Category {
@@ -68,23 +70,16 @@ export default function PlaygroundPage() {
   const [input, setInput] = React.useState("");
   const [tab, setTab] = React.useState("edit");
   const [unlock, setUnlock] = React.useState(false);
-  const [data, setData] = React.useState<Response>({
-    id: "",
-    user_id: "",
-    input: "",
-    output: "",
-    categories: [
-      {
-        preview: "",
-        patterns: [],
-        category: "",
-      },
-    ],
-  });
+  const [data, setData] = React.useState<Response | null>(mockData);
   const fetchData = async () => {
     return mockData;
   };
 
+  React.useEffect(() => {
+    if (data) {
+      setUnlock(true);
+    }
+  }, [data]);
   // useEffect(() => {
   //   const fetchDataAsync = async () => {
   //     const response = await fetchData();
@@ -104,7 +99,6 @@ export default function PlaygroundPage() {
 
       // const res = await createResponse(payload);
       toast.success("Response created successfully!");
-      setUnlock(true);
       const newData = await fetchData();
       setData(newData);
       setInput(newData.input);
@@ -168,10 +162,11 @@ export default function PlaygroundPage() {
                         className="w-[320px] text-sm"
                         side="left"
                       >
-                        Choose the interface that best suits your task. You can
+                        Choose the mode that best suits your task. You can
                         provide: a simple prompt to complete, starting and
                         ending text to insert a completion within, or some text
-                        with instructions to edit it.
+                        with instructions to edit it through our multistep
+                        process.
                       </HoverCardContent>
                     </HoverCard>
                     <TabsList className="grid grid-cols-3">
@@ -242,56 +237,104 @@ export default function PlaygroundPage() {
                   </TabsContent>
                   <TabsContent
                     value="edit"
-                    className="mt-0 border-0 p-0 flex gap-2 flex-col"
+                    className="mt-0 border-0 p-0 flex gap-10 flex-col"
                   >
                     <VerticalStepper step={step} handleStep={setStep} />
                     <div className="flex w-full space-x-9 h-full">
-                      <div className="flex h-full w-full flex-col space-y-4">
+                      <div className="flex h-full w-full flex-col space-y-4 justify-between">
                         <Accordion type="single" collapsible className="w-full">
-                          {data.categories[step].patterns.map(
-                            (pattern, index) => {
-                              return (
-                                <AccordionItem
-                                  key={index}
-                                  value={`item-${index}`}
-                                >
-                                  <AccordionTrigger>
-                                    {pattern.name}
-                                  </AccordionTrigger>
-                                  <AccordionContent>
-                                    <div className="space-y-4">
-                                      <Card>
-                                        <CardHeader>
-                                          <CardTitle className="text-sm text-muted-foreground">
-                                            Description
-                                          </CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                          <p className="text-base">
-                                            {pattern.description}
-                                          </p>
-                                        </CardContent>
-                                      </Card>
+                          {data &&
+                            data.categories[step].patterns.map(
+                              (pattern, index) => {
+                                return (
+                                  <div
+                                    key={index}
+                                    className="flex items-center justify-center gap-2 w-full"
+                                  >
+                                    <Checkbox
+                                      checked={pattern.applied}
+                                      onCheckedChange={(checked) => {
+                                        if (checked) return;
+                                        setData((prevData) => {
+                                          if (!prevData) return prevData;
+                                          prevData.categories[step].patterns[
+                                            index
+                                          ].applied = checked;
+                                          return {
+                                            ...prevData,
+                                            categories: prevData.categories.map(
+                                              (cat, catIndex) =>
+                                                catIndex === step
+                                                  ? {
+                                                      ...cat,
+                                                      patterns:
+                                                        cat.patterns.map(
+                                                          (pat, patIndex) =>
+                                                            patIndex === index
+                                                              ? {
+                                                                  ...pat,
+                                                                  applied:
+                                                                    checked,
+                                                                }
+                                                              : pat
+                                                        ),
+                                                    }
+                                                  : cat
+                                            ),
+                                          };
+                                        });
+                                      }}
+                                      // onCheckedChange={(checked) =>
+                                      //   handleCheckboxChange(index, checked)
+                                      // }
+                                      className="h-4 w-4 border-black dark:border-white"
+                                    />
+                                    <AccordionItem
+                                      value={`item-${index}`}
+                                      className="w-full"
+                                    >
+                                      <AccordionTrigger>
+                                        <div className="flex items-center space-x-2">
+                                          <span>{pattern.name}</span>
+                                        </div>
+                                      </AccordionTrigger>
 
-                                      <Card>
-                                        <CardHeader>
-                                          <CardTitle className="text-sm text-muted-foreground">
-                                            Example
-                                          </CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                          <pre className="whitespace-pre-wrap break-words rounded-md bg-background p-2 text-sm">
-                                            {pattern.example}
-                                          </pre>
-                                        </CardContent>
-                                      </Card>
-                                    </div>
-                                  </AccordionContent>
-                                </AccordionItem>
-                              );
-                            }
-                          )}
+                                      <AccordionContent>
+                                        <div className="space-y-2">
+                                          <Card className="py-0 gap-1">
+                                            <CardHeader className="">
+                                              <CardTitle className="text-sm font-semibold">
+                                                Description
+                                              </CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                              <pre className="whitespace-pre-wrap break-words rounded-md bg-background text-sm">
+                                                {pattern.description}
+                                              </pre>
+                                            </CardContent>
+                                          </Card>
+
+                                          <Card className="py-0 gap-1">
+                                            <CardHeader>
+                                              <CardTitle className="text-sm font-semibold">
+                                                Example
+                                              </CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                              <pre className="whitespace-pre-wrap break-words rounded-md bg-background text-sm">
+                                                {pattern.example}
+                                              </pre>
+                                            </CardContent>
+                                          </Card>
+                                        </div>
+                                      </AccordionContent>
+                                    </AccordionItem>
+                                  </div>
+                                );
+                              }
+                            )}
                         </Accordion>
+
                         <div className="flex items-center space-x-2">
                           <Button>Apply</Button>
                           <Button variant="secondary">
@@ -305,7 +348,9 @@ export default function PlaygroundPage() {
                         <Textarea
                           id="preview"
                           placeholder="Here is the preview of the output for this step."
-                          className="flex-1 min-h-[40vh] w-[30vw]"
+                          className="flex-1 min-h-[40vh] w-full"
+                          value={data?.categories[step].preview}
+                          readOnly
                         />
                       </div>
                     </div>
@@ -329,14 +374,10 @@ const mockData = {
       preview: "Here is the preview from backend for Category 1",
       patterns: [
         {
-          name: "Pattern 1",
+          name: "Meta Language Creation",
           description: "Description of pattern 1",
           example: "Example of pattern 1",
-        },
-        {
-          name: "Pattern 2",
-          description: "Description of pattern 2",
-          example: "Example of pattern 2",
+          applied: true,
         },
       ],
       category: "Category 1",
@@ -345,14 +386,34 @@ const mockData = {
       preview: "Backend preview for Category 2",
       patterns: [
         {
-          name: "Pattern A",
+          name: "Output Automater",
           description: "This is the description for pattern A",
           example: "Example usage of pattern A",
+          applied: false,
         },
         {
-          name: "Pattern B",
+          name: "Persona",
           description: "Detailed description of pattern B",
           example: "Example for pattern B here",
+          applied: true,
+        },
+        {
+          name: "Visualization Generator",
+          description: "Detailed description of pattern B",
+          example: "Example for pattern B here",
+          applied: true,
+        },
+        {
+          name: "Recipe",
+          description: "Detailed description of pattern B",
+          example: "Example for pattern B here",
+          applied: false,
+        },
+        {
+          name: "Template",
+          description: "Detailed description of pattern B",
+          example: "Example for pattern B here",
+          applied: true,
         },
       ],
       category: "Category 2",
@@ -361,14 +422,16 @@ const mockData = {
       preview: "Preview from backend for Category 3",
       patterns: [
         {
-          name: "Regex Matcher",
+          name: "Fact Check List",
           description: "Matches any digits in a string",
           example: "Input: 'abc123' → Output: '123'",
+          applied: false,
         },
         {
-          name: "Date Extractor",
+          name: "Reflection",
           description: "Extracts dates from sentences",
           example: "Input: 'Today is 2025-04-25' → Output: '2025-04-25'",
+          applied: true,
         },
       ],
       category: "Category 3",
@@ -377,14 +440,28 @@ const mockData = {
       preview: "Preview data for Category 4 from backend",
       patterns: [
         {
-          name: "Lowercase Converter",
+          name: "Question Refinement",
           description: "Converts text to lowercase",
           example: "Input: 'HELLO' → Output: 'hello'",
+          applied: false,
         },
         {
-          name: "Uppercase Converter",
+          name: "Alternative Approaches",
           description: "Converts text to uppercase",
           example: "Input: 'hello' → Output: 'HELLO'",
+          applied: true,
+        },
+        {
+          name: "Cognitive Verifier",
+          description: "Converts text to uppercase",
+          example: "Input: 'hello' → Output: 'HELLO'",
+          applied: false,
+        },
+        {
+          name: "Refusal Breaker",
+          description: "Converts text to uppercase",
+          example: "Input: 'hello' → Output: 'HELLO'",
+          applied: true,
         },
       ],
       category: "Category 4",
@@ -393,17 +470,37 @@ const mockData = {
       preview: "Latest preview from backend for Category 5",
       patterns: [
         {
-          name: "Trim Whitespace",
+          name: "Flipped Interaction",
           description: "Removes leading and trailing spaces",
           example: "Input: '  hello  ' → Output: 'hello'",
+          applied: false,
         },
         {
-          name: "Replace Tabs",
+          name: "Game Play",
           description: "Replaces tab characters with spaces",
           example: "Input: 'a\\tb' → Output: 'a  b'",
+          applied: true,
+        },
+        {
+          name: "Infinite Generation",
+          description: "Replaces tab characters with spaces",
+          example: "Input: 'a\\tb' → Output: 'a  b'",
+          applied: true,
         },
       ],
       category: "Category 5",
+    },
+    {
+      preview: "Additional preview from backend for Category 6",
+      patterns: [
+        {
+          name: "Context Manager",
+          description: "Reverses the input string",
+          example: "Input: 'hello' → Output: 'olleh'",
+          applied: false,
+        },
+      ],
+      category: "Category 6",
     },
   ],
 };
