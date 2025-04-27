@@ -13,7 +13,6 @@ model User {
   email     String  
   password  String
   responses Response[]
-  components ResponseComponent[]
 }
 
 model Response {
@@ -21,18 +20,26 @@ model Response {
   input       String
   output      String
   created_at  DateTime @default(now())
+  categories  Category[]
   user        User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   user_id     String
-  components  ResponseComponent[]
 }
 
-model ResponseComponent {
-  component_id String   @id @default(uuid())
-  subject      String
+model Category {
+  category_id  String   @id @default(uuid())
+  category     String
   input        String
-  output       String
-  user         User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  user_id      String
+  preview      String
+  patterns     Pattern[]
   response     Response @relation(fields: [response_id], references: [response_id], onDelete: Cascade)
   response_id  String
+}
+
+model Pattern {
+  pattern_id  String   @id @default(uuid())
+  pattern     String
+  feedback    String
+  applied     Boolean
+  category    Category @relation(fields: [category_id], references: [category_id], onDelete: Cascade)
+  category_id String
 }
