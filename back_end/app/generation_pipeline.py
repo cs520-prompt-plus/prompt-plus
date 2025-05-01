@@ -32,15 +32,7 @@ async def improve_prompt(user_input: str):
     output = []
 
     for category in CATEGORY_TO_PATTERNS.keys():
-        if category == Category.INPUT_SEMANTICS.value:
-            output.append(await apply_category(user_input, category))
-        else:
-            output.append({
-                "input": user_input,
-                "category": category,
-                "patterns": [],
-                "preview": user_input
-            })
+        output.append(await apply_category(user_input, category))
 
     return await _standardize_category_outputs(output)
 
