@@ -45,7 +45,7 @@ async def create_response(response: ResponseCreate):
         data={
             "user_id": response.user_id,
             "input": response.input,
-            "output": improvement["new_prompt"],
+            "output": improvement["output"],
         }
     )
 
@@ -55,9 +55,9 @@ async def create_response(response: ResponseCreate):
         new_category = await prisma.category.create(
             data={
                 "response_id": new_response.response_id,
-                "category": category_data["name"],
-                "input": improvement["original_prompt"],
-                "preview": category_data["new_prompt"],
+                "category": category_data["category"],
+                "input": improvement["input"],
+                "preview": category_data["preview"],
             }
         )
 
@@ -66,7 +66,7 @@ async def create_response(response: ResponseCreate):
             await prisma.pattern.create(
                 data={
                     "category_id": new_category.category_id,
-                    "pattern": pattern_data["name"],
+                    "pattern": pattern_data["pattern"],
                     "feedback": pattern_data.get("feedback", ""),
                     "applied": pattern_data.get("applied", False),
                 }
