@@ -37,6 +37,7 @@ import { Complete } from "../icons/Complete";
 import { ChatDemo } from "./main/chatBot";
 import { VerticalStepper } from "./main/stepper";
 import { Checkbox } from "../ui/checkbox";
+import { createResponse, updateResponse, mergePreviews } from "@/app/api/responses/backend-service";
 
 export const metadata: Metadata = {
   title: "Playground",
@@ -91,19 +92,39 @@ export default function PlaygroundPage() {
 
   const handleSubmit = async () => {
     try {
-      // const payload = {
-      //   user_id: "3a99b221-3570-40bc-9b1a-0633e7c8c676", // dummy user;
-      //   input: input,
-      // };
       console.log("Input submitted:", input);
 
-      // const res = await createResponse(payload);
+      const payload = {
+        user_id: "3a99b221-3570-40bc-9b1a-0633e7c8c676", // dummy user;
+        input: input,
+      };
+
+      const res = await createResponse(payload);
       toast.success("Response created successfully!");
-      const newData = await fetchData();
-      setData(newData);
-      setInput(newData.input);
-      // const response = res.data;
-      // console.log(response);
+
+      const response = res.data;
+      console.log(response);
+      setData(response);
+      setInput(response.input);
+
+      // const newData = await fetchData();
+      // setData(newData);
+      // setInput(newData.input);
+      // console.log(newData);
+
+      // const payload = {
+      //   previews : [
+      //     "Define what a sandwich is in culinary terms.",
+      //     "Explain the essential components that make up a sandwich.",
+      //     "Describe the cultural significance of sandwiches around the world.",
+      //     "What differentiates a sandwich from other similar foods like wraps or burgers?",
+      //     "Give a short history of how sandwiches originated.",
+      //     "What are the most common types of sandwiches and their ingredients?"
+      //   ]
+      // }
+      // const res = await mergePreviews("3d583ac5-2055-4384-ac73-ced31a8e1fasc",payload);
+      // console.log(res.data)
+
     } catch (error) {
       toast.error("Error creating response. Please try again.");
       console.error("Submission failed", error);

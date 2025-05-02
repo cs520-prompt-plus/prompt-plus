@@ -7,9 +7,18 @@ from app.middleware import LoggingMiddleware
 from app.types.response import ResponseCreate, ResponseRead, UserRead, UserCreate, ResponseOutputUpdate, MergePreviewPrompts
 from app.generation_pipeline import improve_prompt, apply_category, merge_prompts
 from app.client import prisma_client as prisma, connect_db, disconnect_db
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(prefix="/api/v1")
 app.add_middleware(LoggingMiddleware, fastapi=app)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],            
+    allow_credentials=True,
+    allow_methods=["*"],              
+    allow_headers=["*"],
+)
 
 # prisma = Prisma(auto_register=True)
 
@@ -87,7 +96,7 @@ async def create_response(response: ResponseCreate):
     return full_response
 
 # Endpoint to update final Response output, merging 6 previews.
-@app.put("/api/v1/responses/{response_id}/merge", response_model=ResponseRead)
+@app.put("/api/v1/responses/merge/{response_id}", response_model=ResponseRead)
 async def merge_and_update_response(response_id: str, previews_input: MergePreviewPrompts):
     # Validate that response exists
     existing_response = await prisma.response.find_unique(where={"response_id": response_id})
@@ -113,7 +122,7 @@ async def merge_and_update_response(response_id: str, previews_input: MergePrevi
     return updated_response
 
 # Endpoint to update final Response output, to be called after finalized editing with live OpenAI model in FE.
-@app.put("/api/v1/responses/{response_id}/output", response_model=ResponseRead)
+@app.put("/api/v1/responses/update/{response_id}", response_model=ResponseRead)
 async def update_response_output(response_id: str, output_update: ResponseOutputUpdate):
     # Check if response exists
     existing_response = await prisma.response.find_unique(where={"response_id": response_id})

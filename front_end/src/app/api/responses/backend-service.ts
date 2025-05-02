@@ -3,17 +3,22 @@ import { AxiosResponse } from 'axios';
 import {
     ResponseCreatePayload,
     ResponseCreateResponse,
-    ResponseComponentCreatePayload,
-    ResponseComponentCreateResponse,
+    ResponseUpdatePayload,
+    MergePreviewsPayload,
 } from '@/types/response';
 
 export const createResponseEndpoint = () => `/responses/`;
-export const createResponseComponentEndpoint = () => `/response-components/`;
+export const updateResponseEndpoint = (responseId : string) => `/responses/update/${responseId}`; 
+export const mergePreviewsEndpoint = (responseId : string) => `/responses/merge/${responseId}`;
 
 export const createResponse = async (payload: ResponseCreatePayload): Promise<AxiosResponse<ResponseCreateResponse>> => {
-  return await backendAgent.post<ResponseCreateResponse>(createResponseEndpoint(),payload);;
+  return await backendAgent.post<ResponseCreateResponse>(createResponseEndpoint(),payload);
 };
 
-export const createResponseComponent = async (payload: ResponseComponentCreatePayload): Promise<AxiosResponse<ResponseComponentCreateResponse>> => {
-    return await backendAgent.post<ResponseComponentCreateResponse>(createResponseComponentEndpoint(),payload);;
-  };
+export const updateResponse = async (responseId: string, payload: ResponseUpdatePayload): Promise<AxiosResponse<ResponseCreateResponse>> => {
+  return await backendAgent.put<ResponseCreateResponse>(updateResponseEndpoint(responseId),payload);
+} 
+
+export const mergePreviews = async (responseId: string, payload: MergePreviewsPayload): Promise<AxiosResponse<ResponseCreateResponse>> => {
+  return await backendAgent.put<ResponseCreateResponse>(mergePreviewsEndpoint(responseId),payload);
+} 
