@@ -40,3 +40,5 @@ class ResponseRead(BaseModel):
 class ResponseOutputUpdate(BaseModel):
     output: str
 
+class MergePreviewPrompts(BaseModel):
+    previews: List[str]
