@@ -4,8 +4,8 @@ from typing import List
 
 from app.dependencies import use_logging
 from app.middleware import LoggingMiddleware
-from app.types.response import ResponseCreate, ResponseRead, UserRead, UserCreate, ResponseOutputUpdate
-from app.generation_pipeline import improve_prompt, apply_category
+from app.types.response import ResponseCreate, ResponseRead, UserRead, UserCreate, ResponseOutputUpdate, MergePreviewPrompts
+from app.generation_pipeline import improve_prompt, apply_category, merge_prompts
 from app.client import prisma_client as prisma, connect_db, disconnect_db
 
 app = FastAPI(prefix="/api/v1")
@@ -86,7 +86,33 @@ async def create_response(response: ResponseCreate):
 
     return full_response
 
-# Endpoint to update final Response output, to be called after finalized editing.
+# Endpoint to update final Response output, merging 6 previews.
+@app.put("/api/v1/responses/{response_id}/merge", response_model=ResponseRead)
+async def merge_and_update_response(response_id: str, previews_input: MergePreviewPrompts):
+    # Validate that response exists
+    existing_response = await prisma.response.find_unique(where={"response_id": response_id})
+    if not existing_response:
+        raise HTTPException(status_code=404, detail="Response not found")
+
+    # Generate the merged prompt
+    merged_prompt = await merge_prompts(previews_input.previews)
+
+    # Update the response output field
+    updated_response = await prisma.response.update(
+        where={"response_id": response_id},
+        data={"output": merged_prompt},
+        include={
+            "categories": {
+                "include": {
+                    "patterns": True
+                }
+            }
+        }
+    )
+
+    return updated_response
+
+# Endpoint to update final Response output, to be called after finalized editing with live OpenAI model in FE.
 @app.put("/api/v1/responses/{response_id}/output", response_model=ResponseRead)
 async def update_response_output(response_id: str, output_update: ResponseOutputUpdate):
     # Check if response exists
