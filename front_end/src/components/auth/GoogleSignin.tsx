@@ -16,11 +16,7 @@ function GoogleSignIn() {
 
   return (
     <Suspense>
-      <Button
-        color="primary"
-        onClick={handleClick}
-        variant="ghost"
-      >
+      <Button color="primary" onClick={handleClick} variant="ghost">
         <Image src={googleLogo} alt="Google Logo" width={20} height={20} />
         Continue with Google
       </Button>

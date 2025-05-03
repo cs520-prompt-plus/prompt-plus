@@ -61,6 +61,7 @@ import { SkeletonWrapper } from "../ui/skeleton-wrapper";
 import { Spinner } from "../ui/spinner";
 import { ChatDemo } from "./main/chatBot";
 import { VerticalStepper } from "./main/stepper";
+import GoogleSignIn from "../auth/GoogleSignin";
 
 export const metadata: Metadata = {
   title: "Playground",
@@ -191,6 +192,7 @@ export default function PlaygroundPage() {
               <PresetShare />
             </div>
             <PresetActions />
+            <GoogleSignIn />
           </div>
         </div>
         <Separator />

@@ -7,7 +7,7 @@ from app.dependencies import use_logging
 from app.middleware import LoggingMiddleware
 from app.types.response import ResponseCreate, ResponseRead, UserRead, UserCreate, ResponseOutputUpdate, MergePreviewPrompts
 from app.generation_pipeline import improve_prompt, apply_category, merge_prompts
-from app.client import prisma_client as prisma, connect_db, disconnect_db
+from app.client import prisma_client as prisma
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(prefix="/api/v1")
