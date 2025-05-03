@@ -38,8 +38,6 @@ export function ChatDemo(props: ChatDemoProps) {
     },
   });
 
-  console.log("status", status);
-
   return (
     <div className={cn("flex", "flex-col", "h-full", "w-full")}>
       <Chat
@@ -53,11 +51,11 @@ export function ChatDemo(props: ChatDemoProps) {
         append={append}
         setMessages={setMessages}
         // transcribeAudio={transcribeAudio}
-        suggestions={[
-          "Refine to be more specific",
-          "Make it more concise",
-          "Add more context",
-        ]}
+        // suggestions={[
+        //   "Refine to be more specific",
+        //   "Make it more concise",
+        //   "Add more context",
+        // ]}
       />
     </div>
   );

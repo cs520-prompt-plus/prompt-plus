@@ -37,6 +37,9 @@ import { Complete } from "../icons/Complete";
 import { ChatDemo } from "./main/chatBot";
 import { VerticalStepper } from "./main/stepper";
 import { Checkbox } from "../ui/checkbox";
+import { getResponseById,createResponse, updateResponse, mergePreviews } from "@/app/api/responses/backend-service";
+import { ResponseCreateResponse } from "@/types/response";
+import { patternDescriptions } from "@/app/constants/enum";
 
 export const metadata: Metadata = {
   title: "Playground",
@@ -70,7 +73,7 @@ export default function PlaygroundPage() {
   const [input, setInput] = React.useState("");
   const [tab, setTab] = React.useState("edit");
   const [unlock, setUnlock] = React.useState(false);
-  const [data, setData] = React.useState<Response | null>(mockData);
+  const [data, setData] = React.useState<ResponseCreateResponse | null>(mockData);
   const fetchData = async () => {
     return mockData;
   };
@@ -91,19 +94,33 @@ export default function PlaygroundPage() {
 
   const handleSubmit = async () => {
     try {
-      // const payload = {
-      //   user_id: "3a99b221-3570-40bc-9b1a-0633e7c8c676", // dummy user;
-      //   input: input,
-      // };
       console.log("Input submitted:", input);
 
+      const payload = {
+        user_id: "9ac4cc47-b01b-4b68-ac01-6b6f4865bbf3", // dummy user;
+        input: input,
+      };
+
       // const res = await createResponse(payload);
+      const res = await getResponseById("3d583ac5-2055-4384-ac73-ced31a8e1fcb"); // dummy response 
       toast.success("Response created successfully!");
-      const newData = await fetchData();
-      setData(newData);
-      setInput(newData.input);
-      // const response = res.data;
-      // console.log(response);
+
+      const response = res.data;
+      const enhancedResponse: ResponseCreateResponse = {
+        ...response,
+        categories: response.categories.map(category => ({
+          ...category,
+          patterns: category.patterns.map(pattern => ({
+            ...pattern,
+            description: patternDescriptions[pattern.pattern] || "",
+          })),
+        })),
+      };
+      
+      console.log(enhancedResponse);
+      setData(enhancedResponse);
+      setInput(enhancedResponse.input);
+
     } catch (error) {
       toast.error("Error creating response. Please try again.");
       console.error("Submission failed", error);
@@ -232,7 +249,7 @@ export default function PlaygroundPage() {
                     </div>
                     <div className="flex flex-1 flex-col space-y-2">
                       <Label htmlFor="input">Output</Label>
-                      <ChatDemo model={selectedModel.name} />
+                      <ChatDemo model={selectedModel.name} initialMessages={[{id: "init-1",role: "assistant",parts: [{ type: "text", text: data?.output ?? "" }]}]}/>
                     </div>
                   </TabsContent>
                   <TabsContent
@@ -295,7 +312,7 @@ export default function PlaygroundPage() {
                                     >
                                       <AccordionTrigger>
                                         <div className="flex items-center space-x-2">
-                                          <span>{pattern.name}</span>
+                                          <span>{pattern.pattern}</span>
                                         </div>
                                       </AccordionTrigger>
 
@@ -317,12 +334,12 @@ export default function PlaygroundPage() {
                                           <Card className="py-0 gap-1">
                                             <CardHeader>
                                               <CardTitle className="text-sm font-semibold">
-                                                Example
+                                                Feedback
                                               </CardTitle>
                                             </CardHeader>
                                             <CardContent>
                                               <pre className="whitespace-pre-wrap break-words rounded-md bg-background text-sm">
-                                                {pattern.example}
+                                                {pattern.feedback}
                                               </pre>
                                             </CardContent>
                                           </Card>
@@ -364,143 +381,173 @@ export default function PlaygroundPage() {
     </div>
   );
 }
-const mockData = {
-  id: "1",
+
+const mockData: ResponseCreateResponse = {
+  response_id: "1",
   user_id: "3a99b221-3570-40bc-9b1a-0633e7c8c676",
   input: "Here is the input from backend",
   output: "Here is the output from backend",
+  created_at: new Date().toISOString(),
   categories: [
     {
+      category_id: "cat-1",
+      category: "Category 1",
+      input: "Here is the input from backend",
       preview: "Here is the preview from backend for Category 1",
       patterns: [
         {
-          name: "Meta Language Creation",
+          pattern_id: "pat-1-1",
+          pattern: "Meta Language Creation",
           description: "Description of pattern 1",
-          example: "Example of pattern 1",
+          feedback: "",
           applied: true,
         },
       ],
-      category: "Category 1",
     },
     {
+      category_id: "cat-2",
+      category: "Category 2",
+      input: "Here is the input from backend",
       preview: "Backend preview for Category 2",
       patterns: [
         {
-          name: "Output Automater",
+          pattern_id: "pat-2-1",
+          pattern: "Output Automater",
           description: "This is the description for pattern A",
-          example: "Example usage of pattern A",
+          feedback: "",
           applied: false,
         },
         {
-          name: "Persona",
+          pattern_id: "pat-2-2",
+          pattern: "Persona",
           description: "Detailed description of pattern B",
-          example: "Example for pattern B here",
+          feedback: "",
           applied: true,
         },
         {
-          name: "Visualization Generator",
+          pattern_id: "pat-2-3",
+          pattern: "Visualization Generator",
           description: "Detailed description of pattern B",
-          example: "Example for pattern B here",
+          feedback: "",
           applied: true,
         },
         {
-          name: "Recipe",
+          pattern_id: "pat-2-4",
+          pattern: "Recipe",
           description: "Detailed description of pattern B",
-          example: "Example for pattern B here",
+          feedback: "",
           applied: false,
         },
         {
-          name: "Template",
+          pattern_id: "pat-2-5",
+          pattern: "Template",
           description: "Detailed description of pattern B",
-          example: "Example for pattern B here",
+          feedback: "",
           applied: true,
         },
       ],
-      category: "Category 2",
     },
     {
+      category_id: "cat-3",
+      category: "Category 3",
+      input: "Here is the input from backend",
       preview: "Preview from backend for Category 3",
       patterns: [
         {
-          name: "Fact Check List",
+          pattern_id: "pat-3-1",
+          pattern: "Fact Check List",
           description: "Matches any digits in a string",
-          example: "Input: 'abc123' → Output: '123'",
+          feedback: "",
           applied: false,
         },
         {
-          name: "Reflection",
+          pattern_id: "pat-3-2",
+          pattern: "Reflection",
           description: "Extracts dates from sentences",
-          example: "Input: 'Today is 2025-04-25' → Output: '2025-04-25'",
+          feedback: "",
           applied: true,
         },
       ],
-      category: "Category 3",
     },
     {
+      category_id: "cat-4",
+      category: "Category 4",
+      input: "Here is the input from backend",
       preview: "Preview data for Category 4 from backend",
       patterns: [
         {
-          name: "Question Refinement",
+          pattern_id: "pat-4-1",
+          pattern: "Question Refinement",
           description: "Converts text to lowercase",
-          example: "Input: 'HELLO' → Output: 'hello'",
+          feedback: "",
           applied: false,
         },
         {
-          name: "Alternative Approaches",
+          pattern_id: "pat-4-2",
+          pattern: "Alternative Approaches",
           description: "Converts text to uppercase",
-          example: "Input: 'hello' → Output: 'HELLO'",
+          feedback: "",
           applied: true,
         },
         {
-          name: "Cognitive Verifier",
+          pattern_id: "pat-4-3",
+          pattern: "Cognitive Verifier",
           description: "Converts text to uppercase",
-          example: "Input: 'hello' → Output: 'HELLO'",
+          feedback: "",
           applied: false,
         },
         {
-          name: "Refusal Breaker",
+          pattern_id: "pat-4-4",
+          pattern: "Refusal Breaker",
           description: "Converts text to uppercase",
-          example: "Input: 'hello' → Output: 'HELLO'",
+          feedback: "",
           applied: true,
         },
       ],
-      category: "Category 4",
     },
     {
+      category_id: "cat-5",
+      category: "Category 5",
+      input: "Here is the input from backend",
       preview: "Latest preview from backend for Category 5",
       patterns: [
         {
-          name: "Flipped Interaction",
+          pattern_id: "pat-5-1",
+          pattern: "Flipped Interaction",
           description: "Removes leading and trailing spaces",
-          example: "Input: '  hello  ' → Output: 'hello'",
+          feedback: "",
           applied: false,
         },
         {
-          name: "Game Play",
+          pattern_id: "pat-5-2",
+          pattern: "Game Play",
           description: "Replaces tab characters with spaces",
-          example: "Input: 'a\\tb' → Output: 'a  b'",
+          feedback: "",
           applied: true,
         },
         {
-          name: "Infinite Generation",
+          pattern_id: "pat-5-3",
+          pattern: "Infinite Generation",
           description: "Replaces tab characters with spaces",
-          example: "Input: 'a\\tb' → Output: 'a  b'",
+          feedback: "",
           applied: true,
         },
       ],
-      category: "Category 5",
     },
     {
+      category_id: "cat-6",
+      category: "Category 6",
+      input: "Here is the input from backend",
       preview: "Additional preview from backend for Category 6",
       patterns: [
         {
-          name: "Context Manager",
+          pattern_id: "pat-6-1",
+          pattern: "Context Manager",
           description: "Reverses the input string",
-          example: "Input: 'hello' → Output: 'olleh'",
+          feedback: "",
           applied: false,
         },
       ],
-      category: "Category 6",
     },
   ],
 };
