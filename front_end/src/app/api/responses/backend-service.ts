@@ -7,9 +7,14 @@ import {
     MergePreviewsPayload,
 } from '@/types/response';
 
+export const getResponseByIdEndpoint = (responseId: string) => `/responses/${responseId}`;
 export const createResponseEndpoint = () => `/responses/`;
 export const updateResponseEndpoint = (responseId : string) => `/responses/update/${responseId}`; 
 export const mergePreviewsEndpoint = (responseId : string) => `/responses/merge/${responseId}`;
+
+export const getResponseById = async (responseId: string): Promise<AxiosResponse<ResponseCreateResponse>> => {
+  return await backendAgent.get<ResponseCreateResponse>(getResponseByIdEndpoint(responseId));
+}
 
 export const createResponse = async (payload: ResponseCreatePayload): Promise<AxiosResponse<ResponseCreateResponse>> => {
   return await backendAgent.post<ResponseCreateResponse>(createResponseEndpoint(),payload);

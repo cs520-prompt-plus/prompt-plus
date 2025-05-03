@@ -17,6 +17,7 @@ export interface ResponseCreateResponse {
       patterns: {
         pattern_id: string;
         pattern: string;
+        description? : string;
         feedback: string;
         applied: boolean;
       }[];
