@@ -1,11 +1,10 @@
 "use client";
 
-import * as React from "react";
 import { PopoverProps } from "@radix-ui/react-popover";
 import { Check, ChevronsUpDown } from "lucide-react";
+import * as React from "react";
 
-import { cn } from "@/lib/utils";
-import { useMutationObserver } from "@/hooks/use-mutation-observer";
+import { Model, ModelType } from "@/components/data/models";
 import { Button } from "@/components/ui/button"; // Adjust the import path as necessary
 import {
   Command,
@@ -20,13 +19,13 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Model, ModelType } from "@/components/data/models";
+import { useMutationObserver } from "@/hooks/use-mutation-observer";
+import { cn } from "@/lib/utils";
 
 interface ModelSelectorProps extends PopoverProps {
   types: readonly ModelType[];
@@ -47,19 +46,6 @@ export function ModelSelector({
 
   return (
     <div className="grid gap-2">
-      <HoverCard openDelay={200}>
-        <HoverCardTrigger asChild>
-          <Label htmlFor="model">Model</Label>
-        </HoverCardTrigger>
-        <HoverCardContent
-          align="start"
-          className="w-[260px] text-sm"
-          side="left"
-        >
-          The model which will generate the completion. Some models are suitable
-          for natural language tasks, others specialize in code. Learn more.
-        </HoverCardContent>
-      </HoverCard>
       <Popover open={open} onOpenChange={setOpen} {...props}>
         <PopoverTrigger asChild>
           <Button
