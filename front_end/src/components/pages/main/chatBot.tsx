@@ -41,6 +41,7 @@ export function ChatDemo(props: ChatDemoProps) {
   return (
     <div className={cn("flex", "flex-col", "h-full", "w-full")}>
       <Chat
+        suggestions={[]}
         className="grow"
         messages={toMessages(messages)}
         handleSubmit={handleSubmit}
