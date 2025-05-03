@@ -1,11 +1,9 @@
 "use client";
 import { Model, models, types } from "@/components/data/models";
 import { presets } from "@/components/data/presets";
-import { CodeViewer } from "@/components/pages/main/code-viewer";
 import { MaxLengthSelector } from "@/components/pages/main/maxlength-selector";
 import { ModelSelector } from "@/components/pages/main/model-selector";
 import { PresetActions } from "@/components/pages/main/preset-actions";
-import { PresetSave } from "@/components/pages/main/preset-save";
 import { PresetSelector } from "@/components/pages/main/preset-selector";
 import { PresetShare } from "@/components/pages/main/preset-share";
 import { TemperatureSelector } from "@/components/pages/main/temperature-selector";
@@ -189,9 +187,7 @@ export default function PlaygroundPage() {
           <h2 className="text-lg font-semibold">Playground</h2>
           <div className="ml-auto flex w-full space-x-2 sm:justify-end">
             <PresetSelector presets={presets} />
-            <PresetSave />
             <div className="hidden space-x-2 md:flex">
-              <CodeViewer />
               <PresetShare />
             </div>
             <PresetActions />
@@ -273,7 +269,7 @@ export default function PlaygroundPage() {
                         models={models}
                         selectedModel={selectedModel}
                         setSelectedModel={setSelectedModel}
-                      />{" "}
+                      />
                       <DropdownMenuTrigger asChild>
                         <Button variant="outline">
                           <Settings />
@@ -342,19 +338,12 @@ export default function PlaygroundPage() {
                         </div>
                       </SkeletonWrapper>
                       <div className="w-full flex h-full items-center justify-between">
-                        <div className="flex items-center space-x-2 ">
+                        <div className="flex items-center h-full space-x-2 ">
                           <Button onClick={handleSubmit} disabled={loading}>
-                            {loading ? (
-                              <div className="flex items-center space-x-2">
-                                <span>Loading...</span>
-                                <Spinner />
-                              </div>
-                            ) : (
-                              "Submit"
-                            )}
+                            {loading ? <Spinner /> : "Submit"}
                           </Button>
                         </div>
-                        <div className="flex items-center space-x-2 ">
+                        <div className="flex items-center h-full space-x-2 ">
                           <Button
                             onClick={() => {
                               setTab("edit");
@@ -472,7 +461,7 @@ export default function PlaygroundPage() {
                   </TabsContent>
                   <TabsContent
                     value="output"
-                    className="mt-0 border-0 p-0 flex gap-10 flex-col"
+                    className="mt-0 border-0 p-0 flex gap-4 flex-col"
                   >
                     <div className="flex flex-1 flex-col space-y-2">
                       <Label htmlFor="input">Output</Label>
@@ -488,6 +477,9 @@ export default function PlaygroundPage() {
                         ]}
                       />
                     </div>
+                    <Button onClick={handleSubmit} disabled={loading}>
+                      {loading ? <Spinner /> : "Save"}
+                    </Button>
                   </TabsContent>
                 </div>
               </div>
