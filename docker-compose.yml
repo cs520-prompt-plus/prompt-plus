@@ -1,7 +1,31 @@
 version: "3"
 
 services:
+  # ----------------------------------------------------------------
+  # 1) prisma-init: runs prisma generate + db push, writes clients out
+  # ----------------------------------------------------------------
+  prisma-init:
+    hostname: prisma-init
+    build:
+      context: ./prisma
+      dockerfile: Dockerfile
+    env_file:
+      - ./prisma/.env
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    # mount in your schema + .env at /app,
+    # and mount the two output dirs so prisma can write into them
+    volumes:
+      - "./prisma:/app" # <-- schema.prisma + .env
+      - "./front_end/src/prisma:/front_end/src/prisma" # <-- JS client output
+      - "./back_end/prisma-client-py:/back_end/prisma-client-py" # <-- Python client output
+
+  # ----------------------------------------------------------------
+  # 2) backend app: FastAPI + prisma-client-py
+  # ----------------------------------------------------------------
   app:
+    hostname: back_end
     build:
       context: ./back_end
       dockerfile: Dockerfile
@@ -10,16 +34,45 @@ services:
     env_file:
       - ./back_end/.env
     depends_on:
-      postgres_db:
-        condition: service_healthy
+      - prisma-init
+      - postgres_db
     ports:
       - "8000:80"
     volumes:
       - "./back_end/app:/app/app:ro"
-      - "./back_end/prisma:/app/prisma:ro"
+      - "./prisma:/app/prisma:ro" # for runtime schema introspection (if you need it)
+      - "./back_end/prisma-client-py:/app/prisma-client-py:ro"
+    environment:
+      # so Python can import the generated client package
+      - PYTHONPATH=/app/prisma-client-py
     networks:
       - prisma-network
 
+  # ----------------------------------------------------------------
+  # 3) frontend-dev: Next.js + @prisma/client
+  # ----------------------------------------------------------------
+  frontend-dev:
+    hostname: front_end
+    build:
+      context: ./front_end
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prisma-init
+      - postgres_db
+    volumes:
+      - "./front_end:/app"
+      - "./prisma:/app/prisma:ro" # make your schema available
+      - "./front_end/src/prisma:/app/src/prisma:ro" # the generated JS client
+    environment:
+      - DATABASE_URL=postgresql://postgres:prisma@postgres_db:5432/postgres
+    networks:
+      - prisma-network
+
+  # ----------------------------------------------------------------
+  # 4) postgres
+  # ----------------------------------------------------------------
   postgres_db:
     image: postgres:15
     hostname: postgres_db
@@ -40,25 +93,6 @@ services:
       retries: 20
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-  prisma-studio:
-    image: node:lts-alpine3.17
-    working_dir: /usr/src/app
-    volumes:
-      - ./back_end/prisma:/usr/src/app/prisma
-      - ./back_end/.env:/usr/src/app/.env
-    command: npx prisma studio --port 5555 --browser none
-    ports:
-      - "5555:5555"
-    env_file:
-      - ./back_end/.env
-    depends_on:
-      postgres_db:
-        condition: service_healthy
-      app:
-        condition: service_started
-    networks:
-      - prisma-network
 
 volumes:
   postgres_data:

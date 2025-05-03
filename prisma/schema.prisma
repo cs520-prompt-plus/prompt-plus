@@ -2,14 +2,17 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-generator py {
-  provider             = "prisma-client-py"
-  recursive_type_depth = -1
+
+generator python {
+  provider = "prisma-client-py"
+  output   = "../back_end/prisma-client-py"
 }
+
 generator js {
   provider = "prisma-client-js"
-  output   = "../../front_end/src/prisma" 
+  output   = "../front_end/src/prisma"
 }
+
 
 model User {
   user_id   String   @id @default(uuid())
