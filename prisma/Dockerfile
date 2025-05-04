@@ -1,14 +1,18 @@
+# prisma/Dockerfile
 FROM node:lts-alpine3.17
+
+# 1) Install Python + build tools for the Python generator
+RUN apk add --no-cache python3 python3-dev py3-pip build-base libffi-dev openssl-dev
+
+# 2) Install Prisma CLI v5.17.0 and Python plugin
+RUN npm install -g prisma@5.17.0 \
+ && pip3 install prisma
 
 WORKDIR /app
 
-RUN npm install -g prisma
+# Copy your schema + .env
+COPY schema.prisma ./
+COPY .env          ./
 
-# Copy schema and env from prisma folder
-COPY . .
-
-# Set environment explicitly (optional but safe)
-ENV DOTENV_CONFIG_PATH=.env
-
-# Run generate and push
-CMD ["sh", "-c", "prisma generate --schema=schema.prisma && prisma db push --schema=schema.prisma"]
+# Default entrypoint does nothing; actual work happens via override in compose
+CMD ["echo", "Ready to generate clients"]

@@ -1,0 +1,51 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator python {
+  provider = "prisma-client-py"
+  output   = "../back_end/prisma_client_py"
+}
+
+generator js {
+  provider = "prisma-client-js"
+  output   = "../front_end/src/prisma"
+}
+
+model User {
+  user_id   String     @id @default(uuid())
+  name      String
+  email     String
+  password  String
+  responses Response[]
+}
+
+model Response {
+  response_id String     @id @default(uuid())
+  input       String
+  output      String
+  created_at  DateTime   @default(now())
+  categories  Category[]
+  user        User       @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user_id     String
+}
+
+model Category {
+  category_id String    @id @default(uuid())
+  category    String
+  input       String
+  preview     String
+  patterns    Pattern[]
+  response    Response  @relation(fields: [response_id], references: [response_id], onDelete: Cascade)
+  response_id String
+}
+
+model Pattern {
+  pattern_id  String   @id @default(uuid())
+  pattern     String
+  feedback    String
+  applied     Boolean
+  category    Category @relation(fields: [category_id], references: [category_id], onDelete: Cascade)
+  category_id String
+}

@@ -5,7 +5,7 @@ datasource db {
 
 generator python {
   provider = "prisma-client-py"
-  output   = "../back_end/prisma-client-py"
+  output   = "../back_end/prisma_client_py"
 }
 
 generator js {
