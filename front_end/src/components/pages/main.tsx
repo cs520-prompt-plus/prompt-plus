@@ -62,7 +62,8 @@ import { Spinner } from "../ui/spinner";
 import { ChatDemo } from "./main/chatBot";
 import { VerticalStepper } from "./main/stepper";
 import type { Message as UIMessage } from "@ai-sdk/react";
-import { mergePreviews, updateResponse } from "@/app/api/responses/backend-service";
+import { mergePreviews, updateResponse, createResponse } from "@/app/api/responses/backend-service";
+import { patternDescriptions } from "@/app/constants/enum";
 
 export const metadata: Metadata = {
   title: "Playground",
@@ -143,8 +144,6 @@ export default function PlaygroundPage() {
       // const res = await getResponseById("3d583ac5-2055-4384-ac73-ced31a8e1fcb"); // dummy response
       // const res = await createResponse(payload);
 
-      // toast.success("Response created successfully!");
-
       // const response = res.data;
       // const enhancedResponse: ResponseCreateResponse = {
       //   ...response,
@@ -166,6 +165,7 @@ export default function PlaygroundPage() {
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
       setData(mockData);
       setInput(mockData.input);
+
       toast.success("Response created successfully!");
     } catch (error) {
       toast.error("Error creating response. Please try again.");
