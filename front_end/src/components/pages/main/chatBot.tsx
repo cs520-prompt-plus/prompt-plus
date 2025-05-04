@@ -18,6 +18,7 @@ type MessagePart =
 type ChatDemoProps = {
   initialMessages?: UseChatOptions["initialMessages"];
   model: string;
+  onAssistantMessage?: (msg: UIMessage) => void;
 };
 
 export function ChatDemo(props: ChatDemoProps) {
@@ -35,6 +36,12 @@ export function ChatDemo(props: ChatDemoProps) {
     api: "/api/chat",
     body: {
       model: props.model,
+    },
+    onFinish: (message) => {
+      // Only call if it's from assistant
+      if (message.role === "assistant") {
+        props.onAssistantMessage?.(message);
+      }
     },
   });
 

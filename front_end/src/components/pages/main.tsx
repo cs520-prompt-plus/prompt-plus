@@ -61,6 +61,8 @@ import { SkeletonWrapper } from "../ui/skeleton-wrapper";
 import { Spinner } from "../ui/spinner";
 import { ChatDemo } from "./main/chatBot";
 import { VerticalStepper } from "./main/stepper";
+import type { Message as UIMessage } from "@ai-sdk/react";
+import { mergePreviews, updateResponse } from "@/app/api/responses/backend-service";
 
 export const metadata: Metadata = {
   title: "Playground",
@@ -77,6 +79,8 @@ export default function PlaygroundPage() {
   const [data, setData] = React.useState<ResponseCreateResponse | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [style, setStyle] = React.useState("improve");
+  const [lastAIMessage, setLastAIMessage] = React.useState<UIMessage | null>(null);
+  const [previewUpdated, setPreviewUpdated] = React.useState(false);
 
   const setDataImmer = (updater: (draft: ResponseCreateResponse) => void) => {
     setData((prev) => produce(prev, updater));
@@ -104,11 +108,11 @@ export default function PlaygroundPage() {
 
   const handleApplyCategory = async (categoryIndex: number) => {
     setLoading(true);
-    if (categoryIndex < 5) {
-      setOutputUnlock(false);
-    } else {
-      setOutputUnlock(true);
-    }
+    // if (categoryIndex < 5) {
+    //   setOutputUnlock(false);
+    // } else {
+    //   setOutputUnlock(true);
+    // }
     console.log(
       `Apply category ${categoryIndex} with patterns:`,
       data?.categories?.[categoryIndex].patterns
@@ -117,14 +121,18 @@ export default function PlaygroundPage() {
     console.log("Updated categories:", updatedCategories);
     await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
     setData(mockData);
-    toast.success("Category applied successfully!");
-    toast.success("You can now view the output.");
+    toast.success("Category applied successfully!, Please see your new preview.");
+    setPreviewUpdated(true);
+    setOutputUnlock(false);
     setLoading(false);
   };
 
   const handleSubmit = async () => {
     setLoading(true);
     try {
+      if (style == "generate"){
+        setInput("Generate an AI prompt with the following specifications: " + input);
+      }
       console.log("Input submitted:", input);
 
       // const payload = {
@@ -132,8 +140,9 @@ export default function PlaygroundPage() {
       //   input: input,
       // };
 
-      // const res = await createResponse(payload);
       // const res = await getResponseById("3d583ac5-2055-4384-ac73-ced31a8e1fcb"); // dummy response
+      // const res = await createResponse(payload);
+
       // toast.success("Response created successfully!");
 
       // const response = res.data;
@@ -156,6 +165,7 @@ export default function PlaygroundPage() {
 
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
       setData(mockData);
+      setInput(mockData.input);
       toast.success("Response created successfully!");
     } catch (error) {
       toast.error("Error creating response. Please try again.");
@@ -163,6 +173,47 @@ export default function PlaygroundPage() {
     }
     setLoading(false);
   };
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      if (lastAIMessage && data) {
+        const final_output = lastAIMessage.content;
+        const response_id = data.response_id;
+        // const response_id = "3d583ac5-2055-4384-ac73-ced31a8e1fasc"; // dummy
+
+        // await updateResponse(response_id, {output : final_output});
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+        toast.success("Final Prompt successfully saved.")
+        setLastAIMessage(null);
+      }
+    } catch (error) {
+      toast.error("Error updating response. Please try again.");
+      console.error("Updating failed", error);
+    }
+    setLoading(false);
+  }
+
+  const handleMerge = async () => {
+    setLoading(true);
+    try {
+      if (data && data.categories){
+        const previews = data.categories.map((category) => category.preview);
+        const response_id = data.response_id;
+        // const response_id = "3d583ac5-2055-4384-ac73-ced31a8e1fasc"; // dummy
+
+        // await mergePreviews(response_id,{previews:previews});\
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+        toast.success("Successfully Merge Previews.")
+        setPreviewUpdated(false);
+        setOutputUnlock(true);
+      }
+    } catch (error) {
+      toast.error("Error merging previews. Please try again.");
+      console.error("Merging failed", error);
+    }
+    setLoading(false);
+  }
 
   return (
     <div className="p-10 h-full w-full ">
@@ -313,7 +364,7 @@ export default function PlaygroundPage() {
                                 <SelectGroup>
                                   <SelectLabel>Style</SelectLabel>
                                   <SelectItem value="improve">
-                                    Improve my currrent prompt
+                                    Improve my current prompt
                                   </SelectItem>
                                   <SelectItem value="generate">
                                     Generate a new prompt
@@ -458,12 +509,15 @@ export default function PlaygroundPage() {
                         </SkeletonWrapper>
                       </div>
                     </div>
+                    <Button onClick={() => handleMerge()} disabled={!previewUpdated}>
+                      Merge Previews
+                    </Button>
                   </TabsContent>
                   <TabsContent
                     value="output"
                     className="mt-0 border-0 p-0 flex gap-4 flex-col"
                   >
-                    <div className="flex flex-1 flex-col space-y-2 max-h-[60vh]">
+                    <div className="flex flex-1 flex-col space-y-2 max-h-[60vh] p-10">
                       <Label htmlFor="input">Output</Label>
                       <ChatDemo
                         model={selectedModel.name}
@@ -475,10 +529,11 @@ export default function PlaygroundPage() {
                             parts: [{ type: "text", text: data?.output ?? "" }],
                           },
                         ]}
+                        onAssistantMessage={(msg) => setLastAIMessage(msg)}
                       />
                     </div>
-                    <Button onClick={handleSubmit} disabled={loading}>
-                      {loading ? <Spinner /> : "Save"}
+                    <Button onClick={handleSave} disabled={loading || lastAIMessage==null}>
+                      {loading ? <Spinner /> : "Save Final Output from AI"}
                     </Button>
                   </TabsContent>
                 </div>
