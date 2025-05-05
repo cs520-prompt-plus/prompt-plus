@@ -9,16 +9,91 @@ generator python {
 }
 
 generator js {
-  provider      = "prisma-client-js"
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-1.1.x"]
+}
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  username      String?         @unique
+  email         String?         @unique
+  emailVerified DateTime?       @map("email_verified")
+  image         String?
+  role          String?         @default("user")
+
+  accounts      Account[]
+  sessions      Session[]
+  Authenticator Authenticator[]   // Optional for WebAuthn support
+  responses Response[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+    @@map("users")
 }
 
-model User {
-  user_id   String   @id @default(uuid())
-  name      String
-  email     String
-  password  String
-  responses Response[]
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @unique @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  refresh_token_expires_in Int?
+ 
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
 }
+ 
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  @@map("sessions")
+}
+ 
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+ 
+// Optional for WebAuthn support
+model Authenticator {
+  credentialID         String  @unique @map("credential_id")
+  userId               String
+  providerAccountId    String @map("provider_account_id")
+  credentialPublicKey  String @map("credential_public_key")
+  counter              Int
+  credentialDeviceType String @map("credential_device_type")
+  credentialBackedUp   Boolean @map("credential_backed_up")
+  transports           String?
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@id([userId, credentialID])
+  @@map("authenticators")
+}
+
 
 model Response {
   response_id String   @id @default(uuid())
@@ -26,7 +101,7 @@ model Response {
   output      String
   created_at  DateTime @default(now())
   categories  Category[]
-  user        User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id     String
 }
 

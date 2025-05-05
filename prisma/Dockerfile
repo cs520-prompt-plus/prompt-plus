@@ -1,4 +1,4 @@
-FROM node:lts-alpine3.17
+FROM node:latest
 RUN npm install -g prisma@5.17.0
 
 WORKDIR /app
