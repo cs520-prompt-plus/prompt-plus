@@ -1,9 +1,6 @@
 version: "3.9"
 
 services:
-  # ──────────────────────────────────────────────────────────────
-  # 1) PostgreSQL
-  # ──────────────────────────────────────────────────────────────
   postgres_db:
     image: postgres:15
     environment:
@@ -20,58 +17,46 @@ services:
     networks:
       - prisma-network
 
-  # ──────────────────────────────────────────────────────────────
-  # 2) FastAPI backend (Python Prisma)
-  # ──────────────────────────────────────────────────────────────
   back_end:
     build:
-      context: ./back_end
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: back_end/Dockerfile
+      args:
+        - uvicorn_extras=--reload --use-colors --log-level debug
     env_file:
-      - ../prisma/.env
+      - ./back_end/.env
     depends_on:
-      - postgres_db
+      postgres_db:
+        condition: service_healthy
     ports:
       - "8000:80"
     volumes:
       - "./back_end/app:/app/app:ro"
-      # ONLY mount the actual Prisma package, not the entire generator folder:
-      - "./back_end/prisma_client_py/prisma:/app/prisma:ro"
-    environment:
-      - PYTHONPATH=/app
+      - "./prisma:/app/prisma:ro"
     networks:
       - prisma-network
 
-  # ──────────────────────────────────────────────────────────────
-  # 3) Next.js frontend (JS Prisma)
-  # ──────────────────────────────────────────────────────────────
   front_end:
     build:
-      context: ./front_end
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: front_end/Dockerfile
     env_file:
-      - ../prisma/.env
+      - ./prisma/.env
     depends_on:
       - postgres_db
     ports:
       - "3000:3000"
-    volumes:
-      - "./front_end:/app"
-      - "./front_end/src/prisma:/app/src/prisma:ro"
     environment:
       - DATABASE_URL=postgresql://postgres:prisma@postgres_db:5432/postgres
     networks:
       - prisma-network
 
-  # ──────────────────────────────────────────────────────────────
-  # 4) Prisma Studio
-  # ──────────────────────────────────────────────────────────────
   prisma-studio:
     build:
-      context: ./prisma
+      context: prisma
       dockerfile: Dockerfile
     env_file:
-      - ./.env
+      - ./prisma/.env
     depends_on:
       - postgres_db
     entrypoint:
@@ -80,8 +65,6 @@ services:
       - prisma studio --schema=./schema.prisma --port=5555 --browser none
     ports:
       - "5555:5555"
-    volumes:
-      - "./prisma:/app"
     networks:
       - prisma-network
 

@@ -1,33 +1,19 @@
-# ── Stage 0: generate & vendor Python Prisma client ─────────────────
-FROM node:lts-alpine3.17 AS gen-python
-
-RUN apk add --no-cache python3 py3-pip build-base libffi-dev openssl-dev \
- && pip3 install prisma
-
-WORKDIR /prisma
-COPY prisma/schema.prisma ./
-COPY prisma/.env          ./
-
-# only runs the python generator (which also vendors the engine)
-RUN python3 -m prisma generate --schema=schema.prisma
-
-# ── Stage 1: build FastAPI image with that client ─────────────────
 FROM ghcr.io/owl-corp/python-poetry-base:3.11-slim
-WORKDIR /app
 
-# install your Python deps
-COPY back_end/pyproject.toml back_end/poetry.lock ./
+ADD back_end/poetry.lock back_end/pyproject.toml prisma/schema.prisma ./
 RUN poetry install --no-root
+RUN poetry run prisma generate --generator python
 
-# pull in the generated Python client (with engine) as /app/prisma-client-py
-COPY --from=gen-python /prisma/prisma-client-py ./prisma-client-py
-
-# copy your FastAPI code
-COPY back_end/app ./app
-
-# so `from prisma import Prisma` works
-ENV PYTHONPATH=/app/prisma-client-py
+WORKDIR /app
+ADD back_end/app ./app
+ADD ./prisma ./prisma
 
 EXPOSE 80
-ENTRYPOINT ["bash","-c"]
-CMD ["poetry run uvicorn app.main:app --host 0.0.0.0 --port 80 --reload"]
+
+# Pull the uvicorn_extra build arg and ave it as an env var.
+# The CMD instruction is ran at execution time, so it also needs to be an env var, so that it is available at that time.
+ARG uvicorn_extras=""
+ENV uvicorn_extras=$uvicorn_extras
+
+ENTRYPOINT ["/bin/bash", "-c"]
+CMD ["poetry run prisma db push --schema prisma/schema.prisma && poetry run uvicorn app:app --host 0.0.0.0 --port 80 $uvicorn_extras"]

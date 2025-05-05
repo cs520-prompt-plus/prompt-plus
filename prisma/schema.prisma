@@ -5,15 +5,11 @@ datasource db {
 
 generator python {
   provider             = "prisma-client-py"
-  output               = "prisma-client-py"
   recursive_type_depth = -1
-  binaryTargets        = ["native","debian-openssl-3.0.x"]
 }
 
 generator js {
   provider      = "prisma-client-js"
-  output        = "node_modules/.prisma/client"
-  binaryTargets = ["native"]
 }
 
 model User {
