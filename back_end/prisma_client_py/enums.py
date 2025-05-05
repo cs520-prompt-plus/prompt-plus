@@ -36,7 +36,7 @@ from typing import (
 from typing_extensions import TypedDict, Literal
 
 
-LiteralString = str
+from typing_extensions import LiteralString
 # -- template enums.py.jinja --
 from ._compat import StrEnum
 

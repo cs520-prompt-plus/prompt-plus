@@ -36,7 +36,7 @@ from typing import (
 from typing_extensions import TypedDict, Literal
 
 
-LiteralString = str
+from typing_extensions import LiteralString
 # -- template types.py.jinja --
 from typing import TypeVar
 
@@ -68,16 +68,14 @@ Serializable = Union[
     int,
     str,
     datetime.datetime,
-    List[Any],
-    Dict[None, Any],
-    Dict[bool, Any],
-    Dict[float, Any],
-    Dict[int, Any],
-    Dict[str, Any],
+    List['Serializable'],
+    Dict[None, 'Serializable'],
+    Dict[bool, 'Serializable'],
+    Dict[float, 'Serializable'],
+    Dict[int, 'Serializable'],
+    Dict[str, 'Serializable'],
 ]
 
-
-    
 
 StringFilter = TypedDict(
     'StringFilter',
@@ -92,95 +90,13 @@ StringFilter = TypedDict(
         'startswith': str,
         'endswith': str,
         'in': List[str],
-        'not': Union[str, 'StringFilterRecursive1'],
+        'not': Union[str, 'StringFilter'],
         'mode': SortMode,
         'search': str,
     },
     total=False,
 )
 
-
-StringFilterRecursive1 = TypedDict(
-    'StringFilterRecursive1',
-    {
-        'equals': str,
-        'not_in': List[str],
-        'lt': str,
-        'lte': str,
-        'gt': str,
-        'gte': str,
-        'contains': str,
-        'startswith': str,
-        'endswith': str,
-        'in': List[str],
-        'not': Union[str, 'StringFilterRecursive2'],
-        'mode': SortMode,
-        'search': str,
-    },
-    total=False,
-)
-
-
-StringFilterRecursive2 = TypedDict(
-    'StringFilterRecursive2',
-    {
-        'equals': str,
-        'not_in': List[str],
-        'lt': str,
-        'lte': str,
-        'gt': str,
-        'gte': str,
-        'contains': str,
-        'startswith': str,
-        'endswith': str,
-        'in': List[str],
-        'not': Union[str, 'StringFilterRecursive3'],
-        'mode': SortMode,
-        'search': str,
-    },
-    total=False,
-)
-
-
-StringFilterRecursive3 = TypedDict(
-    'StringFilterRecursive3',
-    {
-        'equals': str,
-        'not_in': List[str],
-        'lt': str,
-        'lte': str,
-        'gt': str,
-        'gte': str,
-        'contains': str,
-        'startswith': str,
-        'endswith': str,
-        'in': List[str],
-        'not': Union[str, 'StringFilterRecursive4'],
-        'mode': SortMode,
-        'search': str,
-    },
-    total=False,
-)
-
-
-StringFilterRecursive4 = TypedDict(
-    'StringFilterRecursive4',
-    {
-        'equals': str,
-        'not_in': List[str],
-        'lt': str,
-        'lte': str,
-        'gt': str,
-        'gte': str,
-        'contains': str,
-        'startswith': str,
-        'endswith': str,
-        'in': List[str],
-                'mode': SortMode,
-        'search': str,
-    },
-    total=False,
-)
 
 
 class StringWithAggregatesFilter(StringFilter, total=False):
@@ -190,8 +106,6 @@ class StringWithAggregatesFilter(StringFilter, total=False):
     _avg: 'StringFilter'
     _count: 'IntFilter'
 
-
-    
 
 DateTimeFilter = TypedDict(
     'DateTimeFilter',
@@ -203,73 +117,11 @@ DateTimeFilter = TypedDict(
         'gt': datetime.datetime,
         'gte': datetime.datetime,
         'in': List[datetime.datetime],
-        'not': Union[datetime.datetime, 'DateTimeFilterRecursive1'],
+        'not': Union[datetime.datetime, 'DateTimeFilter'],
     },
     total=False,
 )
 
-
-DateTimeFilterRecursive1 = TypedDict(
-    'DateTimeFilterRecursive1',
-    {
-        'equals': datetime.datetime,
-        'not_in': List[datetime.datetime],
-        'lt': datetime.datetime,
-        'lte': datetime.datetime,
-        'gt': datetime.datetime,
-        'gte': datetime.datetime,
-        'in': List[datetime.datetime],
-        'not': Union[datetime.datetime, 'DateTimeFilterRecursive2'],
-    },
-    total=False,
-)
-
-
-DateTimeFilterRecursive2 = TypedDict(
-    'DateTimeFilterRecursive2',
-    {
-        'equals': datetime.datetime,
-        'not_in': List[datetime.datetime],
-        'lt': datetime.datetime,
-        'lte': datetime.datetime,
-        'gt': datetime.datetime,
-        'gte': datetime.datetime,
-        'in': List[datetime.datetime],
-        'not': Union[datetime.datetime, 'DateTimeFilterRecursive3'],
-    },
-    total=False,
-)
-
-
-DateTimeFilterRecursive3 = TypedDict(
-    'DateTimeFilterRecursive3',
-    {
-        'equals': datetime.datetime,
-        'not_in': List[datetime.datetime],
-        'lt': datetime.datetime,
-        'lte': datetime.datetime,
-        'gt': datetime.datetime,
-        'gte': datetime.datetime,
-        'in': List[datetime.datetime],
-        'not': Union[datetime.datetime, 'DateTimeFilterRecursive4'],
-    },
-    total=False,
-)
-
-
-DateTimeFilterRecursive4 = TypedDict(
-    'DateTimeFilterRecursive4',
-    {
-        'equals': datetime.datetime,
-        'not_in': List[datetime.datetime],
-        'lt': datetime.datetime,
-        'lte': datetime.datetime,
-        'gt': datetime.datetime,
-        'gte': datetime.datetime,
-        'in': List[datetime.datetime],
-            },
-    total=False,
-)
 
 
 class DateTimeWithAggregatesFilter(DateTimeFilter, total=False):
@@ -280,55 +132,15 @@ class DateTimeWithAggregatesFilter(DateTimeFilter, total=False):
     _count: 'IntFilter'
 
 
-    
-
 BooleanFilter = TypedDict(
     'BooleanFilter',
     {
         'equals': bool,
-        'not': Union[bool, 'BooleanFilterRecursive1'],
+        'not': Union[bool, 'BooleanFilter'],
     },
     total=False,
 )
 
-
-BooleanFilterRecursive1 = TypedDict(
-    'BooleanFilterRecursive1',
-    {
-        'equals': bool,
-        'not': Union[bool, 'BooleanFilterRecursive2'],
-    },
-    total=False,
-)
-
-
-BooleanFilterRecursive2 = TypedDict(
-    'BooleanFilterRecursive2',
-    {
-        'equals': bool,
-        'not': Union[bool, 'BooleanFilterRecursive3'],
-    },
-    total=False,
-)
-
-
-BooleanFilterRecursive3 = TypedDict(
-    'BooleanFilterRecursive3',
-    {
-        'equals': bool,
-        'not': Union[bool, 'BooleanFilterRecursive4'],
-    },
-    total=False,
-)
-
-
-BooleanFilterRecursive4 = TypedDict(
-    'BooleanFilterRecursive4',
-    {
-        'equals': bool,
-            },
-    total=False,
-)
 
 
 class BooleanWithAggregatesFilter(BooleanFilter, total=False):
@@ -338,8 +150,6 @@ class BooleanWithAggregatesFilter(BooleanFilter, total=False):
     _avg: 'BooleanFilter'
     _count: 'IntFilter'
 
-
-    
 
 IntFilter = TypedDict(
     'IntFilter',
@@ -351,73 +161,11 @@ IntFilter = TypedDict(
         'gt': int,
         'gte': int,
         'in': List[int],
-        'not': Union[int, 'IntFilterRecursive1'],
+        'not': Union[int, 'IntFilter'],
     },
     total=False,
 )
 
-
-IntFilterRecursive1 = TypedDict(
-    'IntFilterRecursive1',
-    {
-        'equals': int,
-        'not_in': List[int],
-        'lt': int,
-        'lte': int,
-        'gt': int,
-        'gte': int,
-        'in': List[int],
-        'not': Union[int, 'IntFilterRecursive2'],
-    },
-    total=False,
-)
-
-
-IntFilterRecursive2 = TypedDict(
-    'IntFilterRecursive2',
-    {
-        'equals': int,
-        'not_in': List[int],
-        'lt': int,
-        'lte': int,
-        'gt': int,
-        'gte': int,
-        'in': List[int],
-        'not': Union[int, 'IntFilterRecursive3'],
-    },
-    total=False,
-)
-
-
-IntFilterRecursive3 = TypedDict(
-    'IntFilterRecursive3',
-    {
-        'equals': int,
-        'not_in': List[int],
-        'lt': int,
-        'lte': int,
-        'gt': int,
-        'gte': int,
-        'in': List[int],
-        'not': Union[int, 'IntFilterRecursive4'],
-    },
-    total=False,
-)
-
-
-IntFilterRecursive4 = TypedDict(
-    'IntFilterRecursive4',
-    {
-        'equals': int,
-        'not_in': List[int],
-        'lt': int,
-        'lte': int,
-        'gt': int,
-        'gte': int,
-        'in': List[int],
-            },
-    total=False,
-)
 
 
 class IntWithAggregatesFilter(IntFilter, total=False):
@@ -430,8 +178,6 @@ class IntWithAggregatesFilter(IntFilter, total=False):
 
 BigIntFilter = IntFilter
 BigIntWithAggregatesFilter = IntWithAggregatesFilter
-    
-
 FloatFilter = TypedDict(
     'FloatFilter',
     {
@@ -442,73 +188,11 @@ FloatFilter = TypedDict(
         'gt': float,
         'gte': float,
         'in': List[float],
-        'not': Union[float, 'FloatFilterRecursive1'],
+        'not': Union[float, 'FloatFilter'],
     },
     total=False,
 )
 
-
-FloatFilterRecursive1 = TypedDict(
-    'FloatFilterRecursive1',
-    {
-        'equals': float,
-        'not_in': List[float],
-        'lt': float,
-        'lte': float,
-        'gt': float,
-        'gte': float,
-        'in': List[float],
-        'not': Union[float, 'FloatFilterRecursive2'],
-    },
-    total=False,
-)
-
-
-FloatFilterRecursive2 = TypedDict(
-    'FloatFilterRecursive2',
-    {
-        'equals': float,
-        'not_in': List[float],
-        'lt': float,
-        'lte': float,
-        'gt': float,
-        'gte': float,
-        'in': List[float],
-        'not': Union[float, 'FloatFilterRecursive3'],
-    },
-    total=False,
-)
-
-
-FloatFilterRecursive3 = TypedDict(
-    'FloatFilterRecursive3',
-    {
-        'equals': float,
-        'not_in': List[float],
-        'lt': float,
-        'lte': float,
-        'gt': float,
-        'gte': float,
-        'in': List[float],
-        'not': Union[float, 'FloatFilterRecursive4'],
-    },
-    total=False,
-)
-
-
-FloatFilterRecursive4 = TypedDict(
-    'FloatFilterRecursive4',
-    {
-        'equals': float,
-        'not_in': List[float],
-        'lt': float,
-        'lte': float,
-        'gt': float,
-        'gte': float,
-        'in': List[float],
-            },
-    total=False,
-)
 
 
 class FloatWithAggregatesFilter(FloatFilter, total=False):
@@ -519,65 +203,17 @@ class FloatWithAggregatesFilter(FloatFilter, total=False):
     _count: 'IntFilter'
 
 
-    
-
 BytesFilter = TypedDict(
     'BytesFilter',
     {
         'equals': 'fields.Base64',
         'in': List['fields.Base64'],
         'not_in': List['fields.Base64'],
-        'not': Union['fields.Base64', 'BytesFilterRecursive1'],
+        'not': Union['fields.Base64', 'BytesFilter'],
     },
     total=False,
 )
 
-
-BytesFilterRecursive1 = TypedDict(
-    'BytesFilterRecursive1',
-    {
-        'equals': 'fields.Base64',
-        'in': List['fields.Base64'],
-        'not_in': List['fields.Base64'],
-        'not': Union['fields.Base64', 'BytesFilterRecursive2'],
-    },
-    total=False,
-)
-
-
-BytesFilterRecursive2 = TypedDict(
-    'BytesFilterRecursive2',
-    {
-        'equals': 'fields.Base64',
-        'in': List['fields.Base64'],
-        'not_in': List['fields.Base64'],
-        'not': Union['fields.Base64', 'BytesFilterRecursive3'],
-    },
-    total=False,
-)
-
-
-BytesFilterRecursive3 = TypedDict(
-    'BytesFilterRecursive3',
-    {
-        'equals': 'fields.Base64',
-        'in': List['fields.Base64'],
-        'not_in': List['fields.Base64'],
-        'not': Union['fields.Base64', 'BytesFilterRecursive4'],
-    },
-    total=False,
-)
-
-
-BytesFilterRecursive4 = TypedDict(
-    'BytesFilterRecursive4',
-    {
-        'equals': 'fields.Base64',
-        'in': List['fields.Base64'],
-        'not_in': List['fields.Base64'],
-            },
-    total=False,
-)
 
 
 class BytesWithAggregatesFilter(BytesFilter, total=False):
@@ -607,8 +243,6 @@ class JsonWithAggregatesFilter(JsonFilter, total=False):
     _count: 'IntFilter'
 
 
-    
-
 DecimalFilter = TypedDict(
     'DecimalFilter',
     {
@@ -619,73 +253,11 @@ DecimalFilter = TypedDict(
         'gt': decimal.Decimal,
         'gte': decimal.Decimal,
         'in': List[decimal.Decimal],
-        'not': Union[decimal.Decimal, 'DecimalFilterRecursive1'],
+        'not': Union[decimal.Decimal, 'DecimalFilter'],
     },
     total=False,
 )
 
-
-DecimalFilterRecursive1 = TypedDict(
-    'DecimalFilterRecursive1',
-    {
-        'equals': decimal.Decimal,
-        'not_in': List[decimal.Decimal],
-        'lt': decimal.Decimal,
-        'lte': decimal.Decimal,
-        'gt': decimal.Decimal,
-        'gte': decimal.Decimal,
-        'in': List[decimal.Decimal],
-        'not': Union[decimal.Decimal, 'DecimalFilterRecursive2'],
-    },
-    total=False,
-)
-
-
-DecimalFilterRecursive2 = TypedDict(
-    'DecimalFilterRecursive2',
-    {
-        'equals': decimal.Decimal,
-        'not_in': List[decimal.Decimal],
-        'lt': decimal.Decimal,
-        'lte': decimal.Decimal,
-        'gt': decimal.Decimal,
-        'gte': decimal.Decimal,
-        'in': List[decimal.Decimal],
-        'not': Union[decimal.Decimal, 'DecimalFilterRecursive3'],
-    },
-    total=False,
-)
-
-
-DecimalFilterRecursive3 = TypedDict(
-    'DecimalFilterRecursive3',
-    {
-        'equals': decimal.Decimal,
-        'not_in': List[decimal.Decimal],
-        'lt': decimal.Decimal,
-        'lte': decimal.Decimal,
-        'gt': decimal.Decimal,
-        'gte': decimal.Decimal,
-        'in': List[decimal.Decimal],
-        'not': Union[decimal.Decimal, 'DecimalFilterRecursive4'],
-    },
-    total=False,
-)
-
-
-DecimalFilterRecursive4 = TypedDict(
-    'DecimalFilterRecursive4',
-    {
-        'equals': decimal.Decimal,
-        'not_in': List[decimal.Decimal],
-        'lt': decimal.Decimal,
-        'lte': decimal.Decimal,
-        'gt': decimal.Decimal,
-        'gte': decimal.Decimal,
-        'in': List[decimal.Decimal],
-            },
-    total=False,
-)
 
 
 class DecimalWithAggregatesFilter(StringFilter, total=False):
@@ -1308,24 +880,21 @@ UserOrderByInput = Union[
 # TODO: cleanup these types
 
 
-# Dict[str, Any] is a mypy limitation
-# see https://github.com/RobertCraigie/prisma-client-py/issues/45
-# switch to pyright for improved types, see https://prisma-client-py.readthedocs.io/en/stable/reference/limitations/
 
 UserRelationFilter = TypedDict(
     'UserRelationFilter',
     {
-        'is': 'Dict[str, Any]',
-        'is_not': 'Dict[str, Any]',
+        'is': 'UserWhereInput',
+        'is_not': 'UserWhereInput',
     },
     total=False,
 )
 
 
 class UserListRelationFilter(TypedDict, total=False):
-    some: 'Dict[str, Any]'
-    none: 'Dict[str, Any]'
-    every: 'Dict[str, Any]'
+    some: 'UserWhereInput'
+    none: 'UserWhereInput'
+    every: 'UserWhereInput'
 
 
 class UserInclude(TypedDict, total=False):
@@ -1333,57 +902,15 @@ class UserInclude(TypedDict, total=False):
     responses: Union[bool, 'FindManyResponseArgsFromUser']
 
 
-    
-
 class UserIncludeFromUser(TypedDict, total=False):
     """Relational arguments for User"""
-    responses: Union[bool, 'FindManyResponseArgsFromUserRecursive1']
+    responses: Union[bool, 'FindManyResponseArgsFromUser']
 
-
-class UserIncludeFromUserRecursive1(TypedDict, total=False):
-    """Relational arguments for User"""
-    responses: Union[bool, 'FindManyResponseArgsFromUserRecursive2']
-
-
-class UserIncludeFromUserRecursive2(TypedDict, total=False):
-    """Relational arguments for User"""
-    responses: Union[bool, 'FindManyResponseArgsFromUserRecursive3']
-
-
-class UserIncludeFromUserRecursive3(TypedDict, total=False):
-    """Relational arguments for User"""
-    responses: Union[bool, 'FindManyResponseArgsFromUserRecursive4']
-
-
-class UserIncludeFromUserRecursive4(TypedDict, total=False):
-    """Relational arguments for User"""
-
-    
 
 class UserArgsFromUser(TypedDict, total=False):
     """Arguments for User"""
-    include: 'UserIncludeFromUserRecursive1'
+    include: 'UserIncludeFromUser'
 
-
-class UserArgsFromUserRecursive1(TypedDict, total=False):
-    """Arguments for User"""
-    include: 'UserIncludeFromUserRecursive2'
-
-
-class UserArgsFromUserRecursive2(TypedDict, total=False):
-    """Arguments for User"""
-    include: 'UserIncludeFromUserRecursive3'
-
-
-class UserArgsFromUserRecursive3(TypedDict, total=False):
-    """Arguments for User"""
-    include: 'UserIncludeFromUserRecursive4'
-
-
-class UserArgsFromUserRecursive4(TypedDict, total=False):
-    """Arguments for User"""
-    
-    
 
 class FindManyUserArgsFromUser(TypedDict, total=False):
     """Arguments for User"""
@@ -1393,106 +920,19 @@ class FindManyUserArgsFromUser(TypedDict, total=False):
     where: 'UserWhereInput'
     cursor: 'UserWhereUniqueInput'
     distinct: List['UserScalarFieldKeys']
-    include: 'UserIncludeFromUserRecursive1'
+    include: 'UserIncludeFromUser'
 
-
-class FindManyUserArgsFromUserRecursive1(TypedDict, total=False):
-    """Arguments for User"""
-    take: int
-    skip: int
-    order_by: Union['UserOrderByInput', List['UserOrderByInput']]
-    where: 'UserWhereInput'
-    cursor: 'UserWhereUniqueInput'
-    distinct: List['UserScalarFieldKeys']
-    include: 'UserIncludeFromUserRecursive2'
-
-
-class FindManyUserArgsFromUserRecursive2(TypedDict, total=False):
-    """Arguments for User"""
-    take: int
-    skip: int
-    order_by: Union['UserOrderByInput', List['UserOrderByInput']]
-    where: 'UserWhereInput'
-    cursor: 'UserWhereUniqueInput'
-    distinct: List['UserScalarFieldKeys']
-    include: 'UserIncludeFromUserRecursive3'
-
-
-class FindManyUserArgsFromUserRecursive3(TypedDict, total=False):
-    """Arguments for User"""
-    take: int
-    skip: int
-    order_by: Union['UserOrderByInput', List['UserOrderByInput']]
-    where: 'UserWhereInput'
-    cursor: 'UserWhereUniqueInput'
-    distinct: List['UserScalarFieldKeys']
-    include: 'UserIncludeFromUserRecursive4'
-
-
-class FindManyUserArgsFromUserRecursive4(TypedDict, total=False):
-    """Arguments for User"""
-    take: int
-    skip: int
-    order_by: Union['UserOrderByInput', List['UserOrderByInput']]
-    where: 'UserWhereInput'
-    cursor: 'UserWhereUniqueInput'
-    distinct: List['UserScalarFieldKeys']
-    
-    
 
 class ResponseIncludeFromUser(TypedDict, total=False):
     """Relational arguments for User"""
-    categories: Union[bool, 'FindManyCategoryArgsFromUserRecursive1']
-    user: Union[bool, 'UserArgsFromUserRecursive1']
+    categories: Union[bool, 'FindManyCategoryArgsFromUser']
+    user: Union[bool, 'UserArgsFromUser']
 
-
-class ResponseIncludeFromUserRecursive1(TypedDict, total=False):
-    """Relational arguments for User"""
-    categories: Union[bool, 'FindManyCategoryArgsFromUserRecursive2']
-    user: Union[bool, 'UserArgsFromUserRecursive2']
-
-
-class ResponseIncludeFromUserRecursive2(TypedDict, total=False):
-    """Relational arguments for User"""
-    categories: Union[bool, 'FindManyCategoryArgsFromUserRecursive3']
-    user: Union[bool, 'UserArgsFromUserRecursive3']
-
-
-class ResponseIncludeFromUserRecursive3(TypedDict, total=False):
-    """Relational arguments for User"""
-    categories: Union[bool, 'FindManyCategoryArgsFromUserRecursive4']
-    user: Union[bool, 'UserArgsFromUserRecursive4']
-
-
-class ResponseIncludeFromUserRecursive4(TypedDict, total=False):
-    """Relational arguments for User"""
-
-    
 
 class ResponseArgsFromUser(TypedDict, total=False):
     """Arguments for User"""
-    include: 'ResponseIncludeFromResponseRecursive1'
+    include: 'ResponseIncludeFromResponse'
 
-
-class ResponseArgsFromUserRecursive1(TypedDict, total=False):
-    """Arguments for User"""
-    include: 'ResponseIncludeFromResponseRecursive2'
-
-
-class ResponseArgsFromUserRecursive2(TypedDict, total=False):
-    """Arguments for User"""
-    include: 'ResponseIncludeFromResponseRecursive3'
-
-
-class ResponseArgsFromUserRecursive3(TypedDict, total=False):
-    """Arguments for User"""
-    include: 'ResponseIncludeFromResponseRecursive4'
-
-
-class ResponseArgsFromUserRecursive4(TypedDict, total=False):
-    """Arguments for User"""
-    
-    
 
 class FindManyResponseArgsFromUser(TypedDict, total=False):
     """Arguments for User"""
@@ -1502,106 +942,19 @@ class FindManyResponseArgsFromUser(TypedDict, total=False):
     where: 'ResponseWhereInput'
     cursor: 'ResponseWhereUniqueInput'
     distinct: List['ResponseScalarFieldKeys']
-    include: 'ResponseIncludeFromResponseRecursive1'
+    include: 'ResponseIncludeFromResponse'
 
-
-class FindManyResponseArgsFromUserRecursive1(TypedDict, total=False):
-    """Arguments for User"""
-    take: int
-    skip: int
-    order_by: Union['ResponseOrderByInput', List['ResponseOrderByInput']]
-    where: 'ResponseWhereInput'
-    cursor: 'ResponseWhereUniqueInput'
-    distinct: List['ResponseScalarFieldKeys']
-    include: 'ResponseIncludeFromResponseRecursive2'
-
-
-class FindManyResponseArgsFromUserRecursive2(TypedDict, total=False):
-    """Arguments for User"""
-    take: int
-    skip: int
-    order_by: Union['ResponseOrderByInput', List['ResponseOrderByInput']]
-    where: 'ResponseWhereInput'
-    cursor: 'ResponseWhereUniqueInput'
-    distinct: List['ResponseScalarFieldKeys']
-    include: 'ResponseIncludeFromResponseRecursive3'
-
-
-class FindManyResponseArgsFromUserRecursive3(TypedDict, total=False):
-    """Arguments for User"""
-    take: int
-    skip: int
-    order_by: Union['ResponseOrderByInput', List['ResponseOrderByInput']]
-    where: 'ResponseWhereInput'
-    cursor: 'ResponseWhereUniqueInput'
-    distinct: List['ResponseScalarFieldKeys']
-    include: 'ResponseIncludeFromResponseRecursive4'
-
-
-class FindManyResponseArgsFromUserRecursive4(TypedDict, total=False):
-    """Arguments for User"""
-    take: int
-    skip: int
-    order_by: Union['ResponseOrderByInput', List['ResponseOrderByInput']]
-    where: 'ResponseWhereInput'
-    cursor: 'ResponseWhereUniqueInput'
-    distinct: List['ResponseScalarFieldKeys']
-    
-    
 
 class CategoryIncludeFromUser(TypedDict, total=False):
     """Relational arguments for User"""
-    patterns: Union[bool, 'FindManyPatternArgsFromUserRecursive1']
-    response: Union[bool, 'ResponseArgsFromUserRecursive1']
+    patterns: Union[bool, 'FindManyPatternArgsFromUser']
+    response: Union[bool, 'ResponseArgsFromUser']
 
-
-class CategoryIncludeFromUserRecursive1(TypedDict, total=False):
-    """Relational arguments for User"""
-    patterns: Union[bool, 'FindManyPatternArgsFromUserRecursive2']
-    response: Union[bool, 'ResponseArgsFromUserRecursive2']
-
-
-class CategoryIncludeFromUserRecursive2(TypedDict, total=False):
-    """Relational arguments for User"""
-    patterns: Union[bool, 'FindManyPatternArgsFromUserRecursive3']
-    response: Union[bool, 'ResponseArgsFromUserRecursive3']
-
-
-class CategoryIncludeFromUserRecursive3(TypedDict, total=False):
-    """Relational arguments for User"""
-    patterns: Union[bool, 'FindManyPatternArgsFromUserRecursive4']
-    response: Union[bool, 'ResponseArgsFromUserRecursive4']
-
-
-class CategoryIncludeFromUserRecursive4(TypedDict, total=False):
-    """Relational arguments for User"""
-
-    
 
 class CategoryArgsFromUser(TypedDict, total=False):
     """Arguments for User"""
-    include: 'CategoryIncludeFromCategoryRecursive1'
+    include: 'CategoryIncludeFromCategory'
 
-
-class CategoryArgsFromUserRecursive1(TypedDict, total=False):
-    """Arguments for User"""
-    include: 'CategoryIncludeFromCategoryRecursive2'
-
-
-class CategoryArgsFromUserRecursive2(TypedDict, total=False):
-    """Arguments for User"""
-    include: 'CategoryIncludeFromCategoryRecursive3'
-
-
-class CategoryArgsFromUserRecursive3(TypedDict, total=False):
-    """Arguments for User"""
-    include: 'CategoryIncludeFromCategoryRecursive4'
-
-
-class CategoryArgsFromUserRecursive4(TypedDict, total=False):
-    """Arguments for User"""
-    
-    
 
 class FindManyCategoryArgsFromUser(TypedDict, total=False):
     """Arguments for User"""
@@ -1611,102 +964,18 @@ class FindManyCategoryArgsFromUser(TypedDict, total=False):
     where: 'CategoryWhereInput'
     cursor: 'CategoryWhereUniqueInput'
     distinct: List['CategoryScalarFieldKeys']
-    include: 'CategoryIncludeFromCategoryRecursive1'
+    include: 'CategoryIncludeFromCategory'
 
-
-class FindManyCategoryArgsFromUserRecursive1(TypedDict, total=False):
-    """Arguments for User"""
-    take: int
-    skip: int
-    order_by: Union['CategoryOrderByInput', List['CategoryOrderByInput']]
-    where: 'CategoryWhereInput'
-    cursor: 'CategoryWhereUniqueInput'
-    distinct: List['CategoryScalarFieldKeys']
-    include: 'CategoryIncludeFromCategoryRecursive2'
-
-
-class FindManyCategoryArgsFromUserRecursive2(TypedDict, total=False):
-    """Arguments for User"""
-    take: int
-    skip: int
-    order_by: Union['CategoryOrderByInput', List['CategoryOrderByInput']]
-    where: 'CategoryWhereInput'
-    cursor: 'CategoryWhereUniqueInput'
-    distinct: List['CategoryScalarFieldKeys']
-    include: 'CategoryIncludeFromCategoryRecursive3'
-
-
-class FindManyCategoryArgsFromUserRecursive3(TypedDict, total=False):
-    """Arguments for User"""
-    take: int
-    skip: int
-    order_by: Union['CategoryOrderByInput', List['CategoryOrderByInput']]
-    where: 'CategoryWhereInput'
-    cursor: 'CategoryWhereUniqueInput'
-    distinct: List['CategoryScalarFieldKeys']
-    include: 'CategoryIncludeFromCategoryRecursive4'
-
-
-class FindManyCategoryArgsFromUserRecursive4(TypedDict, total=False):
-    """Arguments for User"""
-    take: int
-    skip: int
-    order_by: Union['CategoryOrderByInput', List['CategoryOrderByInput']]
-    where: 'CategoryWhereInput'
-    cursor: 'CategoryWhereUniqueInput'
-    distinct: List['CategoryScalarFieldKeys']
-    
-    
 
 class PatternIncludeFromUser(TypedDict, total=False):
     """Relational arguments for User"""
-    category: Union[bool, 'CategoryArgsFromUserRecursive1']
+    category: Union[bool, 'CategoryArgsFromUser']
 
-
-class PatternIncludeFromUserRecursive1(TypedDict, total=False):
-    """Relational arguments for User"""
-    category: Union[bool, 'CategoryArgsFromUserRecursive2']
-
-
-class PatternIncludeFromUserRecursive2(TypedDict, total=False):
-    """Relational arguments for User"""
-    category: Union[bool, 'CategoryArgsFromUserRecursive3']
-
-
-class PatternIncludeFromUserRecursive3(TypedDict, total=False):
-    """Relational arguments for User"""
-    category: Union[bool, 'CategoryArgsFromUserRecursive4']
-
-
-class PatternIncludeFromUserRecursive4(TypedDict, total=False):
-    """Relational arguments for User"""
-
-    
 
 class PatternArgsFromUser(TypedDict, total=False):
     """Arguments for User"""
-    include: 'PatternIncludeFromPatternRecursive1'
+    include: 'PatternIncludeFromPattern'
 
-
-class PatternArgsFromUserRecursive1(TypedDict, total=False):
-    """Arguments for User"""
-    include: 'PatternIncludeFromPatternRecursive2'
-
-
-class PatternArgsFromUserRecursive2(TypedDict, total=False):
-    """Arguments for User"""
-    include: 'PatternIncludeFromPatternRecursive3'
-
-
-class PatternArgsFromUserRecursive3(TypedDict, total=False):
-    """Arguments for User"""
-    include: 'PatternIncludeFromPatternRecursive4'
-
-
-class PatternArgsFromUserRecursive4(TypedDict, total=False):
-    """Arguments for User"""
-    
-    
 
 class FindManyPatternArgsFromUser(TypedDict, total=False):
     """Arguments for User"""
@@ -1716,58 +985,14 @@ class FindManyPatternArgsFromUser(TypedDict, total=False):
     where: 'PatternWhereInput'
     cursor: 'PatternWhereUniqueInput'
     distinct: List['PatternScalarFieldKeys']
-    include: 'PatternIncludeFromPatternRecursive1'
+    include: 'PatternIncludeFromPattern'
 
 
-class FindManyPatternArgsFromUserRecursive1(TypedDict, total=False):
-    """Arguments for User"""
-    take: int
-    skip: int
-    order_by: Union['PatternOrderByInput', List['PatternOrderByInput']]
-    where: 'PatternWhereInput'
-    cursor: 'PatternWhereUniqueInput'
-    distinct: List['PatternScalarFieldKeys']
-    include: 'PatternIncludeFromPatternRecursive2'
-
-
-class FindManyPatternArgsFromUserRecursive2(TypedDict, total=False):
-    """Arguments for User"""
-    take: int
-    skip: int
-    order_by: Union['PatternOrderByInput', List['PatternOrderByInput']]
-    where: 'PatternWhereInput'
-    cursor: 'PatternWhereUniqueInput'
-    distinct: List['PatternScalarFieldKeys']
-    include: 'PatternIncludeFromPatternRecursive3'
-
-
-class FindManyPatternArgsFromUserRecursive3(TypedDict, total=False):
-    """Arguments for User"""
-    take: int
-    skip: int
-    order_by: Union['PatternOrderByInput', List['PatternOrderByInput']]
-    where: 'PatternWhereInput'
-    cursor: 'PatternWhereUniqueInput'
-    distinct: List['PatternScalarFieldKeys']
-    include: 'PatternIncludeFromPatternRecursive4'
-
-
-class FindManyPatternArgsFromUserRecursive4(TypedDict, total=False):
-    """Arguments for User"""
-    take: int
-    skip: int
-    order_by: Union['PatternOrderByInput', List['PatternOrderByInput']]
-    where: 'PatternWhereInput'
-    cursor: 'PatternWhereUniqueInput'
-    distinct: List['PatternScalarFieldKeys']
-    
 
 
 FindManyUserArgs = FindManyUserArgsFromUser
 FindFirstUserArgs = FindManyUserArgsFromUser
 
-
-    
 
 class UserWhereInput(TypedDict, total=False):
     """User arguments for searching"""
@@ -1777,72 +1002,16 @@ class UserWhereInput(TypedDict, total=False):
     password: Union[_str, 'types.StringFilter']
     responses: 'ResponseListRelationFilter'
 
-    # should be noted that AND and NOT should be Union['UserWhereInputRecursive1', List['UserWhereInputRecursive1']]
+    # should be noted that AND and NOT should be Union['UserWhereInput', List['UserWhereInput']]
     # but this causes mypy to hang :/
-    AND: List['UserWhereInputRecursive1']
-    OR: List['UserWhereInputRecursive1']
-    NOT: List['UserWhereInputRecursive1']
-
-
-class UserWhereInputRecursive1(TypedDict, total=False):
-    """User arguments for searching"""
-    user_id: Union[_str, 'types.StringFilter']
-    name: Union[_str, 'types.StringFilter']
-    email: Union[_str, 'types.StringFilter']
-    password: Union[_str, 'types.StringFilter']
-    responses: 'ResponseListRelationFilter'
-
-    # should be noted that AND and NOT should be Union['UserWhereInputRecursive2', List['UserWhereInputRecursive2']]
-    # but this causes mypy to hang :/
-    AND: List['UserWhereInputRecursive2']
-    OR: List['UserWhereInputRecursive2']
-    NOT: List['UserWhereInputRecursive2']
-
-
-class UserWhereInputRecursive2(TypedDict, total=False):
-    """User arguments for searching"""
-    user_id: Union[_str, 'types.StringFilter']
-    name: Union[_str, 'types.StringFilter']
-    email: Union[_str, 'types.StringFilter']
-    password: Union[_str, 'types.StringFilter']
-    responses: 'ResponseListRelationFilter'
-
-    # should be noted that AND and NOT should be Union['UserWhereInputRecursive3', List['UserWhereInputRecursive3']]
-    # but this causes mypy to hang :/
-    AND: List['UserWhereInputRecursive3']
-    OR: List['UserWhereInputRecursive3']
-    NOT: List['UserWhereInputRecursive3']
-
-
-class UserWhereInputRecursive3(TypedDict, total=False):
-    """User arguments for searching"""
-    user_id: Union[_str, 'types.StringFilter']
-    name: Union[_str, 'types.StringFilter']
-    email: Union[_str, 'types.StringFilter']
-    password: Union[_str, 'types.StringFilter']
-    responses: 'ResponseListRelationFilter'
-
-    # should be noted that AND and NOT should be Union['UserWhereInputRecursive4', List['UserWhereInputRecursive4']]
-    # but this causes mypy to hang :/
-    AND: List['UserWhereInputRecursive4']
-    OR: List['UserWhereInputRecursive4']
-    NOT: List['UserWhereInputRecursive4']
-
-
-class UserWhereInputRecursive4(TypedDict, total=False):
-    """User arguments for searching"""
-    user_id: Union[_str, 'types.StringFilter']
-    name: Union[_str, 'types.StringFilter']
-    email: Union[_str, 'types.StringFilter']
-    password: Union[_str, 'types.StringFilter']
-    responses: 'ResponseListRelationFilter'
+    AND: List['UserWhereInput']
+    OR: List['UserWhereInput']
+    NOT: List['UserWhereInput']
 
 
 
 # aggregate User types
 
-
-    
 
 class UserScalarWhereWithAggregatesInput(TypedDict, total=False):
     """User arguments for searching"""
@@ -1851,53 +1020,9 @@ class UserScalarWhereWithAggregatesInput(TypedDict, total=False):
     email: Union[_str, 'types.StringWithAggregatesFilter']
     password: Union[_str, 'types.StringWithAggregatesFilter']
 
-    AND: List['UserScalarWhereWithAggregatesInputRecursive1']
-    OR: List['UserScalarWhereWithAggregatesInputRecursive1']
-    NOT: List['UserScalarWhereWithAggregatesInputRecursive1']
-
-
-class UserScalarWhereWithAggregatesInputRecursive1(TypedDict, total=False):
-    """User arguments for searching"""
-    user_id: Union[_str, 'types.StringWithAggregatesFilter']
-    name: Union[_str, 'types.StringWithAggregatesFilter']
-    email: Union[_str, 'types.StringWithAggregatesFilter']
-    password: Union[_str, 'types.StringWithAggregatesFilter']
-
-    AND: List['UserScalarWhereWithAggregatesInputRecursive2']
-    OR: List['UserScalarWhereWithAggregatesInputRecursive2']
-    NOT: List['UserScalarWhereWithAggregatesInputRecursive2']
-
-
-class UserScalarWhereWithAggregatesInputRecursive2(TypedDict, total=False):
-    """User arguments for searching"""
-    user_id: Union[_str, 'types.StringWithAggregatesFilter']
-    name: Union[_str, 'types.StringWithAggregatesFilter']
-    email: Union[_str, 'types.StringWithAggregatesFilter']
-    password: Union[_str, 'types.StringWithAggregatesFilter']
-
-    AND: List['UserScalarWhereWithAggregatesInputRecursive3']
-    OR: List['UserScalarWhereWithAggregatesInputRecursive3']
-    NOT: List['UserScalarWhereWithAggregatesInputRecursive3']
-
-
-class UserScalarWhereWithAggregatesInputRecursive3(TypedDict, total=False):
-    """User arguments for searching"""
-    user_id: Union[_str, 'types.StringWithAggregatesFilter']
-    name: Union[_str, 'types.StringWithAggregatesFilter']
-    email: Union[_str, 'types.StringWithAggregatesFilter']
-    password: Union[_str, 'types.StringWithAggregatesFilter']
-
-    AND: List['UserScalarWhereWithAggregatesInputRecursive4']
-    OR: List['UserScalarWhereWithAggregatesInputRecursive4']
-    NOT: List['UserScalarWhereWithAggregatesInputRecursive4']
-
-
-class UserScalarWhereWithAggregatesInputRecursive4(TypedDict, total=False):
-    """User arguments for searching"""
-    user_id: Union[_str, 'types.StringWithAggregatesFilter']
-    name: Union[_str, 'types.StringWithAggregatesFilter']
-    email: Union[_str, 'types.StringWithAggregatesFilter']
-    password: Union[_str, 'types.StringWithAggregatesFilter']
+    AND: List['UserScalarWhereWithAggregatesInput']
+    OR: List['UserScalarWhereWithAggregatesInput']
+    NOT: List['UserScalarWhereWithAggregatesInput']
 
 
 
@@ -2182,24 +1307,21 @@ ResponseOrderByInput = Union[
 # TODO: cleanup these types
 
 
-# Dict[str, Any] is a mypy limitation
-# see https://github.com/RobertCraigie/prisma-client-py/issues/45
-# switch to pyright for improved types, see https://prisma-client-py.readthedocs.io/en/stable/reference/limitations/
 
 ResponseRelationFilter = TypedDict(
     'ResponseRelationFilter',
     {
-        'is': 'Dict[str, Any]',
-        'is_not': 'Dict[str, Any]',
+        'is': 'ResponseWhereInput',
+        'is_not': 'ResponseWhereInput',
     },
     total=False,
 )
 
 
 class ResponseListRelationFilter(TypedDict, total=False):
-    some: 'Dict[str, Any]'
-    none: 'Dict[str, Any]'
-    every: 'Dict[str, Any]'
+    some: 'ResponseWhereInput'
+    none: 'ResponseWhereInput'
+    every: 'ResponseWhereInput'
 
 
 class ResponseInclude(TypedDict, total=False):
@@ -2208,57 +1330,15 @@ class ResponseInclude(TypedDict, total=False):
     user: Union[bool, 'UserArgsFromResponse']
 
 
-    
-
 class UserIncludeFromResponse(TypedDict, total=False):
     """Relational arguments for Response"""
-    responses: Union[bool, 'FindManyResponseArgsFromResponseRecursive1']
+    responses: Union[bool, 'FindManyResponseArgsFromResponse']
 
-
-class UserIncludeFromResponseRecursive1(TypedDict, total=False):
-    """Relational arguments for Response"""
-    responses: Union[bool, 'FindManyResponseArgsFromResponseRecursive2']
-
-
-class UserIncludeFromResponseRecursive2(TypedDict, total=False):
-    """Relational arguments for Response"""
-    responses: Union[bool, 'FindManyResponseArgsFromResponseRecursive3']
-
-
-class UserIncludeFromResponseRecursive3(TypedDict, total=False):
-    """Relational arguments for Response"""
-    responses: Union[bool, 'FindManyResponseArgsFromResponseRecursive4']
-
-
-class UserIncludeFromResponseRecursive4(TypedDict, total=False):
-    """Relational arguments for Response"""
-
-    
 
 class UserArgsFromResponse(TypedDict, total=False):
     """Arguments for Response"""
-    include: 'UserIncludeFromUserRecursive1'
+    include: 'UserIncludeFromUser'
 
-
-class UserArgsFromResponseRecursive1(TypedDict, total=False):
-    """Arguments for Response"""
-    include: 'UserIncludeFromUserRecursive2'
-
-
-class UserArgsFromResponseRecursive2(TypedDict, total=False):
-    """Arguments for Response"""
-    include: 'UserIncludeFromUserRecursive3'
-
-
-class UserArgsFromResponseRecursive3(TypedDict, total=False):
-    """Arguments for Response"""
-    include: 'UserIncludeFromUserRecursive4'
-
-
-class UserArgsFromResponseRecursive4(TypedDict, total=False):
-    """Arguments for Response"""
-    
-    
 
 class FindManyUserArgsFromResponse(TypedDict, total=False):
     """Arguments for Response"""
@@ -2268,106 +1348,19 @@ class FindManyUserArgsFromResponse(TypedDict, total=False):
     where: 'UserWhereInput'
     cursor: 'UserWhereUniqueInput'
     distinct: List['UserScalarFieldKeys']
-    include: 'UserIncludeFromUserRecursive1'
+    include: 'UserIncludeFromUser'
 
-
-class FindManyUserArgsFromResponseRecursive1(TypedDict, total=False):
-    """Arguments for Response"""
-    take: int
-    skip: int
-    order_by: Union['UserOrderByInput', List['UserOrderByInput']]
-    where: 'UserWhereInput'
-    cursor: 'UserWhereUniqueInput'
-    distinct: List['UserScalarFieldKeys']
-    include: 'UserIncludeFromUserRecursive2'
-
-
-class FindManyUserArgsFromResponseRecursive2(TypedDict, total=False):
-    """Arguments for Response"""
-    take: int
-    skip: int
-    order_by: Union['UserOrderByInput', List['UserOrderByInput']]
-    where: 'UserWhereInput'
-    cursor: 'UserWhereUniqueInput'
-    distinct: List['UserScalarFieldKeys']
-    include: 'UserIncludeFromUserRecursive3'
-
-
-class FindManyUserArgsFromResponseRecursive3(TypedDict, total=False):
-    """Arguments for Response"""
-    take: int
-    skip: int
-    order_by: Union['UserOrderByInput', List['UserOrderByInput']]
-    where: 'UserWhereInput'
-    cursor: 'UserWhereUniqueInput'
-    distinct: List['UserScalarFieldKeys']
-    include: 'UserIncludeFromUserRecursive4'
-
-
-class FindManyUserArgsFromResponseRecursive4(TypedDict, total=False):
-    """Arguments for Response"""
-    take: int
-    skip: int
-    order_by: Union['UserOrderByInput', List['UserOrderByInput']]
-    where: 'UserWhereInput'
-    cursor: 'UserWhereUniqueInput'
-    distinct: List['UserScalarFieldKeys']
-    
-    
 
 class ResponseIncludeFromResponse(TypedDict, total=False):
     """Relational arguments for Response"""
-    categories: Union[bool, 'FindManyCategoryArgsFromResponseRecursive1']
-    user: Union[bool, 'UserArgsFromResponseRecursive1']
+    categories: Union[bool, 'FindManyCategoryArgsFromResponse']
+    user: Union[bool, 'UserArgsFromResponse']
 
-
-class ResponseIncludeFromResponseRecursive1(TypedDict, total=False):
-    """Relational arguments for Response"""
-    categories: Union[bool, 'FindManyCategoryArgsFromResponseRecursive2']
-    user: Union[bool, 'UserArgsFromResponseRecursive2']
-
-
-class ResponseIncludeFromResponseRecursive2(TypedDict, total=False):
-    """Relational arguments for Response"""
-    categories: Union[bool, 'FindManyCategoryArgsFromResponseRecursive3']
-    user: Union[bool, 'UserArgsFromResponseRecursive3']
-
-
-class ResponseIncludeFromResponseRecursive3(TypedDict, total=False):
-    """Relational arguments for Response"""
-    categories: Union[bool, 'FindManyCategoryArgsFromResponseRecursive4']
-    user: Union[bool, 'UserArgsFromResponseRecursive4']
-
-
-class ResponseIncludeFromResponseRecursive4(TypedDict, total=False):
-    """Relational arguments for Response"""
-
-    
 
 class ResponseArgsFromResponse(TypedDict, total=False):
     """Arguments for Response"""
-    include: 'ResponseIncludeFromResponseRecursive1'
+    include: 'ResponseIncludeFromResponse'
 
-
-class ResponseArgsFromResponseRecursive1(TypedDict, total=False):
-    """Arguments for Response"""
-    include: 'ResponseIncludeFromResponseRecursive2'
-
-
-class ResponseArgsFromResponseRecursive2(TypedDict, total=False):
-    """Arguments for Response"""
-    include: 'ResponseIncludeFromResponseRecursive3'
-
-
-class ResponseArgsFromResponseRecursive3(TypedDict, total=False):
-    """Arguments for Response"""
-    include: 'ResponseIncludeFromResponseRecursive4'
-
-
-class ResponseArgsFromResponseRecursive4(TypedDict, total=False):
-    """Arguments for Response"""
-    
-    
 
 class FindManyResponseArgsFromResponse(TypedDict, total=False):
     """Arguments for Response"""
@@ -2377,106 +1370,19 @@ class FindManyResponseArgsFromResponse(TypedDict, total=False):
     where: 'ResponseWhereInput'
     cursor: 'ResponseWhereUniqueInput'
     distinct: List['ResponseScalarFieldKeys']
-    include: 'ResponseIncludeFromResponseRecursive1'
+    include: 'ResponseIncludeFromResponse'
 
-
-class FindManyResponseArgsFromResponseRecursive1(TypedDict, total=False):
-    """Arguments for Response"""
-    take: int
-    skip: int
-    order_by: Union['ResponseOrderByInput', List['ResponseOrderByInput']]
-    where: 'ResponseWhereInput'
-    cursor: 'ResponseWhereUniqueInput'
-    distinct: List['ResponseScalarFieldKeys']
-    include: 'ResponseIncludeFromResponseRecursive2'
-
-
-class FindManyResponseArgsFromResponseRecursive2(TypedDict, total=False):
-    """Arguments for Response"""
-    take: int
-    skip: int
-    order_by: Union['ResponseOrderByInput', List['ResponseOrderByInput']]
-    where: 'ResponseWhereInput'
-    cursor: 'ResponseWhereUniqueInput'
-    distinct: List['ResponseScalarFieldKeys']
-    include: 'ResponseIncludeFromResponseRecursive3'
-
-
-class FindManyResponseArgsFromResponseRecursive3(TypedDict, total=False):
-    """Arguments for Response"""
-    take: int
-    skip: int
-    order_by: Union['ResponseOrderByInput', List['ResponseOrderByInput']]
-    where: 'ResponseWhereInput'
-    cursor: 'ResponseWhereUniqueInput'
-    distinct: List['ResponseScalarFieldKeys']
-    include: 'ResponseIncludeFromResponseRecursive4'
-
-
-class FindManyResponseArgsFromResponseRecursive4(TypedDict, total=False):
-    """Arguments for Response"""
-    take: int
-    skip: int
-    order_by: Union['ResponseOrderByInput', List['ResponseOrderByInput']]
-    where: 'ResponseWhereInput'
-    cursor: 'ResponseWhereUniqueInput'
-    distinct: List['ResponseScalarFieldKeys']
-    
-    
 
 class CategoryIncludeFromResponse(TypedDict, total=False):
     """Relational arguments for Response"""
-    patterns: Union[bool, 'FindManyPatternArgsFromResponseRecursive1']
-    response: Union[bool, 'ResponseArgsFromResponseRecursive1']
+    patterns: Union[bool, 'FindManyPatternArgsFromResponse']
+    response: Union[bool, 'ResponseArgsFromResponse']
 
-
-class CategoryIncludeFromResponseRecursive1(TypedDict, total=False):
-    """Relational arguments for Response"""
-    patterns: Union[bool, 'FindManyPatternArgsFromResponseRecursive2']
-    response: Union[bool, 'ResponseArgsFromResponseRecursive2']
-
-
-class CategoryIncludeFromResponseRecursive2(TypedDict, total=False):
-    """Relational arguments for Response"""
-    patterns: Union[bool, 'FindManyPatternArgsFromResponseRecursive3']
-    response: Union[bool, 'ResponseArgsFromResponseRecursive3']
-
-
-class CategoryIncludeFromResponseRecursive3(TypedDict, total=False):
-    """Relational arguments for Response"""
-    patterns: Union[bool, 'FindManyPatternArgsFromResponseRecursive4']
-    response: Union[bool, 'ResponseArgsFromResponseRecursive4']
-
-
-class CategoryIncludeFromResponseRecursive4(TypedDict, total=False):
-    """Relational arguments for Response"""
-
-    
 
 class CategoryArgsFromResponse(TypedDict, total=False):
     """Arguments for Response"""
-    include: 'CategoryIncludeFromCategoryRecursive1'
+    include: 'CategoryIncludeFromCategory'
 
-
-class CategoryArgsFromResponseRecursive1(TypedDict, total=False):
-    """Arguments for Response"""
-    include: 'CategoryIncludeFromCategoryRecursive2'
-
-
-class CategoryArgsFromResponseRecursive2(TypedDict, total=False):
-    """Arguments for Response"""
-    include: 'CategoryIncludeFromCategoryRecursive3'
-
-
-class CategoryArgsFromResponseRecursive3(TypedDict, total=False):
-    """Arguments for Response"""
-    include: 'CategoryIncludeFromCategoryRecursive4'
-
-
-class CategoryArgsFromResponseRecursive4(TypedDict, total=False):
-    """Arguments for Response"""
-    
-    
 
 class FindManyCategoryArgsFromResponse(TypedDict, total=False):
     """Arguments for Response"""
@@ -2486,102 +1392,18 @@ class FindManyCategoryArgsFromResponse(TypedDict, total=False):
     where: 'CategoryWhereInput'
     cursor: 'CategoryWhereUniqueInput'
     distinct: List['CategoryScalarFieldKeys']
-    include: 'CategoryIncludeFromCategoryRecursive1'
+    include: 'CategoryIncludeFromCategory'
 
-
-class FindManyCategoryArgsFromResponseRecursive1(TypedDict, total=False):
-    """Arguments for Response"""
-    take: int
-    skip: int
-    order_by: Union['CategoryOrderByInput', List['CategoryOrderByInput']]
-    where: 'CategoryWhereInput'
-    cursor: 'CategoryWhereUniqueInput'
-    distinct: List['CategoryScalarFieldKeys']
-    include: 'CategoryIncludeFromCategoryRecursive2'
-
-
-class FindManyCategoryArgsFromResponseRecursive2(TypedDict, total=False):
-    """Arguments for Response"""
-    take: int
-    skip: int
-    order_by: Union['CategoryOrderByInput', List['CategoryOrderByInput']]
-    where: 'CategoryWhereInput'
-    cursor: 'CategoryWhereUniqueInput'
-    distinct: List['CategoryScalarFieldKeys']
-    include: 'CategoryIncludeFromCategoryRecursive3'
-
-
-class FindManyCategoryArgsFromResponseRecursive3(TypedDict, total=False):
-    """Arguments for Response"""
-    take: int
-    skip: int
-    order_by: Union['CategoryOrderByInput', List['CategoryOrderByInput']]
-    where: 'CategoryWhereInput'
-    cursor: 'CategoryWhereUniqueInput'
-    distinct: List['CategoryScalarFieldKeys']
-    include: 'CategoryIncludeFromCategoryRecursive4'
-
-
-class FindManyCategoryArgsFromResponseRecursive4(TypedDict, total=False):
-    """Arguments for Response"""
-    take: int
-    skip: int
-    order_by: Union['CategoryOrderByInput', List['CategoryOrderByInput']]
-    where: 'CategoryWhereInput'
-    cursor: 'CategoryWhereUniqueInput'
-    distinct: List['CategoryScalarFieldKeys']
-    
-    
 
 class PatternIncludeFromResponse(TypedDict, total=False):
     """Relational arguments for Response"""
-    category: Union[bool, 'CategoryArgsFromResponseRecursive1']
+    category: Union[bool, 'CategoryArgsFromResponse']
 
-
-class PatternIncludeFromResponseRecursive1(TypedDict, total=False):
-    """Relational arguments for Response"""
-    category: Union[bool, 'CategoryArgsFromResponseRecursive2']
-
-
-class PatternIncludeFromResponseRecursive2(TypedDict, total=False):
-    """Relational arguments for Response"""
-    category: Union[bool, 'CategoryArgsFromResponseRecursive3']
-
-
-class PatternIncludeFromResponseRecursive3(TypedDict, total=False):
-    """Relational arguments for Response"""
-    category: Union[bool, 'CategoryArgsFromResponseRecursive4']
-
-
-class PatternIncludeFromResponseRecursive4(TypedDict, total=False):
-    """Relational arguments for Response"""
-
-    
 
 class PatternArgsFromResponse(TypedDict, total=False):
     """Arguments for Response"""
-    include: 'PatternIncludeFromPatternRecursive1'
+    include: 'PatternIncludeFromPattern'
 
-
-class PatternArgsFromResponseRecursive1(TypedDict, total=False):
-    """Arguments for Response"""
-    include: 'PatternIncludeFromPatternRecursive2'
-
-
-class PatternArgsFromResponseRecursive2(TypedDict, total=False):
-    """Arguments for Response"""
-    include: 'PatternIncludeFromPatternRecursive3'
-
-
-class PatternArgsFromResponseRecursive3(TypedDict, total=False):
-    """Arguments for Response"""
-    include: 'PatternIncludeFromPatternRecursive4'
-
-
-class PatternArgsFromResponseRecursive4(TypedDict, total=False):
-    """Arguments for Response"""
-    
-    
 
 class FindManyPatternArgsFromResponse(TypedDict, total=False):
     """Arguments for Response"""
@@ -2591,58 +1413,14 @@ class FindManyPatternArgsFromResponse(TypedDict, total=False):
     where: 'PatternWhereInput'
     cursor: 'PatternWhereUniqueInput'
     distinct: List['PatternScalarFieldKeys']
-    include: 'PatternIncludeFromPatternRecursive1'
+    include: 'PatternIncludeFromPattern'
 
 
-class FindManyPatternArgsFromResponseRecursive1(TypedDict, total=False):
-    """Arguments for Response"""
-    take: int
-    skip: int
-    order_by: Union['PatternOrderByInput', List['PatternOrderByInput']]
-    where: 'PatternWhereInput'
-    cursor: 'PatternWhereUniqueInput'
-    distinct: List['PatternScalarFieldKeys']
-    include: 'PatternIncludeFromPatternRecursive2'
-
-
-class FindManyPatternArgsFromResponseRecursive2(TypedDict, total=False):
-    """Arguments for Response"""
-    take: int
-    skip: int
-    order_by: Union['PatternOrderByInput', List['PatternOrderByInput']]
-    where: 'PatternWhereInput'
-    cursor: 'PatternWhereUniqueInput'
-    distinct: List['PatternScalarFieldKeys']
-    include: 'PatternIncludeFromPatternRecursive3'
-
-
-class FindManyPatternArgsFromResponseRecursive3(TypedDict, total=False):
-    """Arguments for Response"""
-    take: int
-    skip: int
-    order_by: Union['PatternOrderByInput', List['PatternOrderByInput']]
-    where: 'PatternWhereInput'
-    cursor: 'PatternWhereUniqueInput'
-    distinct: List['PatternScalarFieldKeys']
-    include: 'PatternIncludeFromPatternRecursive4'
-
-
-class FindManyPatternArgsFromResponseRecursive4(TypedDict, total=False):
-    """Arguments for Response"""
-    take: int
-    skip: int
-    order_by: Union['PatternOrderByInput', List['PatternOrderByInput']]
-    where: 'PatternWhereInput'
-    cursor: 'PatternWhereUniqueInput'
-    distinct: List['PatternScalarFieldKeys']
-    
 
 
 FindManyResponseArgs = FindManyResponseArgsFromResponse
 FindFirstResponseArgs = FindManyResponseArgsFromResponse
 
-
-    
 
 class ResponseWhereInput(TypedDict, total=False):
     """Response arguments for searching"""
@@ -2654,80 +1432,16 @@ class ResponseWhereInput(TypedDict, total=False):
     user: 'UserRelationFilter'
     user_id: Union[_str, 'types.StringFilter']
 
-    # should be noted that AND and NOT should be Union['ResponseWhereInputRecursive1', List['ResponseWhereInputRecursive1']]
+    # should be noted that AND and NOT should be Union['ResponseWhereInput', List['ResponseWhereInput']]
     # but this causes mypy to hang :/
-    AND: List['ResponseWhereInputRecursive1']
-    OR: List['ResponseWhereInputRecursive1']
-    NOT: List['ResponseWhereInputRecursive1']
-
-
-class ResponseWhereInputRecursive1(TypedDict, total=False):
-    """Response arguments for searching"""
-    response_id: Union[_str, 'types.StringFilter']
-    input: Union[_str, 'types.StringFilter']
-    output: Union[_str, 'types.StringFilter']
-    created_at: Union[datetime.datetime, 'types.DateTimeFilter']
-    categories: 'CategoryListRelationFilter'
-    user: 'UserRelationFilter'
-    user_id: Union[_str, 'types.StringFilter']
-
-    # should be noted that AND and NOT should be Union['ResponseWhereInputRecursive2', List['ResponseWhereInputRecursive2']]
-    # but this causes mypy to hang :/
-    AND: List['ResponseWhereInputRecursive2']
-    OR: List['ResponseWhereInputRecursive2']
-    NOT: List['ResponseWhereInputRecursive2']
-
-
-class ResponseWhereInputRecursive2(TypedDict, total=False):
-    """Response arguments for searching"""
-    response_id: Union[_str, 'types.StringFilter']
-    input: Union[_str, 'types.StringFilter']
-    output: Union[_str, 'types.StringFilter']
-    created_at: Union[datetime.datetime, 'types.DateTimeFilter']
-    categories: 'CategoryListRelationFilter'
-    user: 'UserRelationFilter'
-    user_id: Union[_str, 'types.StringFilter']
-
-    # should be noted that AND and NOT should be Union['ResponseWhereInputRecursive3', List['ResponseWhereInputRecursive3']]
-    # but this causes mypy to hang :/
-    AND: List['ResponseWhereInputRecursive3']
-    OR: List['ResponseWhereInputRecursive3']
-    NOT: List['ResponseWhereInputRecursive3']
-
-
-class ResponseWhereInputRecursive3(TypedDict, total=False):
-    """Response arguments for searching"""
-    response_id: Union[_str, 'types.StringFilter']
-    input: Union[_str, 'types.StringFilter']
-    output: Union[_str, 'types.StringFilter']
-    created_at: Union[datetime.datetime, 'types.DateTimeFilter']
-    categories: 'CategoryListRelationFilter'
-    user: 'UserRelationFilter'
-    user_id: Union[_str, 'types.StringFilter']
-
-    # should be noted that AND and NOT should be Union['ResponseWhereInputRecursive4', List['ResponseWhereInputRecursive4']]
-    # but this causes mypy to hang :/
-    AND: List['ResponseWhereInputRecursive4']
-    OR: List['ResponseWhereInputRecursive4']
-    NOT: List['ResponseWhereInputRecursive4']
-
-
-class ResponseWhereInputRecursive4(TypedDict, total=False):
-    """Response arguments for searching"""
-    response_id: Union[_str, 'types.StringFilter']
-    input: Union[_str, 'types.StringFilter']
-    output: Union[_str, 'types.StringFilter']
-    created_at: Union[datetime.datetime, 'types.DateTimeFilter']
-    categories: 'CategoryListRelationFilter'
-    user: 'UserRelationFilter'
-    user_id: Union[_str, 'types.StringFilter']
+    AND: List['ResponseWhereInput']
+    OR: List['ResponseWhereInput']
+    NOT: List['ResponseWhereInput']
 
 
 
 # aggregate Response types
 
-
-    
 
 class ResponseScalarWhereWithAggregatesInput(TypedDict, total=False):
     """Response arguments for searching"""
@@ -2737,57 +1451,9 @@ class ResponseScalarWhereWithAggregatesInput(TypedDict, total=False):
     created_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     user_id: Union[_str, 'types.StringWithAggregatesFilter']
 
-    AND: List['ResponseScalarWhereWithAggregatesInputRecursive1']
-    OR: List['ResponseScalarWhereWithAggregatesInputRecursive1']
-    NOT: List['ResponseScalarWhereWithAggregatesInputRecursive1']
-
-
-class ResponseScalarWhereWithAggregatesInputRecursive1(TypedDict, total=False):
-    """Response arguments for searching"""
-    response_id: Union[_str, 'types.StringWithAggregatesFilter']
-    input: Union[_str, 'types.StringWithAggregatesFilter']
-    output: Union[_str, 'types.StringWithAggregatesFilter']
-    created_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
-    user_id: Union[_str, 'types.StringWithAggregatesFilter']
-
-    AND: List['ResponseScalarWhereWithAggregatesInputRecursive2']
-    OR: List['ResponseScalarWhereWithAggregatesInputRecursive2']
-    NOT: List['ResponseScalarWhereWithAggregatesInputRecursive2']
-
-
-class ResponseScalarWhereWithAggregatesInputRecursive2(TypedDict, total=False):
-    """Response arguments for searching"""
-    response_id: Union[_str, 'types.StringWithAggregatesFilter']
-    input: Union[_str, 'types.StringWithAggregatesFilter']
-    output: Union[_str, 'types.StringWithAggregatesFilter']
-    created_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
-    user_id: Union[_str, 'types.StringWithAggregatesFilter']
-
-    AND: List['ResponseScalarWhereWithAggregatesInputRecursive3']
-    OR: List['ResponseScalarWhereWithAggregatesInputRecursive3']
-    NOT: List['ResponseScalarWhereWithAggregatesInputRecursive3']
-
-
-class ResponseScalarWhereWithAggregatesInputRecursive3(TypedDict, total=False):
-    """Response arguments for searching"""
-    response_id: Union[_str, 'types.StringWithAggregatesFilter']
-    input: Union[_str, 'types.StringWithAggregatesFilter']
-    output: Union[_str, 'types.StringWithAggregatesFilter']
-    created_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
-    user_id: Union[_str, 'types.StringWithAggregatesFilter']
-
-    AND: List['ResponseScalarWhereWithAggregatesInputRecursive4']
-    OR: List['ResponseScalarWhereWithAggregatesInputRecursive4']
-    NOT: List['ResponseScalarWhereWithAggregatesInputRecursive4']
-
-
-class ResponseScalarWhereWithAggregatesInputRecursive4(TypedDict, total=False):
-    """Response arguments for searching"""
-    response_id: Union[_str, 'types.StringWithAggregatesFilter']
-    input: Union[_str, 'types.StringWithAggregatesFilter']
-    output: Union[_str, 'types.StringWithAggregatesFilter']
-    created_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
-    user_id: Union[_str, 'types.StringWithAggregatesFilter']
+    AND: List['ResponseScalarWhereWithAggregatesInput']
+    OR: List['ResponseScalarWhereWithAggregatesInput']
+    NOT: List['ResponseScalarWhereWithAggregatesInput']
 
 
 
@@ -3082,24 +1748,21 @@ CategoryOrderByInput = Union[
 # TODO: cleanup these types
 
 
-# Dict[str, Any] is a mypy limitation
-# see https://github.com/RobertCraigie/prisma-client-py/issues/45
-# switch to pyright for improved types, see https://prisma-client-py.readthedocs.io/en/stable/reference/limitations/
 
 CategoryRelationFilter = TypedDict(
     'CategoryRelationFilter',
     {
-        'is': 'Dict[str, Any]',
-        'is_not': 'Dict[str, Any]',
+        'is': 'CategoryWhereInput',
+        'is_not': 'CategoryWhereInput',
     },
     total=False,
 )
 
 
 class CategoryListRelationFilter(TypedDict, total=False):
-    some: 'Dict[str, Any]'
-    none: 'Dict[str, Any]'
-    every: 'Dict[str, Any]'
+    some: 'CategoryWhereInput'
+    none: 'CategoryWhereInput'
+    every: 'CategoryWhereInput'
 
 
 class CategoryInclude(TypedDict, total=False):
@@ -3108,57 +1771,15 @@ class CategoryInclude(TypedDict, total=False):
     response: Union[bool, 'ResponseArgsFromCategory']
 
 
-    
-
 class UserIncludeFromCategory(TypedDict, total=False):
     """Relational arguments for Category"""
-    responses: Union[bool, 'FindManyResponseArgsFromCategoryRecursive1']
+    responses: Union[bool, 'FindManyResponseArgsFromCategory']
 
-
-class UserIncludeFromCategoryRecursive1(TypedDict, total=False):
-    """Relational arguments for Category"""
-    responses: Union[bool, 'FindManyResponseArgsFromCategoryRecursive2']
-
-
-class UserIncludeFromCategoryRecursive2(TypedDict, total=False):
-    """Relational arguments for Category"""
-    responses: Union[bool, 'FindManyResponseArgsFromCategoryRecursive3']
-
-
-class UserIncludeFromCategoryRecursive3(TypedDict, total=False):
-    """Relational arguments for Category"""
-    responses: Union[bool, 'FindManyResponseArgsFromCategoryRecursive4']
-
-
-class UserIncludeFromCategoryRecursive4(TypedDict, total=False):
-    """Relational arguments for Category"""
-
-    
 
 class UserArgsFromCategory(TypedDict, total=False):
     """Arguments for Category"""
-    include: 'UserIncludeFromUserRecursive1'
+    include: 'UserIncludeFromUser'
 
-
-class UserArgsFromCategoryRecursive1(TypedDict, total=False):
-    """Arguments for Category"""
-    include: 'UserIncludeFromUserRecursive2'
-
-
-class UserArgsFromCategoryRecursive2(TypedDict, total=False):
-    """Arguments for Category"""
-    include: 'UserIncludeFromUserRecursive3'
-
-
-class UserArgsFromCategoryRecursive3(TypedDict, total=False):
-    """Arguments for Category"""
-    include: 'UserIncludeFromUserRecursive4'
-
-
-class UserArgsFromCategoryRecursive4(TypedDict, total=False):
-    """Arguments for Category"""
-    
-    
 
 class FindManyUserArgsFromCategory(TypedDict, total=False):
     """Arguments for Category"""
@@ -3168,106 +1789,19 @@ class FindManyUserArgsFromCategory(TypedDict, total=False):
     where: 'UserWhereInput'
     cursor: 'UserWhereUniqueInput'
     distinct: List['UserScalarFieldKeys']
-    include: 'UserIncludeFromUserRecursive1'
+    include: 'UserIncludeFromUser'
 
-
-class FindManyUserArgsFromCategoryRecursive1(TypedDict, total=False):
-    """Arguments for Category"""
-    take: int
-    skip: int
-    order_by: Union['UserOrderByInput', List['UserOrderByInput']]
-    where: 'UserWhereInput'
-    cursor: 'UserWhereUniqueInput'
-    distinct: List['UserScalarFieldKeys']
-    include: 'UserIncludeFromUserRecursive2'
-
-
-class FindManyUserArgsFromCategoryRecursive2(TypedDict, total=False):
-    """Arguments for Category"""
-    take: int
-    skip: int
-    order_by: Union['UserOrderByInput', List['UserOrderByInput']]
-    where: 'UserWhereInput'
-    cursor: 'UserWhereUniqueInput'
-    distinct: List['UserScalarFieldKeys']
-    include: 'UserIncludeFromUserRecursive3'
-
-
-class FindManyUserArgsFromCategoryRecursive3(TypedDict, total=False):
-    """Arguments for Category"""
-    take: int
-    skip: int
-    order_by: Union['UserOrderByInput', List['UserOrderByInput']]
-    where: 'UserWhereInput'
-    cursor: 'UserWhereUniqueInput'
-    distinct: List['UserScalarFieldKeys']
-    include: 'UserIncludeFromUserRecursive4'
-
-
-class FindManyUserArgsFromCategoryRecursive4(TypedDict, total=False):
-    """Arguments for Category"""
-    take: int
-    skip: int
-    order_by: Union['UserOrderByInput', List['UserOrderByInput']]
-    where: 'UserWhereInput'
-    cursor: 'UserWhereUniqueInput'
-    distinct: List['UserScalarFieldKeys']
-    
-    
 
 class ResponseIncludeFromCategory(TypedDict, total=False):
     """Relational arguments for Category"""
-    categories: Union[bool, 'FindManyCategoryArgsFromCategoryRecursive1']
-    user: Union[bool, 'UserArgsFromCategoryRecursive1']
+    categories: Union[bool, 'FindManyCategoryArgsFromCategory']
+    user: Union[bool, 'UserArgsFromCategory']
 
-
-class ResponseIncludeFromCategoryRecursive1(TypedDict, total=False):
-    """Relational arguments for Category"""
-    categories: Union[bool, 'FindManyCategoryArgsFromCategoryRecursive2']
-    user: Union[bool, 'UserArgsFromCategoryRecursive2']
-
-
-class ResponseIncludeFromCategoryRecursive2(TypedDict, total=False):
-    """Relational arguments for Category"""
-    categories: Union[bool, 'FindManyCategoryArgsFromCategoryRecursive3']
-    user: Union[bool, 'UserArgsFromCategoryRecursive3']
-
-
-class ResponseIncludeFromCategoryRecursive3(TypedDict, total=False):
-    """Relational arguments for Category"""
-    categories: Union[bool, 'FindManyCategoryArgsFromCategoryRecursive4']
-    user: Union[bool, 'UserArgsFromCategoryRecursive4']
-
-
-class ResponseIncludeFromCategoryRecursive4(TypedDict, total=False):
-    """Relational arguments for Category"""
-
-    
 
 class ResponseArgsFromCategory(TypedDict, total=False):
     """Arguments for Category"""
-    include: 'ResponseIncludeFromResponseRecursive1'
+    include: 'ResponseIncludeFromResponse'
 
-
-class ResponseArgsFromCategoryRecursive1(TypedDict, total=False):
-    """Arguments for Category"""
-    include: 'ResponseIncludeFromResponseRecursive2'
-
-
-class ResponseArgsFromCategoryRecursive2(TypedDict, total=False):
-    """Arguments for Category"""
-    include: 'ResponseIncludeFromResponseRecursive3'
-
-
-class ResponseArgsFromCategoryRecursive3(TypedDict, total=False):
-    """Arguments for Category"""
-    include: 'ResponseIncludeFromResponseRecursive4'
-
-
-class ResponseArgsFromCategoryRecursive4(TypedDict, total=False):
-    """Arguments for Category"""
-    
-    
 
 class FindManyResponseArgsFromCategory(TypedDict, total=False):
     """Arguments for Category"""
@@ -3277,106 +1811,19 @@ class FindManyResponseArgsFromCategory(TypedDict, total=False):
     where: 'ResponseWhereInput'
     cursor: 'ResponseWhereUniqueInput'
     distinct: List['ResponseScalarFieldKeys']
-    include: 'ResponseIncludeFromResponseRecursive1'
+    include: 'ResponseIncludeFromResponse'
 
-
-class FindManyResponseArgsFromCategoryRecursive1(TypedDict, total=False):
-    """Arguments for Category"""
-    take: int
-    skip: int
-    order_by: Union['ResponseOrderByInput', List['ResponseOrderByInput']]
-    where: 'ResponseWhereInput'
-    cursor: 'ResponseWhereUniqueInput'
-    distinct: List['ResponseScalarFieldKeys']
-    include: 'ResponseIncludeFromResponseRecursive2'
-
-
-class FindManyResponseArgsFromCategoryRecursive2(TypedDict, total=False):
-    """Arguments for Category"""
-    take: int
-    skip: int
-    order_by: Union['ResponseOrderByInput', List['ResponseOrderByInput']]
-    where: 'ResponseWhereInput'
-    cursor: 'ResponseWhereUniqueInput'
-    distinct: List['ResponseScalarFieldKeys']
-    include: 'ResponseIncludeFromResponseRecursive3'
-
-
-class FindManyResponseArgsFromCategoryRecursive3(TypedDict, total=False):
-    """Arguments for Category"""
-    take: int
-    skip: int
-    order_by: Union['ResponseOrderByInput', List['ResponseOrderByInput']]
-    where: 'ResponseWhereInput'
-    cursor: 'ResponseWhereUniqueInput'
-    distinct: List['ResponseScalarFieldKeys']
-    include: 'ResponseIncludeFromResponseRecursive4'
-
-
-class FindManyResponseArgsFromCategoryRecursive4(TypedDict, total=False):
-    """Arguments for Category"""
-    take: int
-    skip: int
-    order_by: Union['ResponseOrderByInput', List['ResponseOrderByInput']]
-    where: 'ResponseWhereInput'
-    cursor: 'ResponseWhereUniqueInput'
-    distinct: List['ResponseScalarFieldKeys']
-    
-    
 
 class CategoryIncludeFromCategory(TypedDict, total=False):
     """Relational arguments for Category"""
-    patterns: Union[bool, 'FindManyPatternArgsFromCategoryRecursive1']
-    response: Union[bool, 'ResponseArgsFromCategoryRecursive1']
+    patterns: Union[bool, 'FindManyPatternArgsFromCategory']
+    response: Union[bool, 'ResponseArgsFromCategory']
 
-
-class CategoryIncludeFromCategoryRecursive1(TypedDict, total=False):
-    """Relational arguments for Category"""
-    patterns: Union[bool, 'FindManyPatternArgsFromCategoryRecursive2']
-    response: Union[bool, 'ResponseArgsFromCategoryRecursive2']
-
-
-class CategoryIncludeFromCategoryRecursive2(TypedDict, total=False):
-    """Relational arguments for Category"""
-    patterns: Union[bool, 'FindManyPatternArgsFromCategoryRecursive3']
-    response: Union[bool, 'ResponseArgsFromCategoryRecursive3']
-
-
-class CategoryIncludeFromCategoryRecursive3(TypedDict, total=False):
-    """Relational arguments for Category"""
-    patterns: Union[bool, 'FindManyPatternArgsFromCategoryRecursive4']
-    response: Union[bool, 'ResponseArgsFromCategoryRecursive4']
-
-
-class CategoryIncludeFromCategoryRecursive4(TypedDict, total=False):
-    """Relational arguments for Category"""
-
-    
 
 class CategoryArgsFromCategory(TypedDict, total=False):
     """Arguments for Category"""
-    include: 'CategoryIncludeFromCategoryRecursive1'
+    include: 'CategoryIncludeFromCategory'
 
-
-class CategoryArgsFromCategoryRecursive1(TypedDict, total=False):
-    """Arguments for Category"""
-    include: 'CategoryIncludeFromCategoryRecursive2'
-
-
-class CategoryArgsFromCategoryRecursive2(TypedDict, total=False):
-    """Arguments for Category"""
-    include: 'CategoryIncludeFromCategoryRecursive3'
-
-
-class CategoryArgsFromCategoryRecursive3(TypedDict, total=False):
-    """Arguments for Category"""
-    include: 'CategoryIncludeFromCategoryRecursive4'
-
-
-class CategoryArgsFromCategoryRecursive4(TypedDict, total=False):
-    """Arguments for Category"""
-    
-    
 
 class FindManyCategoryArgsFromCategory(TypedDict, total=False):
     """Arguments for Category"""
@@ -3386,102 +1833,18 @@ class FindManyCategoryArgsFromCategory(TypedDict, total=False):
     where: 'CategoryWhereInput'
     cursor: 'CategoryWhereUniqueInput'
     distinct: List['CategoryScalarFieldKeys']
-    include: 'CategoryIncludeFromCategoryRecursive1'
+    include: 'CategoryIncludeFromCategory'
 
-
-class FindManyCategoryArgsFromCategoryRecursive1(TypedDict, total=False):
-    """Arguments for Category"""
-    take: int
-    skip: int
-    order_by: Union['CategoryOrderByInput', List['CategoryOrderByInput']]
-    where: 'CategoryWhereInput'
-    cursor: 'CategoryWhereUniqueInput'
-    distinct: List['CategoryScalarFieldKeys']
-    include: 'CategoryIncludeFromCategoryRecursive2'
-
-
-class FindManyCategoryArgsFromCategoryRecursive2(TypedDict, total=False):
-    """Arguments for Category"""
-    take: int
-    skip: int
-    order_by: Union['CategoryOrderByInput', List['CategoryOrderByInput']]
-    where: 'CategoryWhereInput'
-    cursor: 'CategoryWhereUniqueInput'
-    distinct: List['CategoryScalarFieldKeys']
-    include: 'CategoryIncludeFromCategoryRecursive3'
-
-
-class FindManyCategoryArgsFromCategoryRecursive3(TypedDict, total=False):
-    """Arguments for Category"""
-    take: int
-    skip: int
-    order_by: Union['CategoryOrderByInput', List['CategoryOrderByInput']]
-    where: 'CategoryWhereInput'
-    cursor: 'CategoryWhereUniqueInput'
-    distinct: List['CategoryScalarFieldKeys']
-    include: 'CategoryIncludeFromCategoryRecursive4'
-
-
-class FindManyCategoryArgsFromCategoryRecursive4(TypedDict, total=False):
-    """Arguments for Category"""
-    take: int
-    skip: int
-    order_by: Union['CategoryOrderByInput', List['CategoryOrderByInput']]
-    where: 'CategoryWhereInput'
-    cursor: 'CategoryWhereUniqueInput'
-    distinct: List['CategoryScalarFieldKeys']
-    
-    
 
 class PatternIncludeFromCategory(TypedDict, total=False):
     """Relational arguments for Category"""
-    category: Union[bool, 'CategoryArgsFromCategoryRecursive1']
+    category: Union[bool, 'CategoryArgsFromCategory']
 
-
-class PatternIncludeFromCategoryRecursive1(TypedDict, total=False):
-    """Relational arguments for Category"""
-    category: Union[bool, 'CategoryArgsFromCategoryRecursive2']
-
-
-class PatternIncludeFromCategoryRecursive2(TypedDict, total=False):
-    """Relational arguments for Category"""
-    category: Union[bool, 'CategoryArgsFromCategoryRecursive3']
-
-
-class PatternIncludeFromCategoryRecursive3(TypedDict, total=False):
-    """Relational arguments for Category"""
-    category: Union[bool, 'CategoryArgsFromCategoryRecursive4']
-
-
-class PatternIncludeFromCategoryRecursive4(TypedDict, total=False):
-    """Relational arguments for Category"""
-
-    
 
 class PatternArgsFromCategory(TypedDict, total=False):
     """Arguments for Category"""
-    include: 'PatternIncludeFromPatternRecursive1'
+    include: 'PatternIncludeFromPattern'
 
-
-class PatternArgsFromCategoryRecursive1(TypedDict, total=False):
-    """Arguments for Category"""
-    include: 'PatternIncludeFromPatternRecursive2'
-
-
-class PatternArgsFromCategoryRecursive2(TypedDict, total=False):
-    """Arguments for Category"""
-    include: 'PatternIncludeFromPatternRecursive3'
-
-
-class PatternArgsFromCategoryRecursive3(TypedDict, total=False):
-    """Arguments for Category"""
-    include: 'PatternIncludeFromPatternRecursive4'
-
-
-class PatternArgsFromCategoryRecursive4(TypedDict, total=False):
-    """Arguments for Category"""
-    
-    
 
 class FindManyPatternArgsFromCategory(TypedDict, total=False):
     """Arguments for Category"""
@@ -3491,58 +1854,14 @@ class FindManyPatternArgsFromCategory(TypedDict, total=False):
     where: 'PatternWhereInput'
     cursor: 'PatternWhereUniqueInput'
     distinct: List['PatternScalarFieldKeys']
-    include: 'PatternIncludeFromPatternRecursive1'
+    include: 'PatternIncludeFromPattern'
 
 
-class FindManyPatternArgsFromCategoryRecursive1(TypedDict, total=False):
-    """Arguments for Category"""
-    take: int
-    skip: int
-    order_by: Union['PatternOrderByInput', List['PatternOrderByInput']]
-    where: 'PatternWhereInput'
-    cursor: 'PatternWhereUniqueInput'
-    distinct: List['PatternScalarFieldKeys']
-    include: 'PatternIncludeFromPatternRecursive2'
-
-
-class FindManyPatternArgsFromCategoryRecursive2(TypedDict, total=False):
-    """Arguments for Category"""
-    take: int
-    skip: int
-    order_by: Union['PatternOrderByInput', List['PatternOrderByInput']]
-    where: 'PatternWhereInput'
-    cursor: 'PatternWhereUniqueInput'
-    distinct: List['PatternScalarFieldKeys']
-    include: 'PatternIncludeFromPatternRecursive3'
-
-
-class FindManyPatternArgsFromCategoryRecursive3(TypedDict, total=False):
-    """Arguments for Category"""
-    take: int
-    skip: int
-    order_by: Union['PatternOrderByInput', List['PatternOrderByInput']]
-    where: 'PatternWhereInput'
-    cursor: 'PatternWhereUniqueInput'
-    distinct: List['PatternScalarFieldKeys']
-    include: 'PatternIncludeFromPatternRecursive4'
-
-
-class FindManyPatternArgsFromCategoryRecursive4(TypedDict, total=False):
-    """Arguments for Category"""
-    take: int
-    skip: int
-    order_by: Union['PatternOrderByInput', List['PatternOrderByInput']]
-    where: 'PatternWhereInput'
-    cursor: 'PatternWhereUniqueInput'
-    distinct: List['PatternScalarFieldKeys']
-    
 
 
 FindManyCategoryArgs = FindManyCategoryArgsFromCategory
 FindFirstCategoryArgs = FindManyCategoryArgsFromCategory
 
-
-    
 
 class CategoryWhereInput(TypedDict, total=False):
     """Category arguments for searching"""
@@ -3554,80 +1873,16 @@ class CategoryWhereInput(TypedDict, total=False):
     response: 'ResponseRelationFilter'
     response_id: Union[_str, 'types.StringFilter']
 
-    # should be noted that AND and NOT should be Union['CategoryWhereInputRecursive1', List['CategoryWhereInputRecursive1']]
+    # should be noted that AND and NOT should be Union['CategoryWhereInput', List['CategoryWhereInput']]
     # but this causes mypy to hang :/
-    AND: List['CategoryWhereInputRecursive1']
-    OR: List['CategoryWhereInputRecursive1']
-    NOT: List['CategoryWhereInputRecursive1']
-
-
-class CategoryWhereInputRecursive1(TypedDict, total=False):
-    """Category arguments for searching"""
-    category_id: Union[_str, 'types.StringFilter']
-    category: Union[_str, 'types.StringFilter']
-    input: Union[_str, 'types.StringFilter']
-    preview: Union[_str, 'types.StringFilter']
-    patterns: 'PatternListRelationFilter'
-    response: 'ResponseRelationFilter'
-    response_id: Union[_str, 'types.StringFilter']
-
-    # should be noted that AND and NOT should be Union['CategoryWhereInputRecursive2', List['CategoryWhereInputRecursive2']]
-    # but this causes mypy to hang :/
-    AND: List['CategoryWhereInputRecursive2']
-    OR: List['CategoryWhereInputRecursive2']
-    NOT: List['CategoryWhereInputRecursive2']
-
-
-class CategoryWhereInputRecursive2(TypedDict, total=False):
-    """Category arguments for searching"""
-    category_id: Union[_str, 'types.StringFilter']
-    category: Union[_str, 'types.StringFilter']
-    input: Union[_str, 'types.StringFilter']
-    preview: Union[_str, 'types.StringFilter']
-    patterns: 'PatternListRelationFilter'
-    response: 'ResponseRelationFilter'
-    response_id: Union[_str, 'types.StringFilter']
-
-    # should be noted that AND and NOT should be Union['CategoryWhereInputRecursive3', List['CategoryWhereInputRecursive3']]
-    # but this causes mypy to hang :/
-    AND: List['CategoryWhereInputRecursive3']
-    OR: List['CategoryWhereInputRecursive3']
-    NOT: List['CategoryWhereInputRecursive3']
-
-
-class CategoryWhereInputRecursive3(TypedDict, total=False):
-    """Category arguments for searching"""
-    category_id: Union[_str, 'types.StringFilter']
-    category: Union[_str, 'types.StringFilter']
-    input: Union[_str, 'types.StringFilter']
-    preview: Union[_str, 'types.StringFilter']
-    patterns: 'PatternListRelationFilter'
-    response: 'ResponseRelationFilter'
-    response_id: Union[_str, 'types.StringFilter']
-
-    # should be noted that AND and NOT should be Union['CategoryWhereInputRecursive4', List['CategoryWhereInputRecursive4']]
-    # but this causes mypy to hang :/
-    AND: List['CategoryWhereInputRecursive4']
-    OR: List['CategoryWhereInputRecursive4']
-    NOT: List['CategoryWhereInputRecursive4']
-
-
-class CategoryWhereInputRecursive4(TypedDict, total=False):
-    """Category arguments for searching"""
-    category_id: Union[_str, 'types.StringFilter']
-    category: Union[_str, 'types.StringFilter']
-    input: Union[_str, 'types.StringFilter']
-    preview: Union[_str, 'types.StringFilter']
-    patterns: 'PatternListRelationFilter'
-    response: 'ResponseRelationFilter'
-    response_id: Union[_str, 'types.StringFilter']
+    AND: List['CategoryWhereInput']
+    OR: List['CategoryWhereInput']
+    NOT: List['CategoryWhereInput']
 
 
 
 # aggregate Category types
 
-
-    
 
 class CategoryScalarWhereWithAggregatesInput(TypedDict, total=False):
     """Category arguments for searching"""
@@ -3637,57 +1892,9 @@ class CategoryScalarWhereWithAggregatesInput(TypedDict, total=False):
     preview: Union[_str, 'types.StringWithAggregatesFilter']
     response_id: Union[_str, 'types.StringWithAggregatesFilter']
 
-    AND: List['CategoryScalarWhereWithAggregatesInputRecursive1']
-    OR: List['CategoryScalarWhereWithAggregatesInputRecursive1']
-    NOT: List['CategoryScalarWhereWithAggregatesInputRecursive1']
-
-
-class CategoryScalarWhereWithAggregatesInputRecursive1(TypedDict, total=False):
-    """Category arguments for searching"""
-    category_id: Union[_str, 'types.StringWithAggregatesFilter']
-    category: Union[_str, 'types.StringWithAggregatesFilter']
-    input: Union[_str, 'types.StringWithAggregatesFilter']
-    preview: Union[_str, 'types.StringWithAggregatesFilter']
-    response_id: Union[_str, 'types.StringWithAggregatesFilter']
-
-    AND: List['CategoryScalarWhereWithAggregatesInputRecursive2']
-    OR: List['CategoryScalarWhereWithAggregatesInputRecursive2']
-    NOT: List['CategoryScalarWhereWithAggregatesInputRecursive2']
-
-
-class CategoryScalarWhereWithAggregatesInputRecursive2(TypedDict, total=False):
-    """Category arguments for searching"""
-    category_id: Union[_str, 'types.StringWithAggregatesFilter']
-    category: Union[_str, 'types.StringWithAggregatesFilter']
-    input: Union[_str, 'types.StringWithAggregatesFilter']
-    preview: Union[_str, 'types.StringWithAggregatesFilter']
-    response_id: Union[_str, 'types.StringWithAggregatesFilter']
-
-    AND: List['CategoryScalarWhereWithAggregatesInputRecursive3']
-    OR: List['CategoryScalarWhereWithAggregatesInputRecursive3']
-    NOT: List['CategoryScalarWhereWithAggregatesInputRecursive3']
-
-
-class CategoryScalarWhereWithAggregatesInputRecursive3(TypedDict, total=False):
-    """Category arguments for searching"""
-    category_id: Union[_str, 'types.StringWithAggregatesFilter']
-    category: Union[_str, 'types.StringWithAggregatesFilter']
-    input: Union[_str, 'types.StringWithAggregatesFilter']
-    preview: Union[_str, 'types.StringWithAggregatesFilter']
-    response_id: Union[_str, 'types.StringWithAggregatesFilter']
-
-    AND: List['CategoryScalarWhereWithAggregatesInputRecursive4']
-    OR: List['CategoryScalarWhereWithAggregatesInputRecursive4']
-    NOT: List['CategoryScalarWhereWithAggregatesInputRecursive4']
-
-
-class CategoryScalarWhereWithAggregatesInputRecursive4(TypedDict, total=False):
-    """Category arguments for searching"""
-    category_id: Union[_str, 'types.StringWithAggregatesFilter']
-    category: Union[_str, 'types.StringWithAggregatesFilter']
-    input: Union[_str, 'types.StringWithAggregatesFilter']
-    preview: Union[_str, 'types.StringWithAggregatesFilter']
-    response_id: Union[_str, 'types.StringWithAggregatesFilter']
+    AND: List['CategoryScalarWhereWithAggregatesInput']
+    OR: List['CategoryScalarWhereWithAggregatesInput']
+    NOT: List['CategoryScalarWhereWithAggregatesInput']
 
 
 
@@ -3980,24 +2187,21 @@ PatternOrderByInput = Union[
 # TODO: cleanup these types
 
 
-# Dict[str, Any] is a mypy limitation
-# see https://github.com/RobertCraigie/prisma-client-py/issues/45
-# switch to pyright for improved types, see https://prisma-client-py.readthedocs.io/en/stable/reference/limitations/
 
 PatternRelationFilter = TypedDict(
     'PatternRelationFilter',
     {
-        'is': 'Dict[str, Any]',
-        'is_not': 'Dict[str, Any]',
+        'is': 'PatternWhereInput',
+        'is_not': 'PatternWhereInput',
     },
     total=False,
 )
 
 
 class PatternListRelationFilter(TypedDict, total=False):
-    some: 'Dict[str, Any]'
-    none: 'Dict[str, Any]'
-    every: 'Dict[str, Any]'
+    some: 'PatternWhereInput'
+    none: 'PatternWhereInput'
+    every: 'PatternWhereInput'
 
 
 class PatternInclude(TypedDict, total=False):
@@ -4005,57 +2209,15 @@ class PatternInclude(TypedDict, total=False):
     category: Union[bool, 'CategoryArgsFromPattern']
 
 
-    
-
 class UserIncludeFromPattern(TypedDict, total=False):
     """Relational arguments for Pattern"""
-    responses: Union[bool, 'FindManyResponseArgsFromPatternRecursive1']
+    responses: Union[bool, 'FindManyResponseArgsFromPattern']
 
-
-class UserIncludeFromPatternRecursive1(TypedDict, total=False):
-    """Relational arguments for Pattern"""
-    responses: Union[bool, 'FindManyResponseArgsFromPatternRecursive2']
-
-
-class UserIncludeFromPatternRecursive2(TypedDict, total=False):
-    """Relational arguments for Pattern"""
-    responses: Union[bool, 'FindManyResponseArgsFromPatternRecursive3']
-
-
-class UserIncludeFromPatternRecursive3(TypedDict, total=False):
-    """Relational arguments for Pattern"""
-    responses: Union[bool, 'FindManyResponseArgsFromPatternRecursive4']
-
-
-class UserIncludeFromPatternRecursive4(TypedDict, total=False):
-    """Relational arguments for Pattern"""
-
-    
 
 class UserArgsFromPattern(TypedDict, total=False):
     """Arguments for Pattern"""
-    include: 'UserIncludeFromUserRecursive1'
+    include: 'UserIncludeFromUser'
 
-
-class UserArgsFromPatternRecursive1(TypedDict, total=False):
-    """Arguments for Pattern"""
-    include: 'UserIncludeFromUserRecursive2'
-
-
-class UserArgsFromPatternRecursive2(TypedDict, total=False):
-    """Arguments for Pattern"""
-    include: 'UserIncludeFromUserRecursive3'
-
-
-class UserArgsFromPatternRecursive3(TypedDict, total=False):
-    """Arguments for Pattern"""
-    include: 'UserIncludeFromUserRecursive4'
-
-
-class UserArgsFromPatternRecursive4(TypedDict, total=False):
-    """Arguments for Pattern"""
-    
-    
 
 class FindManyUserArgsFromPattern(TypedDict, total=False):
     """Arguments for Pattern"""
@@ -4065,106 +2227,19 @@ class FindManyUserArgsFromPattern(TypedDict, total=False):
     where: 'UserWhereInput'
     cursor: 'UserWhereUniqueInput'
     distinct: List['UserScalarFieldKeys']
-    include: 'UserIncludeFromUserRecursive1'
+    include: 'UserIncludeFromUser'
 
-
-class FindManyUserArgsFromPatternRecursive1(TypedDict, total=False):
-    """Arguments for Pattern"""
-    take: int
-    skip: int
-    order_by: Union['UserOrderByInput', List['UserOrderByInput']]
-    where: 'UserWhereInput'
-    cursor: 'UserWhereUniqueInput'
-    distinct: List['UserScalarFieldKeys']
-    include: 'UserIncludeFromUserRecursive2'
-
-
-class FindManyUserArgsFromPatternRecursive2(TypedDict, total=False):
-    """Arguments for Pattern"""
-    take: int
-    skip: int
-    order_by: Union['UserOrderByInput', List['UserOrderByInput']]
-    where: 'UserWhereInput'
-    cursor: 'UserWhereUniqueInput'
-    distinct: List['UserScalarFieldKeys']
-    include: 'UserIncludeFromUserRecursive3'
-
-
-class FindManyUserArgsFromPatternRecursive3(TypedDict, total=False):
-    """Arguments for Pattern"""
-    take: int
-    skip: int
-    order_by: Union['UserOrderByInput', List['UserOrderByInput']]
-    where: 'UserWhereInput'
-    cursor: 'UserWhereUniqueInput'
-    distinct: List['UserScalarFieldKeys']
-    include: 'UserIncludeFromUserRecursive4'
-
-
-class FindManyUserArgsFromPatternRecursive4(TypedDict, total=False):
-    """Arguments for Pattern"""
-    take: int
-    skip: int
-    order_by: Union['UserOrderByInput', List['UserOrderByInput']]
-    where: 'UserWhereInput'
-    cursor: 'UserWhereUniqueInput'
-    distinct: List['UserScalarFieldKeys']
-    
-    
 
 class ResponseIncludeFromPattern(TypedDict, total=False):
     """Relational arguments for Pattern"""
-    categories: Union[bool, 'FindManyCategoryArgsFromPatternRecursive1']
-    user: Union[bool, 'UserArgsFromPatternRecursive1']
+    categories: Union[bool, 'FindManyCategoryArgsFromPattern']
+    user: Union[bool, 'UserArgsFromPattern']
 
-
-class ResponseIncludeFromPatternRecursive1(TypedDict, total=False):
-    """Relational arguments for Pattern"""
-    categories: Union[bool, 'FindManyCategoryArgsFromPatternRecursive2']
-    user: Union[bool, 'UserArgsFromPatternRecursive2']
-
-
-class ResponseIncludeFromPatternRecursive2(TypedDict, total=False):
-    """Relational arguments for Pattern"""
-    categories: Union[bool, 'FindManyCategoryArgsFromPatternRecursive3']
-    user: Union[bool, 'UserArgsFromPatternRecursive3']
-
-
-class ResponseIncludeFromPatternRecursive3(TypedDict, total=False):
-    """Relational arguments for Pattern"""
-    categories: Union[bool, 'FindManyCategoryArgsFromPatternRecursive4']
-    user: Union[bool, 'UserArgsFromPatternRecursive4']
-
-
-class ResponseIncludeFromPatternRecursive4(TypedDict, total=False):
-    """Relational arguments for Pattern"""
-
-    
 
 class ResponseArgsFromPattern(TypedDict, total=False):
     """Arguments for Pattern"""
-    include: 'ResponseIncludeFromResponseRecursive1'
+    include: 'ResponseIncludeFromResponse'
 
-
-class ResponseArgsFromPatternRecursive1(TypedDict, total=False):
-    """Arguments for Pattern"""
-    include: 'ResponseIncludeFromResponseRecursive2'
-
-
-class ResponseArgsFromPatternRecursive2(TypedDict, total=False):
-    """Arguments for Pattern"""
-    include: 'ResponseIncludeFromResponseRecursive3'
-
-
-class ResponseArgsFromPatternRecursive3(TypedDict, total=False):
-    """Arguments for Pattern"""
-    include: 'ResponseIncludeFromResponseRecursive4'
-
-
-class ResponseArgsFromPatternRecursive4(TypedDict, total=False):
-    """Arguments for Pattern"""
-    
-    
 
 class FindManyResponseArgsFromPattern(TypedDict, total=False):
     """Arguments for Pattern"""
@@ -4174,106 +2249,19 @@ class FindManyResponseArgsFromPattern(TypedDict, total=False):
     where: 'ResponseWhereInput'
     cursor: 'ResponseWhereUniqueInput'
     distinct: List['ResponseScalarFieldKeys']
-    include: 'ResponseIncludeFromResponseRecursive1'
+    include: 'ResponseIncludeFromResponse'
 
-
-class FindManyResponseArgsFromPatternRecursive1(TypedDict, total=False):
-    """Arguments for Pattern"""
-    take: int
-    skip: int
-    order_by: Union['ResponseOrderByInput', List['ResponseOrderByInput']]
-    where: 'ResponseWhereInput'
-    cursor: 'ResponseWhereUniqueInput'
-    distinct: List['ResponseScalarFieldKeys']
-    include: 'ResponseIncludeFromResponseRecursive2'
-
-
-class FindManyResponseArgsFromPatternRecursive2(TypedDict, total=False):
-    """Arguments for Pattern"""
-    take: int
-    skip: int
-    order_by: Union['ResponseOrderByInput', List['ResponseOrderByInput']]
-    where: 'ResponseWhereInput'
-    cursor: 'ResponseWhereUniqueInput'
-    distinct: List['ResponseScalarFieldKeys']
-    include: 'ResponseIncludeFromResponseRecursive3'
-
-
-class FindManyResponseArgsFromPatternRecursive3(TypedDict, total=False):
-    """Arguments for Pattern"""
-    take: int
-    skip: int
-    order_by: Union['ResponseOrderByInput', List['ResponseOrderByInput']]
-    where: 'ResponseWhereInput'
-    cursor: 'ResponseWhereUniqueInput'
-    distinct: List['ResponseScalarFieldKeys']
-    include: 'ResponseIncludeFromResponseRecursive4'
-
-
-class FindManyResponseArgsFromPatternRecursive4(TypedDict, total=False):
-    """Arguments for Pattern"""
-    take: int
-    skip: int
-    order_by: Union['ResponseOrderByInput', List['ResponseOrderByInput']]
-    where: 'ResponseWhereInput'
-    cursor: 'ResponseWhereUniqueInput'
-    distinct: List['ResponseScalarFieldKeys']
-    
-    
 
 class CategoryIncludeFromPattern(TypedDict, total=False):
     """Relational arguments for Pattern"""
-    patterns: Union[bool, 'FindManyPatternArgsFromPatternRecursive1']
-    response: Union[bool, 'ResponseArgsFromPatternRecursive1']
+    patterns: Union[bool, 'FindManyPatternArgsFromPattern']
+    response: Union[bool, 'ResponseArgsFromPattern']
 
-
-class CategoryIncludeFromPatternRecursive1(TypedDict, total=False):
-    """Relational arguments for Pattern"""
-    patterns: Union[bool, 'FindManyPatternArgsFromPatternRecursive2']
-    response: Union[bool, 'ResponseArgsFromPatternRecursive2']
-
-
-class CategoryIncludeFromPatternRecursive2(TypedDict, total=False):
-    """Relational arguments for Pattern"""
-    patterns: Union[bool, 'FindManyPatternArgsFromPatternRecursive3']
-    response: Union[bool, 'ResponseArgsFromPatternRecursive3']
-
-
-class CategoryIncludeFromPatternRecursive3(TypedDict, total=False):
-    """Relational arguments for Pattern"""
-    patterns: Union[bool, 'FindManyPatternArgsFromPatternRecursive4']
-    response: Union[bool, 'ResponseArgsFromPatternRecursive4']
-
-
-class CategoryIncludeFromPatternRecursive4(TypedDict, total=False):
-    """Relational arguments for Pattern"""
-
-    
 
 class CategoryArgsFromPattern(TypedDict, total=False):
     """Arguments for Pattern"""
-    include: 'CategoryIncludeFromCategoryRecursive1'
+    include: 'CategoryIncludeFromCategory'
 
-
-class CategoryArgsFromPatternRecursive1(TypedDict, total=False):
-    """Arguments for Pattern"""
-    include: 'CategoryIncludeFromCategoryRecursive2'
-
-
-class CategoryArgsFromPatternRecursive2(TypedDict, total=False):
-    """Arguments for Pattern"""
-    include: 'CategoryIncludeFromCategoryRecursive3'
-
-
-class CategoryArgsFromPatternRecursive3(TypedDict, total=False):
-    """Arguments for Pattern"""
-    include: 'CategoryIncludeFromCategoryRecursive4'
-
-
-class CategoryArgsFromPatternRecursive4(TypedDict, total=False):
-    """Arguments for Pattern"""
-    
-    
 
 class FindManyCategoryArgsFromPattern(TypedDict, total=False):
     """Arguments for Pattern"""
@@ -4283,102 +2271,18 @@ class FindManyCategoryArgsFromPattern(TypedDict, total=False):
     where: 'CategoryWhereInput'
     cursor: 'CategoryWhereUniqueInput'
     distinct: List['CategoryScalarFieldKeys']
-    include: 'CategoryIncludeFromCategoryRecursive1'
+    include: 'CategoryIncludeFromCategory'
 
-
-class FindManyCategoryArgsFromPatternRecursive1(TypedDict, total=False):
-    """Arguments for Pattern"""
-    take: int
-    skip: int
-    order_by: Union['CategoryOrderByInput', List['CategoryOrderByInput']]
-    where: 'CategoryWhereInput'
-    cursor: 'CategoryWhereUniqueInput'
-    distinct: List['CategoryScalarFieldKeys']
-    include: 'CategoryIncludeFromCategoryRecursive2'
-
-
-class FindManyCategoryArgsFromPatternRecursive2(TypedDict, total=False):
-    """Arguments for Pattern"""
-    take: int
-    skip: int
-    order_by: Union['CategoryOrderByInput', List['CategoryOrderByInput']]
-    where: 'CategoryWhereInput'
-    cursor: 'CategoryWhereUniqueInput'
-    distinct: List['CategoryScalarFieldKeys']
-    include: 'CategoryIncludeFromCategoryRecursive3'
-
-
-class FindManyCategoryArgsFromPatternRecursive3(TypedDict, total=False):
-    """Arguments for Pattern"""
-    take: int
-    skip: int
-    order_by: Union['CategoryOrderByInput', List['CategoryOrderByInput']]
-    where: 'CategoryWhereInput'
-    cursor: 'CategoryWhereUniqueInput'
-    distinct: List['CategoryScalarFieldKeys']
-    include: 'CategoryIncludeFromCategoryRecursive4'
-
-
-class FindManyCategoryArgsFromPatternRecursive4(TypedDict, total=False):
-    """Arguments for Pattern"""
-    take: int
-    skip: int
-    order_by: Union['CategoryOrderByInput', List['CategoryOrderByInput']]
-    where: 'CategoryWhereInput'
-    cursor: 'CategoryWhereUniqueInput'
-    distinct: List['CategoryScalarFieldKeys']
-    
-    
 
 class PatternIncludeFromPattern(TypedDict, total=False):
     """Relational arguments for Pattern"""
-    category: Union[bool, 'CategoryArgsFromPatternRecursive1']
+    category: Union[bool, 'CategoryArgsFromPattern']
 
-
-class PatternIncludeFromPatternRecursive1(TypedDict, total=False):
-    """Relational arguments for Pattern"""
-    category: Union[bool, 'CategoryArgsFromPatternRecursive2']
-
-
-class PatternIncludeFromPatternRecursive2(TypedDict, total=False):
-    """Relational arguments for Pattern"""
-    category: Union[bool, 'CategoryArgsFromPatternRecursive3']
-
-
-class PatternIncludeFromPatternRecursive3(TypedDict, total=False):
-    """Relational arguments for Pattern"""
-    category: Union[bool, 'CategoryArgsFromPatternRecursive4']
-
-
-class PatternIncludeFromPatternRecursive4(TypedDict, total=False):
-    """Relational arguments for Pattern"""
-
-    
 
 class PatternArgsFromPattern(TypedDict, total=False):
     """Arguments for Pattern"""
-    include: 'PatternIncludeFromPatternRecursive1'
+    include: 'PatternIncludeFromPattern'
 
-
-class PatternArgsFromPatternRecursive1(TypedDict, total=False):
-    """Arguments for Pattern"""
-    include: 'PatternIncludeFromPatternRecursive2'
-
-
-class PatternArgsFromPatternRecursive2(TypedDict, total=False):
-    """Arguments for Pattern"""
-    include: 'PatternIncludeFromPatternRecursive3'
-
-
-class PatternArgsFromPatternRecursive3(TypedDict, total=False):
-    """Arguments for Pattern"""
-    include: 'PatternIncludeFromPatternRecursive4'
-
-
-class PatternArgsFromPatternRecursive4(TypedDict, total=False):
-    """Arguments for Pattern"""
-    
-    
 
 class FindManyPatternArgsFromPattern(TypedDict, total=False):
     """Arguments for Pattern"""
@@ -4388,58 +2292,14 @@ class FindManyPatternArgsFromPattern(TypedDict, total=False):
     where: 'PatternWhereInput'
     cursor: 'PatternWhereUniqueInput'
     distinct: List['PatternScalarFieldKeys']
-    include: 'PatternIncludeFromPatternRecursive1'
+    include: 'PatternIncludeFromPattern'
 
 
-class FindManyPatternArgsFromPatternRecursive1(TypedDict, total=False):
-    """Arguments for Pattern"""
-    take: int
-    skip: int
-    order_by: Union['PatternOrderByInput', List['PatternOrderByInput']]
-    where: 'PatternWhereInput'
-    cursor: 'PatternWhereUniqueInput'
-    distinct: List['PatternScalarFieldKeys']
-    include: 'PatternIncludeFromPatternRecursive2'
-
-
-class FindManyPatternArgsFromPatternRecursive2(TypedDict, total=False):
-    """Arguments for Pattern"""
-    take: int
-    skip: int
-    order_by: Union['PatternOrderByInput', List['PatternOrderByInput']]
-    where: 'PatternWhereInput'
-    cursor: 'PatternWhereUniqueInput'
-    distinct: List['PatternScalarFieldKeys']
-    include: 'PatternIncludeFromPatternRecursive3'
-
-
-class FindManyPatternArgsFromPatternRecursive3(TypedDict, total=False):
-    """Arguments for Pattern"""
-    take: int
-    skip: int
-    order_by: Union['PatternOrderByInput', List['PatternOrderByInput']]
-    where: 'PatternWhereInput'
-    cursor: 'PatternWhereUniqueInput'
-    distinct: List['PatternScalarFieldKeys']
-    include: 'PatternIncludeFromPatternRecursive4'
-
-
-class FindManyPatternArgsFromPatternRecursive4(TypedDict, total=False):
-    """Arguments for Pattern"""
-    take: int
-    skip: int
-    order_by: Union['PatternOrderByInput', List['PatternOrderByInput']]
-    where: 'PatternWhereInput'
-    cursor: 'PatternWhereUniqueInput'
-    distinct: List['PatternScalarFieldKeys']
-    
 
 
 FindManyPatternArgs = FindManyPatternArgsFromPattern
 FindFirstPatternArgs = FindManyPatternArgsFromPattern
 
-
-    
 
 class PatternWhereInput(TypedDict, total=False):
     """Pattern arguments for searching"""
@@ -4450,76 +2310,16 @@ class PatternWhereInput(TypedDict, total=False):
     category: 'CategoryRelationFilter'
     category_id: Union[_str, 'types.StringFilter']
 
-    # should be noted that AND and NOT should be Union['PatternWhereInputRecursive1', List['PatternWhereInputRecursive1']]
+    # should be noted that AND and NOT should be Union['PatternWhereInput', List['PatternWhereInput']]
     # but this causes mypy to hang :/
-    AND: List['PatternWhereInputRecursive1']
-    OR: List['PatternWhereInputRecursive1']
-    NOT: List['PatternWhereInputRecursive1']
-
-
-class PatternWhereInputRecursive1(TypedDict, total=False):
-    """Pattern arguments for searching"""
-    pattern_id: Union[_str, 'types.StringFilter']
-    pattern: Union[_str, 'types.StringFilter']
-    feedback: Union[_str, 'types.StringFilter']
-    applied: Union[_bool, 'types.BooleanFilter']
-    category: 'CategoryRelationFilter'
-    category_id: Union[_str, 'types.StringFilter']
-
-    # should be noted that AND and NOT should be Union['PatternWhereInputRecursive2', List['PatternWhereInputRecursive2']]
-    # but this causes mypy to hang :/
-    AND: List['PatternWhereInputRecursive2']
-    OR: List['PatternWhereInputRecursive2']
-    NOT: List['PatternWhereInputRecursive2']
-
-
-class PatternWhereInputRecursive2(TypedDict, total=False):
-    """Pattern arguments for searching"""
-    pattern_id: Union[_str, 'types.StringFilter']
-    pattern: Union[_str, 'types.StringFilter']
-    feedback: Union[_str, 'types.StringFilter']
-    applied: Union[_bool, 'types.BooleanFilter']
-    category: 'CategoryRelationFilter'
-    category_id: Union[_str, 'types.StringFilter']
-
-    # should be noted that AND and NOT should be Union['PatternWhereInputRecursive3', List['PatternWhereInputRecursive3']]
-    # but this causes mypy to hang :/
-    AND: List['PatternWhereInputRecursive3']
-    OR: List['PatternWhereInputRecursive3']
-    NOT: List['PatternWhereInputRecursive3']
-
-
-class PatternWhereInputRecursive3(TypedDict, total=False):
-    """Pattern arguments for searching"""
-    pattern_id: Union[_str, 'types.StringFilter']
-    pattern: Union[_str, 'types.StringFilter']
-    feedback: Union[_str, 'types.StringFilter']
-    applied: Union[_bool, 'types.BooleanFilter']
-    category: 'CategoryRelationFilter'
-    category_id: Union[_str, 'types.StringFilter']
-
-    # should be noted that AND and NOT should be Union['PatternWhereInputRecursive4', List['PatternWhereInputRecursive4']]
-    # but this causes mypy to hang :/
-    AND: List['PatternWhereInputRecursive4']
-    OR: List['PatternWhereInputRecursive4']
-    NOT: List['PatternWhereInputRecursive4']
-
-
-class PatternWhereInputRecursive4(TypedDict, total=False):
-    """Pattern arguments for searching"""
-    pattern_id: Union[_str, 'types.StringFilter']
-    pattern: Union[_str, 'types.StringFilter']
-    feedback: Union[_str, 'types.StringFilter']
-    applied: Union[_bool, 'types.BooleanFilter']
-    category: 'CategoryRelationFilter'
-    category_id: Union[_str, 'types.StringFilter']
+    AND: List['PatternWhereInput']
+    OR: List['PatternWhereInput']
+    NOT: List['PatternWhereInput']
 
 
 
 # aggregate Pattern types
 
-
-    
 
 class PatternScalarWhereWithAggregatesInput(TypedDict, total=False):
     """Pattern arguments for searching"""
@@ -4529,57 +2329,9 @@ class PatternScalarWhereWithAggregatesInput(TypedDict, total=False):
     applied: Union[_bool, 'types.BooleanWithAggregatesFilter']
     category_id: Union[_str, 'types.StringWithAggregatesFilter']
 
-    AND: List['PatternScalarWhereWithAggregatesInputRecursive1']
-    OR: List['PatternScalarWhereWithAggregatesInputRecursive1']
-    NOT: List['PatternScalarWhereWithAggregatesInputRecursive1']
-
-
-class PatternScalarWhereWithAggregatesInputRecursive1(TypedDict, total=False):
-    """Pattern arguments for searching"""
-    pattern_id: Union[_str, 'types.StringWithAggregatesFilter']
-    pattern: Union[_str, 'types.StringWithAggregatesFilter']
-    feedback: Union[_str, 'types.StringWithAggregatesFilter']
-    applied: Union[_bool, 'types.BooleanWithAggregatesFilter']
-    category_id: Union[_str, 'types.StringWithAggregatesFilter']
-
-    AND: List['PatternScalarWhereWithAggregatesInputRecursive2']
-    OR: List['PatternScalarWhereWithAggregatesInputRecursive2']
-    NOT: List['PatternScalarWhereWithAggregatesInputRecursive2']
-
-
-class PatternScalarWhereWithAggregatesInputRecursive2(TypedDict, total=False):
-    """Pattern arguments for searching"""
-    pattern_id: Union[_str, 'types.StringWithAggregatesFilter']
-    pattern: Union[_str, 'types.StringWithAggregatesFilter']
-    feedback: Union[_str, 'types.StringWithAggregatesFilter']
-    applied: Union[_bool, 'types.BooleanWithAggregatesFilter']
-    category_id: Union[_str, 'types.StringWithAggregatesFilter']
-
-    AND: List['PatternScalarWhereWithAggregatesInputRecursive3']
-    OR: List['PatternScalarWhereWithAggregatesInputRecursive3']
-    NOT: List['PatternScalarWhereWithAggregatesInputRecursive3']
-
-
-class PatternScalarWhereWithAggregatesInputRecursive3(TypedDict, total=False):
-    """Pattern arguments for searching"""
-    pattern_id: Union[_str, 'types.StringWithAggregatesFilter']
-    pattern: Union[_str, 'types.StringWithAggregatesFilter']
-    feedback: Union[_str, 'types.StringWithAggregatesFilter']
-    applied: Union[_bool, 'types.BooleanWithAggregatesFilter']
-    category_id: Union[_str, 'types.StringWithAggregatesFilter']
-
-    AND: List['PatternScalarWhereWithAggregatesInputRecursive4']
-    OR: List['PatternScalarWhereWithAggregatesInputRecursive4']
-    NOT: List['PatternScalarWhereWithAggregatesInputRecursive4']
-
-
-class PatternScalarWhereWithAggregatesInputRecursive4(TypedDict, total=False):
-    """Pattern arguments for searching"""
-    pattern_id: Union[_str, 'types.StringWithAggregatesFilter']
-    pattern: Union[_str, 'types.StringWithAggregatesFilter']
-    feedback: Union[_str, 'types.StringWithAggregatesFilter']
-    applied: Union[_bool, 'types.BooleanWithAggregatesFilter']
-    category_id: Union[_str, 'types.StringWithAggregatesFilter']
+    AND: List['PatternScalarWhereWithAggregatesInput']
+    OR: List['PatternScalarWhereWithAggregatesInput']
+    NOT: List['PatternScalarWhereWithAggregatesInput']
 
 
 

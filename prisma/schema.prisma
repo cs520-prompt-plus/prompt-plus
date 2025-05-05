@@ -4,20 +4,22 @@ datasource db {
 }
 
 generator python {
-  provider = "prisma-client-py"
-  output   = "../back_end/prisma_client_py"
+  provider             = "prisma-client-py"
+  output               = "prisma-client-py"
+  recursive_type_depth = -1
+  binaryTargets        = ["native","debian-openssl-3.0.x"]
 }
 
 generator js {
-  provider = "prisma-client-js"
-  output   = "../front_end/src/prisma"
+  provider      = "prisma-client-js"
+  output        = "node_modules/.prisma/client"
+  binaryTargets = ["native"]
 }
-
 
 model User {
   user_id   String   @id @default(uuid())
   name      String
-  email     String  
+  email     String
   password  String
   responses Response[]
 }
@@ -33,13 +35,13 @@ model Response {
 }
 
 model Category {
-  category_id  String   @id @default(uuid())
-  category     String
-  input        String
-  preview      String
-  patterns     Pattern[]
-  response     Response @relation(fields: [response_id], references: [response_id], onDelete: Cascade)
-  response_id  String
+  category_id String    @id @default(uuid())
+  category    String
+  input       String
+  preview     String
+  patterns    Pattern[]
+  response    Response  @relation(fields: [response_id], references: [response_id], onDelete: Cascade)
+  response_id String
 }
 
 model Pattern {

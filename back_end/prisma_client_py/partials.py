@@ -36,7 +36,7 @@ from typing import (
 from typing_extensions import TypedDict, Literal
 
 
-LiteralString = str
+from typing_extensions import LiteralString
 # -- template partials.py.jinja --
 from . import types, fields, enums, actions, models, bases
 from ._compat import model_rebuild, field_validator

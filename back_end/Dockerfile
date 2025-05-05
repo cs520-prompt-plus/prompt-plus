@@ -1,26 +1,33 @@
-# back_end/Dockerfile
+# ── Stage 0: generate & vendor Python Prisma client ─────────────────
+FROM node:lts-alpine3.17 AS gen-python
 
+RUN apk add --no-cache python3 py3-pip build-base libffi-dev openssl-dev \
+ && pip3 install prisma
+
+WORKDIR /prisma
+COPY prisma/schema.prisma ./
+COPY prisma/.env          ./
+
+# only runs the python generator (which also vendors the engine)
+RUN python3 -m prisma generate --schema=schema.prisma
+
+# ── Stage 1: build FastAPI image with that client ─────────────────
 FROM ghcr.io/owl-corp/python-poetry-base:3.11-slim
+WORKDIR /app
 
-# 1) Install dependencies into a temporary build directory
-WORKDIR /build
-COPY pyproject.toml poetry.lock ./
+# install your Python deps
+COPY back_end/pyproject.toml back_end/poetry.lock ./
 RUN poetry install --no-root
 
-# 2) Copy your FastAPI application code
-WORKDIR /app
-COPY app ./app
+# pull in the generated Python client (with engine) as /app/prisma-client-py
+COPY --from=gen-python /prisma/prisma-client-py ./prisma-client-py
 
-# 3) Expose the port Uvicorn will listen on
+# copy your FastAPI code
+COPY back_end/app ./app
+
+# so `from prisma import Prisma` works
+ENV PYTHONPATH=/app/prisma-client-py
+
 EXPOSE 80
-
-# 4) Pass through any uvicorn extras at runtime
-ARG uvicorn_extras=""
-ENV uvicorn_extras=$uvicorn_extras
-
-# 5) Ensure your app package can be imported
-ENV PYTHONPATH=/app
-
-# 6) Launch Uvicorn pointing at the `app.main:app` factory
-ENTRYPOINT ["/bin/bash", "-c"]
-CMD ["cd /build && poetry run uvicorn app.main:app --host 0.0.0.0 --port 80 $uvicorn_extras"]
+ENTRYPOINT ["bash","-c"]
+CMD ["poetry run uvicorn app.main:app --host 0.0.0.0 --port 80 --reload"]

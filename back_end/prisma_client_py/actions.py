@@ -37,7 +37,7 @@ from typing import (
 from typing_extensions import TypedDict, Literal
 
 
-LiteralString = str
+from typing_extensions import LiteralString
 # -- template actions.py.jinja --
 from typing import TypeVar
 import warnings
@@ -975,7 +975,7 @@ class UserActions(Generic[_PrismaModelT]):
     # TODO: statically type that the order argument is required when take or skip are present
     async def group_by(
         self,
-        by: List['types.UserScalarFieldKeys'],
+        by: List['types.UserScalarFieldKeysT'],
         *,
         where: Optional['types.UserWhereInput'] = None,
         take: Optional[int] = None,
@@ -986,7 +986,7 @@ class UserActions(Generic[_PrismaModelT]):
         max: Optional['types.UserMaxAggregateInput'] = None,
         having: Optional['types.UserScalarWhereWithAggregatesInput'] = None,
         count: Optional[Union[bool, 'types.UserCountAggregateInput']] = None,
-        order: Optional[Union[Mapping['types.UserScalarFieldKeys', 'types.SortOrder'], List[Mapping['types.UserScalarFieldKeys', 'types.SortOrder']]]] = None,
+        order: Optional[Union[Mapping['types.UserScalarFieldKeysT', 'types.SortOrder'], List[Mapping['types.UserScalarFieldKeysT', 'types.SortOrder']]]] = None,
     ) -> List['types.UserGroupByOutput']:
         """Group User records by one or more field values and perform aggregations
         each group such as finding the average.
@@ -2008,7 +2008,7 @@ class ResponseActions(Generic[_PrismaModelT]):
     # TODO: statically type that the order argument is required when take or skip are present
     async def group_by(
         self,
-        by: List['types.ResponseScalarFieldKeys'],
+        by: List['types.ResponseScalarFieldKeysT'],
         *,
         where: Optional['types.ResponseWhereInput'] = None,
         take: Optional[int] = None,
@@ -2019,7 +2019,7 @@ class ResponseActions(Generic[_PrismaModelT]):
         max: Optional['types.ResponseMaxAggregateInput'] = None,
         having: Optional['types.ResponseScalarWhereWithAggregatesInput'] = None,
         count: Optional[Union[bool, 'types.ResponseCountAggregateInput']] = None,
-        order: Optional[Union[Mapping['types.ResponseScalarFieldKeys', 'types.SortOrder'], List[Mapping['types.ResponseScalarFieldKeys', 'types.SortOrder']]]] = None,
+        order: Optional[Union[Mapping['types.ResponseScalarFieldKeysT', 'types.SortOrder'], List[Mapping['types.ResponseScalarFieldKeysT', 'types.SortOrder']]]] = None,
     ) -> List['types.ResponseGroupByOutput']:
         """Group Response records by one or more field values and perform aggregations
         each group such as finding the average.
@@ -3046,7 +3046,7 @@ class CategoryActions(Generic[_PrismaModelT]):
     # TODO: statically type that the order argument is required when take or skip are present
     async def group_by(
         self,
-        by: List['types.CategoryScalarFieldKeys'],
+        by: List['types.CategoryScalarFieldKeysT'],
         *,
         where: Optional['types.CategoryWhereInput'] = None,
         take: Optional[int] = None,
@@ -3057,7 +3057,7 @@ class CategoryActions(Generic[_PrismaModelT]):
         max: Optional['types.CategoryMaxAggregateInput'] = None,
         having: Optional['types.CategoryScalarWhereWithAggregatesInput'] = None,
         count: Optional[Union[bool, 'types.CategoryCountAggregateInput']] = None,
-        order: Optional[Union[Mapping['types.CategoryScalarFieldKeys', 'types.SortOrder'], List[Mapping['types.CategoryScalarFieldKeys', 'types.SortOrder']]]] = None,
+        order: Optional[Union[Mapping['types.CategoryScalarFieldKeysT', 'types.SortOrder'], List[Mapping['types.CategoryScalarFieldKeysT', 'types.SortOrder']]]] = None,
     ) -> List['types.CategoryGroupByOutput']:
         """Group Category records by one or more field values and perform aggregations
         each group such as finding the average.
@@ -4084,7 +4084,7 @@ class PatternActions(Generic[_PrismaModelT]):
     # TODO: statically type that the order argument is required when take or skip are present
     async def group_by(
         self,
-        by: List['types.PatternScalarFieldKeys'],
+        by: List['types.PatternScalarFieldKeysT'],
         *,
         where: Optional['types.PatternWhereInput'] = None,
         take: Optional[int] = None,
@@ -4095,7 +4095,7 @@ class PatternActions(Generic[_PrismaModelT]):
         max: Optional['types.PatternMaxAggregateInput'] = None,
         having: Optional['types.PatternScalarWhereWithAggregatesInput'] = None,
         count: Optional[Union[bool, 'types.PatternCountAggregateInput']] = None,
-        order: Optional[Union[Mapping['types.PatternScalarFieldKeys', 'types.SortOrder'], List[Mapping['types.PatternScalarFieldKeys', 'types.SortOrder']]]] = None,
+        order: Optional[Union[Mapping['types.PatternScalarFieldKeysT', 'types.SortOrder'], List[Mapping['types.PatternScalarFieldKeysT', 'types.SortOrder']]]] = None,
     ) -> List['types.PatternGroupByOutput']:
         """Group Pattern records by one or more field values and perform aggregations
         each group such as finding the average.

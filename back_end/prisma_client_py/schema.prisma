@@ -4,8 +4,10 @@ datasource db {
 }
 
 generator python {
-  provider = "prisma-client-py"
-  output   = "../back_end/prisma_client_py"
+  provider             = "prisma-client-py"
+  output               = "../back_end/prisma_client_py"
+  recursive_type_depth = -1
+  binaryTargets        = ["native", "debian-openssl-3.0.x"]
 }
 
 generator js {

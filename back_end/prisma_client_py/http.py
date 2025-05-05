@@ -36,7 +36,7 @@ from typing import (
 from typing_extensions import TypedDict, Literal
 
 
-LiteralString = str
+from typing_extensions import LiteralString
 # -- template http.py.jinja --
 from ._async_http import (
     HTTP as HTTP,

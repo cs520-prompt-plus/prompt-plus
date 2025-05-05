@@ -36,7 +36,7 @@ from typing import (
 from typing_extensions import TypedDict, Literal
 
 
-LiteralString = str
+from typing_extensions import LiteralString
 # -- template models.py.jinja --
 import os
 import logging
@@ -65,20 +65,6 @@ class User(bases.BaseUser):
     password: _str
     responses: Optional[List['models.Response']] = None
 
-    # take *args and **kwargs so that other metaclasses can define arguments
-    def __init_subclass__(
-        cls,
-        *args: Any,
-        warn_subclass: Optional[bool] = None,
-        **kwargs: Any,
-    ) -> None:
-        super().__init_subclass__()
-        if warn_subclass is not None:
-            warnings.warn(
-                'The `warn_subclass` argument is deprecated as it is no longer necessary and will be removed in the next release',
-                DeprecationWarning,
-                stacklevel=3,
-            )
 
 
     @staticmethod
@@ -199,20 +185,6 @@ class Response(bases.BaseResponse):
     user: Optional['models.User'] = None
     user_id: _str
 
-    # take *args and **kwargs so that other metaclasses can define arguments
-    def __init_subclass__(
-        cls,
-        *args: Any,
-        warn_subclass: Optional[bool] = None,
-        **kwargs: Any,
-    ) -> None:
-        super().__init_subclass__()
-        if warn_subclass is not None:
-            warnings.warn(
-                'The `warn_subclass` argument is deprecated as it is no longer necessary and will be removed in the next release',
-                DeprecationWarning,
-                stacklevel=3,
-            )
 
 
     @staticmethod
@@ -333,20 +305,6 @@ class Category(bases.BaseCategory):
     response: Optional['models.Response'] = None
     response_id: _str
 
-    # take *args and **kwargs so that other metaclasses can define arguments
-    def __init_subclass__(
-        cls,
-        *args: Any,
-        warn_subclass: Optional[bool] = None,
-        **kwargs: Any,
-    ) -> None:
-        super().__init_subclass__()
-        if warn_subclass is not None:
-            warnings.warn(
-                'The `warn_subclass` argument is deprecated as it is no longer necessary and will be removed in the next release',
-                DeprecationWarning,
-                stacklevel=3,
-            )
 
 
     @staticmethod
@@ -466,20 +424,6 @@ class Pattern(bases.BasePattern):
     category: Optional['models.Category'] = None
     category_id: _str
 
-    # take *args and **kwargs so that other metaclasses can define arguments
-    def __init_subclass__(
-        cls,
-        *args: Any,
-        warn_subclass: Optional[bool] = None,
-        **kwargs: Any,
-    ) -> None:
-        super().__init_subclass__()
-        if warn_subclass is not None:
-            warnings.warn(
-                'The `warn_subclass` argument is deprecated as it is no longer necessary and will be removed in the next release',
-                DeprecationWarning,
-                stacklevel=3,
-            )
 
 
     @staticmethod

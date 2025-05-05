@@ -37,7 +37,7 @@ from typing import (
 from typing_extensions import TypedDict, Literal
 
 
-LiteralString = str
+from typing_extensions import LiteralString
 # -- template engine/abstract.py.jinja --
 
 
