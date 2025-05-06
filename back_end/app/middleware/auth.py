@@ -7,7 +7,7 @@ from typing import Any
 from Crypto.Protocol.KDF import HKDF # pip install pycryptodome
 from Crypto.Hash import SHA256 
 from jose import jwe # pip install python-jose
-from dotenv import load_dotenv
+from app.client import prisma_client as prisma
 import os
 
 def getDerivedEncryptionKey(secret: str) -> Any:
@@ -50,9 +50,16 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if session_token:
             
             session = get_token(session_token)
-            print(f"Session: {session}")
+
+
             if session:
-                request.state.session = session
-                return await call_next(request)
+                email = session.get("email")
+                user = await prisma.user.find_unique(
+                    where={'email': email},
+                )
+                if user:
+                    # Store the user in the request state
+                    request.state.userId = user.id
+                    return await call_next(request)
 
         return JSONResponse({"message": "Unauthorized"}, status_code=401)

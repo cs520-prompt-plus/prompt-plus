@@ -31,16 +31,7 @@ async def root(logger=Depends(use_logging)):
     logger.info("Handling your request")
     return {"message": "Your app is working!"}
 
-@app.get("/api/he")
-async def root(request: Request, logger=Depends(use_logging)):
-    # Log request info
-    logger.info("Handling your request")
-    session = request.state.session
-    if session:
-        logger.info(f"Session: {session}")
-    return JSONResponse(content={"message": "Your app is working!"})
-# User CRUD
-
+# you can access request.state.userId to get the userId from the client
 # Endpoint to create a User
 @app.post("/api/v1/users/", response_model=UserRead)
 async def create_user(user: UserCreate):
