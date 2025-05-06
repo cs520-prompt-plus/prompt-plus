@@ -57,6 +57,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 user = await prisma.user.find_unique(
                     where={'email': email},
                 )
+
                 if user:
                     # Store the user in the request state
                     request.state.userId = user.id
