@@ -71,6 +71,7 @@ import { Spinner } from "../ui/spinner";
 import { ChatDemo } from "./main/chatBot";
 import { VerticalStepper } from "./main/stepper";
 import { BeforeAfterPage } from "./main/comparison";
+import { PromptInput } from "./main/prompt-input";
 
 export const metadata: Metadata = {
   title: "Playground",
@@ -94,6 +95,7 @@ export default function PlaygroundPage() {
   const [lastAIMessage, setLastAIMessage] = React.useState<UIMessage | null>(
     null
   );
+  const [valid, setValid] = React.useState(false);
   const [previewUpdated, setPreviewUpdated] = React.useState(false);
 
   const setDataImmer = (updater: (draft: ResponseCreateResponse) => void) => {
@@ -422,12 +424,12 @@ export default function PlaygroundPage() {
                               </Select>
                             </div>
                           </div>
-                          <Textarea
-                            id="input"
-                            placeholder="Here is my prompt: I want to build a web application that allows users to create and share their own recipes."
-                            className="flex-1 min-h-[35vh] w-full"
-                            onChange={(e) => setInput(e.target.value)}
-                            value={input}
+                          <PromptInput
+                            onValidated={(valid, feedback) => {
+                              setValid(valid);
+                            }}
+                            input={input}
+                            setInput={setInput}
                           />
                           <Label htmlFor="instructions">System Prompt</Label>
                           <Textarea
@@ -439,7 +441,10 @@ export default function PlaygroundPage() {
                       </SkeletonWrapper>
                       <div className="w-full flex h-full items-center justify-between">
                         <div className="flex items-center h-full space-x-2 ">
-                          <Button onClick={handleSubmit} disabled={loading}>
+                          <Button
+                            onClick={handleSubmit}
+                            disabled={loading || !valid}
+                          >
                             {loading ? <Spinner /> : "Submit"}
                           </Button>
                         </div>
