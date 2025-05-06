@@ -33,6 +33,3 @@ docker system prune --all --volumes
 Generate New Prompt
 Evaluate the Result to Refine the Prompt
 Multi-step Prompting
-Handle Edge Cases and Ambiguous Input
-Detect Vague, Ambiguous, or Typo-ridden Prompts
-add save response
