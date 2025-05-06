@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
+import { createResponse } from "@/app/api/responses/backend-service";
+import { patternDescriptions } from "@/app/constants/enum";
 import { Model, models, types } from "@/components/data/models";
 import { presets } from "@/components/data/presets";
 import { MaxLengthSelector } from "@/components/pages/main/maxlength-selector";
@@ -37,9 +39,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { ResponseCreateResponse } from "@/types/response";
+import type { Message as UIMessage } from "@ai-sdk/react";
 import { produce } from "immer";
 import {
   BotMessageSquare,
+  ChevronsLeftRightEllipsisIcon,
   Edit,
   RotateCcw,
   Settings,
@@ -66,13 +70,7 @@ import { SkeletonWrapper } from "../ui/skeleton-wrapper";
 import { Spinner } from "../ui/spinner";
 import { ChatDemo } from "./main/chatBot";
 import { VerticalStepper } from "./main/stepper";
-import type { Message as UIMessage } from "@ai-sdk/react";
-import {
-  mergePreviews,
-  updateResponse,
-  createResponse,
-} from "@/app/api/responses/backend-service";
-import { patternDescriptions } from "@/app/constants/enum";
+import { BeforeAfterPage } from "./main/comparison";
 
 export const metadata: Metadata = {
   title: "Playground",
@@ -86,6 +84,7 @@ export default function PlaygroundPage() {
   const [tab, setTab] = React.useState("input");
   const [editUnlock, setEditUnLock] = React.useState(false);
   const [outputUnlock, setOutputUnlock] = React.useState(false);
+  const [comparisonUnlock, setComparisonUnlock] = React.useState(false);
   const [data, setData] = React.useState<ResponseCreateResponse | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [style, setStyle] = React.useState("improve");
@@ -143,26 +142,29 @@ export default function PlaygroundPage() {
       const payload = {
         input: input,
       };
-      const res = await createResponse(payload);
-      console.log("Response received:", res);
+      // const res = await createResponse(payload);
+      // console.log("Response received:", res);
 
-      const response = res.data;
-      const enhancedResponse: ResponseCreateResponse = {
-        ...response,
-        categories: (response.categories ?? []).map((category) => ({
-          ...category,
-          patterns: category.patterns.map((pattern) => ({
-            ...pattern,
-            description:
-              patternDescriptions[
-                pattern.pattern as keyof typeof patternDescriptions
-              ] || "",
-          })),
-        })),
-      };
+      // const response = res.data;
+      // const enhancedResponse: ResponseCreateResponse = {
+      //   ...response,
+      //   categories: (response.categories ?? []).map((category) => ({
+      //     ...category,
+      //     patterns: category.patterns.map((pattern) => ({
+      //       ...pattern,
+      //       description:
+      //         patternDescriptions[
+      //           pattern.pattern as keyof typeof patternDescriptions
+      //         ] || "",
+      //     })),
+      //   })),
+      // };
 
-      setData(enhancedResponse);
-      setInput(enhancedResponse.input);
+      // setData(enhancedResponse);
+      // setInput(enhancedResponse.input);
+      await new Promise((resolve) => setTimeout(resolve, 200)); // Simulate network delay
+      setData(mockData);
+      setInput(mockData.input);
       toast.success("Response created successfully!");
     } catch (error) {
       toast.error("Error creating response. Please try again.");
@@ -302,7 +304,7 @@ export default function PlaygroundPage() {
                         instructions to edit it through our multistep process.
                       </HoverCardContent>
                     </HoverCard>
-                    <TabsList className="grid grid-cols-3">
+                    <TabsList className="grid grid-cols-4">
                       <TabsTrigger value="input">
                         <span className="sr-only">Input</span>
                         <TextCursorInput />
@@ -327,6 +329,16 @@ export default function PlaygroundPage() {
                       >
                         <span className="sr-only">Output</span>
                         <BotMessageSquare />
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="compare"
+                        className={cn(
+                          !comparisonUnlock ? "bg-muted" : "bg-transparent"
+                        )}
+                        disabled={!comparisonUnlock}
+                      >
+                        <span className="sr-only">Comparison</span>
+                        <ChevronsLeftRightEllipsisIcon />
                       </TabsTrigger>
                     </TabsList>
                   </div>
@@ -546,12 +558,14 @@ export default function PlaygroundPage() {
                         </SkeletonWrapper>
                       </div>
                     </div>
-                    <Button
-                      onClick={() => handleMerge()}
-                      disabled={!previewUpdated}
-                    >
-                      Merge Previews
-                    </Button>
+                    {step == 5 && (
+                      <Button
+                        onClick={() => handleMerge()}
+                        disabled={!previewUpdated}
+                      >
+                        Merge Previews
+                      </Button>
+                    )}
                   </TabsContent>
                   <TabsContent
                     value="output"
@@ -573,10 +587,29 @@ export default function PlaygroundPage() {
                       />
                     </div>
                     <Button
-                      onClick={handleSave}
-                      disabled={loading || lastAIMessage == null}
+                      onClick={() => {
+                        setComparisonUnlock(true);
+                        setTab("compare");
+                      }}
+                      disabled={loading}
                     >
-                      {loading ? <Spinner /> : "Save Final Output from AI"}
+                      {loading ? <Spinner /> : "View Final Prompt"}
+                    </Button>
+                  </TabsContent>
+                  <TabsContent
+                    value="compare"
+                    className="mt-0 border-0 p-0 flex gap-4 flex-col"
+                  >
+                    <BeforeAfterPage
+                      inputPrompt={data?.input ?? ""}
+                      outputResult={data?.output ?? ""}
+                      onCopyOutput={() => {
+                        navigator.clipboard.writeText(data?.output ?? "");
+                        toast.success("Output copied to clipboard!");
+                      }}
+                    />
+                    <Button onClick={handleSave} disabled={loading}>
+                      {loading ? <Spinner /> : "Save Final Output"}
                     </Button>
                   </TabsContent>
                 </div>

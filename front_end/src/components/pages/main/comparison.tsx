@@ -2,18 +2,23 @@ import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Copy } from "lucide-react";
 
 interface BeforeAfterPageProps {
   /** The original user prompt */
   inputPrompt: string;
   /** The improved or AI-generated result */
   outputResult: string;
+  /** Optional callback to re-edit the prompt */
+  onEditPrompt?: () => void;
+  /** Optional callback to copy the improved output */
   onCopyOutput?: () => void;
 }
 
-export default function BeforeAfterPage({
+export function BeforeAfterPage({
   inputPrompt,
   outputResult,
+  onEditPrompt,
   onCopyOutput,
 }: BeforeAfterPageProps) {
   return (
@@ -33,28 +38,35 @@ export default function BeforeAfterPage({
               value={inputPrompt}
               className="h-48 resize-none bg-secondary text-foreground"
             />
+            {onEditPrompt && (
+              <Button
+                variant="outline"
+                className="mt-4 w-full"
+                onClick={onEditPrompt}
+              >
+                Edit Prompt
+              </Button>
+            )}
           </CardContent>
         </Card>
 
-        {/* After Card */}
-        <Card>
+        {/* After Card with hover-triggered copy */}
+        <Card className="group">
           <CardHeader>
             <CardTitle>After</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <Textarea
               readOnly
               value={outputResult}
               className="h-48 resize-none bg-secondary text-foreground"
             />
             {onCopyOutput && (
-              <Button
-                variant="secondary"
-                className="mt-4 w-full"
-                onClick={onCopyOutput}
-              >
-                Copy Output
-              </Button>
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button variant="ghost" size="icon" onClick={onCopyOutput}>
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>
