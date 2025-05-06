@@ -67,7 +67,8 @@ async def create_response(request: Request, response: ResponseCreate):
     print("Creating response...")
     start = time.time()
     user_id = request.state.userId
-    print("input:", response.input)
+    print("input:", response.input, "user_id:", user_id)
+    # return JSONResponse(content={"message": "Response created successfully"}, status_code=200)
     try:
         print("📥 Received input:", response.input)
 

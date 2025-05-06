@@ -46,7 +46,6 @@ class AuthMiddleware(BaseHTTPMiddleware):
         
         
         session_token = request.cookies.get("next-auth.session-token")
-        print(f"Session token: {session_token}")    
         if session_token:
             
             session = get_token(session_token)

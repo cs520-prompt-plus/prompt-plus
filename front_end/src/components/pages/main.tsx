@@ -92,15 +92,6 @@ export default function PlaygroundPage() {
   const { data: session, status } = useSession();
   const [isClient, setIsClient] = React.useState(false);
   const currentPath = usePathname();
-
-  React.useEffect(() => {
-    setIsClient(true);
-    createResponse({
-      input: "make me a sandwich",
-    })
-      .then(console.log)
-      .catch(console.error);
-  }, []);
   const [lastAIMessage, setLastAIMessage] = React.useState<UIMessage | null>(
     null
   );
@@ -109,6 +100,10 @@ export default function PlaygroundPage() {
   const setDataImmer = (updater: (draft: ResponseCreateResponse) => void) => {
     setData((prev) => produce(prev, updater));
   };
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   React.useEffect(() => {
     if (data) {
@@ -132,11 +127,6 @@ export default function PlaygroundPage() {
 
   const handleApplyCategory = async (categoryIndex: number) => {
     setLoading(true);
-    // if (categoryIndex < 5) {
-    //   setOutputUnlock(false);
-    // } else {
-    //   setOutputUnlock(true);
-    // }
     console.log(
       `Apply category ${categoryIndex} with patterns:`,
       data?.categories?.[categoryIndex].patterns
@@ -163,13 +153,13 @@ export default function PlaygroundPage() {
       }
       console.log("Input submitted:", input);
 
-      // const payload = {
-      //   user_id: "9ac4cc47-b01b-4b68-ac01-6b6f4865bbf3", // dummy user;
-      //   input: input,
-      // };
+      const payload = {
+        input: input,
+      };
 
       // const res = await getResponseById("3d583ac5-2055-4384-ac73-ced31a8e1fcb"); // dummy response
-      // const res = await createResponse(payload);
+      const res = await createResponse(payload);
+      console.log("Response received:", res);
 
       // const response = res.data;
       // const enhancedResponse: ResponseCreateResponse = {

@@ -29,8 +29,10 @@ async def merge_prompts(prompts: List[str]):
 
 async def improve_prompt(user_input: str):
     output = []
+    print("Beginning prompt improvement...")
 
     for category in CATEGORY_TO_PATTERNS.keys():
+        print(f"Applying category: {category}")
         output.append(await apply_category(user_input, category))
 
     return await _standardize_category_outputs(output)
@@ -53,6 +55,7 @@ async def apply_category(user_input: str, category: str, force_patterns=[]):
     output = []
 
     for pattern in patterns:
+        print(f"Applying pattern: {pattern}")
         output.append(await _apply_pattern(user_input, category, pattern, force_applied=force_applied))
 
     return await _standardize_pattern_outputs(output, category)
