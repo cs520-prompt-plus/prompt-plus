@@ -30,7 +30,6 @@ docker compose down -v
 docker compose up -d --build
 docker system prune --all --volumes
 
-Prompt Engineer Frontend
 Generate New Prompt
 Evaluate the Result to Refine the Prompt
 Multi-step Prompting
