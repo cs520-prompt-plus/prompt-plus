@@ -2,8 +2,12 @@ import { withAuth } from "next-auth/middleware";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+const reservePaths = ["auth", "chat", "echo"];
 export async function middleware(request: NextRequest) {
-  if (request.nextUrl.pathname.includes("auth")) {
+  console.log("middleware", request.nextUrl.pathname);
+  if (
+    reservePaths.some((path) => request.nextUrl.pathname.includes(`/${path}`))
+  ) {
     return NextResponse.next();
   }
   if (process.env.NODE_ENV === "development") {
@@ -12,9 +16,9 @@ export async function middleware(request: NextRequest) {
 
     console.log("middleware", url.pathname);
     if (url.pathname.startsWith("/api")) {
-      url.hostname = "127.0.0.1";
+      url.hostname = "back_end";
       url.protocol = "http:";
-      url.port = "8000";
+      url.port = process.env.UVICORN_PORT || "80";
       return NextResponse.rewrite(url);
     }
   }

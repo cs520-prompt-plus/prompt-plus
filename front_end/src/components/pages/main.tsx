@@ -82,7 +82,13 @@ export default function PlaygroundPage() {
   const [loading, setLoading] = React.useState(false);
   const [style, setStyle] = React.useState("improve");
   const { data: session, status } = useSession();
+  const [isClient, setIsClient] = React.useState(false);
   const currentPath = usePathname();
+
+  React.useEffect(() => {
+    setIsClient(true);
+    fetch("/api/he").then(console.log);
+  }, []);
 
   const setDataImmer = (updater: (draft: ResponseCreateResponse) => void) => {
     setData((prev) => produce(prev, updater));
@@ -197,39 +203,40 @@ export default function PlaygroundPage() {
               <PresetShare />
             </div>
             <PresetActions />
-            {status === "loading" ? (
-              <Spinner />
-            ) : status === "authenticated" ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Image
-                    src={(session.user?.image as string) ?? ""}
-                    alt="User Avatar"
-                    width={40}
-                    height={40}
-                    className="rounded-full border-2 border-primary-500 dark:border-primary-400"
-                  />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                      <p className="font-semibold">{session.user?.email}</p>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      color="danger"
-                      onClick={() => signOut({ callbackUrl: currentPath })}
-                    >
-                      Log Out
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <GoogleSignIn />
-            )}
+            {isClient &&
+              (status === "loading" ? (
+                <Spinner />
+              ) : status === "authenticated" ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <Image
+                      src={(session.user?.image as string) ?? ""}
+                      alt="User Avatar"
+                      width={40}
+                      height={40}
+                      className="rounded-full border-2 border-primary-500 dark:border-primary-400"
+                    />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem>
+                        <p className="font-semibold">{session.user?.email}</p>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        color="danger"
+                        onClick={() => signOut({ callbackUrl: currentPath })}
+                      >
+                        Log Out
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <GoogleSignIn />
+              ))}
           </div>
         </div>
         <Separator />

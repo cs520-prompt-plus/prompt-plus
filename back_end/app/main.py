@@ -4,14 +4,17 @@ from typing import List
 import traceback
 import time
 from app.dependencies import use_logging
-from app.middleware import LoggingMiddleware
+from app.middleware import LoggingMiddleware, AuthMiddleware
 from app.types.response import ResponseCreate, ResponseRead, UserRead, UserCreate, ResponseOutputUpdate, MergePreviewPrompts
 from app.generation_pipeline import improve_prompt, apply_category, merge_prompts
 from app.client import prisma_client as prisma
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Request, Depends
+from fastapi.responses import JSONResponse
 
 app = FastAPI(prefix="/api/v1")
 app.add_middleware(LoggingMiddleware, fastapi=app)
+app.add_middleware(AuthMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -28,6 +31,14 @@ async def root(logger=Depends(use_logging)):
     logger.info("Handling your request")
     return {"message": "Your app is working!"}
 
+@app.get("/api/he")
+async def root(request: Request, logger=Depends(use_logging)):
+    # Log request info
+    logger.info("Handling your request")
+    session = request.state.session
+    if session:
+        logger.info(f"Session: {session}")
+    return JSONResponse(content={"message": "Your app is working!"})
 # User CRUD
 
 # Endpoint to create a User

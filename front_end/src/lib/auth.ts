@@ -11,7 +11,12 @@ export const authConfig = {
     }),
   ],
   session: {
-    strategy: "jwt",
+    strategy: "jwt", // ✅ must be 'jwt'
+  },
+  jwt: {
+    encryption: true,
+    algorithms: ["A256GCM"], // symmetric
+    secret: process.env.NEXT_AUTH_SECRET,
   },
   adapter: PrismaAdapter(prisma) as Adapter,
   secret: process.env.NEXT_AUTH_SECRET,

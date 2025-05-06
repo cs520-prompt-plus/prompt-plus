@@ -1,3 +1,4 @@
+"use client";
 import googleLogo from "@/public/google.png";
 import { Button } from "../ui/button";
 import { signIn } from "next-auth/react";
