@@ -112,19 +112,6 @@ export default function PlaygroundPage() {
     }
   }, [data]);
 
-  // const fetchData = async () => {
-  //   return mockData;
-  // };
-
-  // useEffect(() => {
-  //   const fetchDataAsync = async () => {
-  //     const response = await fetchData();
-  //     setData(response);
-  //     setInput(response.input);
-  //   };
-  //   fetchDataAsync();
-  // },[]);
-
   const handleApplyCategory = async (categoryIndex: number) => {
     setLoading(true);
     console.log(
@@ -156,7 +143,6 @@ export default function PlaygroundPage() {
       const payload = {
         input: input,
       };
-      // const res = await getResponseById("3d583ac5-2055-4384-ac73-ced31a8e1fcb"); // dummy response
       const res = await createResponse(payload);
       console.log("Response received:", res);
 
@@ -177,11 +163,6 @@ export default function PlaygroundPage() {
 
       setData(enhancedResponse);
       setInput(enhancedResponse.input);
-
-      // await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-      // setData(mockData);
-      // setInput(mockData.input);
-
       toast.success("Response created successfully!");
     } catch (error) {
       toast.error("Error creating response. Please try again.");
