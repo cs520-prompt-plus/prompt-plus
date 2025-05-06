@@ -156,34 +156,31 @@ export default function PlaygroundPage() {
       const payload = {
         input: input,
       };
-      fetch("/api/proxy/api/v1/health", {
-        method: "POST",
-      });
       // const res = await getResponseById("3d583ac5-2055-4384-ac73-ced31a8e1fcb"); // dummy response
       const res = await createResponse(payload);
       console.log("Response received:", res);
 
-      // const response = res.data;
-      // const enhancedResponse: ResponseCreateResponse = {
-      //   ...response,
-      //   categories: (response.categories ?? []).map((category) => ({
-      //     ...category,
-      //     patterns: category.patterns.map((pattern) => ({
-      //       ...pattern,
-      //       description:
-      //         patternDescriptions[
-      //           pattern.pattern as keyof typeof patternDescriptions
-      //         ] || "",
-      //     })),
-      //   })),
-      // };
+      const response = res.data;
+      const enhancedResponse: ResponseCreateResponse = {
+        ...response,
+        categories: (response.categories ?? []).map((category) => ({
+          ...category,
+          patterns: category.patterns.map((pattern) => ({
+            ...pattern,
+            description:
+              patternDescriptions[
+                pattern.pattern as keyof typeof patternDescriptions
+              ] || "",
+          })),
+        })),
+      };
 
-      // setData(enhancedResponse);
-      // setInput(enhancedResponse.input);
+      setData(enhancedResponse);
+      setInput(enhancedResponse.input);
 
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-      setData(mockData);
-      setInput(mockData.input);
+      // await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+      // setData(mockData);
+      // setInput(mockData.input);
 
       toast.success("Response created successfully!");
     } catch (error) {
