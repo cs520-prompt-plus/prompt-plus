@@ -10,18 +10,18 @@ export async function middleware(request: NextRequest) {
   ) {
     return NextResponse.next();
   }
-  if (process.env.NODE_ENV === "development") {
-    const { nextUrl } = request;
-    const url = nextUrl.clone();
+  // if (process.env.NODE_ENV === "development") {
+  //   const { nextUrl } = request;
+  //   const url = nextUrl.clone();
 
-    console.log("middleware", url.pathname);
-    if (url.pathname.startsWith("/api")) {
-      url.hostname = "back_end";
-      url.protocol = "http:";
-      url.port = process.env.UVICORN_PORT || "80";
-      return NextResponse.rewrite(url);
-    }
-  }
+  //   console.log("middleware", url.pathname);
+  //   if (url.pathname.startsWith("/api")) {
+  //     url.hostname = "back_end";
+  //     url.protocol = "http:";
+  //     url.port = process.env.UVICORN_PORT || "80";
+  //     return NextResponse.rewrite(url);
+  //   }
+  // }
   return NextResponse.next();
 }
 

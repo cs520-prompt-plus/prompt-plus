@@ -156,7 +156,9 @@ export default function PlaygroundPage() {
       const payload = {
         input: input,
       };
-
+      fetch("/api/proxy/api/v1/health", {
+        method: "POST",
+      });
       // const res = await getResponseById("3d583ac5-2055-4384-ac73-ced31a8e1fcb"); // dummy response
       const res = await createResponse(payload);
       console.log("Response received:", res);

@@ -10,8 +10,34 @@ from app.generation_pipeline import improve_prompt, apply_category, merge_prompt
 from app.client import prisma_client as prisma
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+import logging
 
+
+logging.basicConfig(level=logging.ERROR)
 app = FastAPI()
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    # read the raw body (you can only do this once, so be careful)
+    try:
+        body = await request.json()
+    except Exception:
+        body = "<could not parse body>"
+
+    # log the path, body, and the list of validation errors
+    logging.error(f"""
+❌ 422 Validation error on POST {request.url.path}
+    → Payload: {body!r}
+    → Errors: {exc.errors()}
+""")
+
+    # return the normal 422 JSON response (or customize it)
+    return JSONResponse(
+        status_code=422,
+        content={ "detail": exc.errors() }
+    )
+
 app.add_middleware(LoggingMiddleware, fastapi=app)
 app.add_middleware(AuthMiddleware)
 
@@ -28,7 +54,7 @@ async def root(request: Request, logger=Depends(use_logging)):
     logger.info("Handling your request")
     return {"message": "Your app is working!"}
 
-@app.get("/api/health")
+@app.post("/api/v1/health")
 async def health_check(request: Request):
     print("Health check endpoint called")   
     return JSONResponse(content={"status": "ok"}, status_code=200) 
@@ -62,7 +88,7 @@ async def get_response_by_id(request: Request, response_id: str):
 
     return response
 
-@app.post("/api/v1/responses", response_model=ResponseRead)
+@app.post("/api/v1/responses/", response_model=ResponseRead)
 async def create_response(request: Request, response: ResponseCreate):
     print("Creating response...")
     start = time.time()
