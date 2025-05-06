@@ -13,7 +13,6 @@ class UserRead(BaseModel):
     email: str
 
 class ResponseCreate(BaseModel):
-    user_id: str
     input: str
 
 class PatternRead(BaseModel):

@@ -95,7 +95,11 @@ export default function PlaygroundPage() {
 
   React.useEffect(() => {
     setIsClient(true);
-    fetch("/api/he").then(console.log);
+    createResponse({
+      input: "make me a sandwich",
+    })
+      .then(console.log)
+      .catch(console.error);
   }, []);
   const [lastAIMessage, setLastAIMessage] = React.useState<UIMessage | null>(
     null

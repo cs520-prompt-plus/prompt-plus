@@ -17,14 +17,11 @@ def prisma_mock():
         mock.disconnect = AsyncMock()
         mock.is_connected = MagicMock(return_value=True)
         yield mock
-
-
 #Test root endpoint
 @pytest.mark.asyncio
 async def test_root(client):
     response = client.get("/")
     assert response.json() == {"message": "Your app is working!"}
-
 
 #Test create response and correct prisma interaction
 @pytest.mark.asyncio

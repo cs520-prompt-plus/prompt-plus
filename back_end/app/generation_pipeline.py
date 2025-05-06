@@ -5,10 +5,9 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain.schema import HumanMessage, AIMessage
 from app.config import Category, Pattern, CATEGORY_TO_PATTERNS, PATTERN_TO_CONTEXT, TEMPLATE_PROMPT, EVALUATION_PROMPT, IMPROVEMENT_PROMPT, STANDARDIZATION_PROMPT, MANUAL_IMPROVEMENT_PROMPT
-
 load_dotenv()
 
-OPENAI_KEY = os.getenv("OPENAI_KEY")
+OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 MODEL = os.getenv("MODEL")
 
 async def manually_improve_prompt(user_feedback: str, generated_prompt: str):

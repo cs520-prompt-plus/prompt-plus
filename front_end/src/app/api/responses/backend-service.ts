@@ -7,13 +7,15 @@ import {
   MergePreviewsPayload,
 } from "@/types/response";
 
+const baseURL = "/api/v1";
+
 export const getResponseByIdEndpoint = (responseId: string) =>
-  `/responses/${responseId}`;
-export const createResponseEndpoint = () => `/responses/`;
+  `${baseURL}/responses/${responseId}`;
+export const createResponseEndpoint = () => `${baseURL}/responses`;
 export const updateResponseEndpoint = (responseId: string) =>
-  `/responses/update/${responseId}`;
+  `${baseURL}/responses/update/${responseId}`;
 export const mergePreviewsEndpoint = (responseId: string) =>
-  `/responses/merge/${responseId}`;
+  `${baseURL}/responses/merge/${responseId}`;
 
 export const getResponseById = async (
   responseId: string
