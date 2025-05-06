@@ -20,6 +20,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -44,9 +45,12 @@ import {
   TextCursorInput,
 } from "lucide-react";
 import { Metadata } from "next";
+import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
+import GoogleSignIn from "../auth/GoogleSignin";
 import { Checkbox } from "../ui/checkbox";
 import {
   Select,
@@ -61,7 +65,6 @@ import { SkeletonWrapper } from "../ui/skeleton-wrapper";
 import { Spinner } from "../ui/spinner";
 import { ChatDemo } from "./main/chatBot";
 import { VerticalStepper } from "./main/stepper";
-import GoogleSignIn from "../auth/GoogleSignin";
 
 export const metadata: Metadata = {
   title: "Playground",
@@ -78,6 +81,8 @@ export default function PlaygroundPage() {
   const [data, setData] = React.useState<ResponseCreateResponse | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [style, setStyle] = React.useState("improve");
+  const { data: session, status } = useSession();
+  const currentPath = usePathname();
 
   const setDataImmer = (updater: (draft: ResponseCreateResponse) => void) => {
     setData((prev) => produce(prev, updater));
@@ -192,7 +197,39 @@ export default function PlaygroundPage() {
               <PresetShare />
             </div>
             <PresetActions />
-            <GoogleSignIn />
+            {status === "loading" ? (
+              <Spinner />
+            ) : status === "authenticated" ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Image
+                    src={(session.user?.image as string) ?? ""}
+                    alt="User Avatar"
+                    width={40}
+                    height={40}
+                    className="rounded-full border-2 border-primary-500 dark:border-primary-400"
+                  />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem>
+                      <p className="font-semibold">{session.user?.email}</p>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      color="danger"
+                      onClick={() => signOut({ callbackUrl: currentPath })}
+                    >
+                      Log Out
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <GoogleSignIn />
+            )}
           </div>
         </div>
         <Separator />
@@ -304,25 +341,31 @@ export default function PlaygroundPage() {
                         <div className="flex flex-1 flex-col space-y-2">
                           <div className="flex items-center space-x-2 justify-between">
                             <Label htmlFor="input">Input</Label>{" "}
-                            <Select value={style} onValueChange={setStyle}>
-                              <SelectTrigger className="w-[20vw]">
-                                <SelectValue
-                                  placeholder="Select the style"
-                                  defaultValue={"improve"}
-                                />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  <SelectLabel>Style</SelectLabel>
-                                  <SelectItem value="improve">
-                                    Improve my currrent prompt
-                                  </SelectItem>
-                                  <SelectItem value="generate">
-                                    Generate a new prompt
-                                  </SelectItem>
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
+                            <div className="flex items-center space-x-2">
+                              <Label htmlFor="style">
+                                How we can help you?
+                              </Label>
+                              <Select value={style} onValueChange={setStyle}>
+                                <SelectTrigger className="w-[20vw]">
+                                  <SelectValue
+                                    placeholder="Select the style"
+                                    defaultValue={"improve"}
+                                  />
+                                </SelectTrigger>
+
+                                <SelectContent>
+                                  <SelectGroup>
+                                    <SelectLabel>Choose your style</SelectLabel>
+                                    <SelectItem value="improve">
+                                      Improve my currrent prompt
+                                    </SelectItem>
+                                    <SelectItem value="generate">
+                                      Generate a new prompt
+                                    </SelectItem>
+                                  </SelectGroup>
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
                           <Textarea
                             id="input"

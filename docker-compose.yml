@@ -22,7 +22,7 @@ services:
       args:
         - uvicorn_extras=--reload --use-colors --log-level debug
     env_file:
-      - ./back_end/.env
+      - ./.env
     depends_on:
       postgres_db:
         condition: service_healthy
@@ -39,8 +39,7 @@ services:
       context: .
       dockerfile: front_end/Dockerfile
     env_file:
-      - ./prisma/.env
-      - ./front_end/.env.local
+      - ./.env
     depends_on:
       - postgres_db
     ports:
@@ -55,7 +54,7 @@ services:
       context: prisma
       dockerfile: Dockerfile
     env_file:
-      - ./prisma/.env
+      - ./.env
     depends_on:
       - postgres_db
     entrypoint:
