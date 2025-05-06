@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import { Model, models, types } from "@/components/data/models";
 import { presets } from "@/components/data/presets";
