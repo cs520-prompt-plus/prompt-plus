@@ -23,7 +23,8 @@ RUN npx prisma generate \
 # ───────────────────────────────────────────────
 # Stage 1: Build Next.js Dev Container
 # ───────────────────────────────────────────────
-FROM node:20-slim
+FROM node:20-bullseye
+
 RUN apt-get update -y && apt-get install -y openssl
 WORKDIR /app
 
