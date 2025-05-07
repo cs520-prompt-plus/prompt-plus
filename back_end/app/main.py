@@ -5,8 +5,9 @@ import traceback
 import time
 from app.dependencies import use_logging
 from app.middleware import LoggingMiddleware
-from app.types.response import ResponseCreate, ResponseRead, UserRead, UserCreate, ResponseOutputUpdate, MergePreviewPrompts
+from app.types.response import ResponseCreate, ResponseRead, UserRead, UserCreate, ResponseOutputUpdate, CategoryRead, CategoryPatternUpdate, MergePreviewPrompts
 from app.generation_pipeline import improve_prompt, apply_category, merge_prompts
+
 from app.client import prisma_client as prisma, connect_db, disconnect_db
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -168,6 +169,43 @@ async def update_response_output(response_id: str, output_update: ResponseOutput
         }
     )
     return updated_response
+
+#endpoint for updating active patterns for cateogry
+@app.put("/api/v1/categories/{category_id}/patterns", response_model=CategoryRead)
+async def update_category_patterns(category_id: str, update_data: CategoryPatternUpdate):
+    #get active patterns for current category
+    category = await prisma.category.find_unique(
+        where={"category_id": category_id},
+        include={"patterns": True, "response": True}
+    )
+    #no active patterns, return error
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+
+    #apply changes from user selection
+    for pattern_update in update_data.patterns:
+        await prisma.pattern.update(
+            where={"pattern_id": pattern_update.pattern_id},
+            data={"applied": pattern_update.applied}
+        )
+
+    #get all active patterns
+    updated_patterns = await prisma.pattern.find_many(
+        where={"category_id": category_id, "applied": True}
+    )
+
+    new_preview = await apply_category(
+        original_prompt=category.input,
+        patterns=[pattern.pattern for pattern in updated_patterns]
+    )
+
+    updated_category = await prisma.category.update(
+        where={"category_id": category_id},
+        data={"preview": new_preview},
+        include={"patterns": True}
+    )
+
+    return updated_category
 
 @app.on_event("startup")
 async def startup() -> None:

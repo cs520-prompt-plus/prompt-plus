@@ -200,8 +200,8 @@ def test_user():
     }
 
 # Create new user
-@pytest.mark.asyncio
-async def test_create_user(client, prisma_mock, test_user):   
+
+def test_create_user(client, prisma_mock, test_user):   
     test_user_create = {
         "name": "test user",
         "email": "user1@etc.com",
@@ -213,7 +213,6 @@ async def test_create_user(client, prisma_mock, test_user):
     prisma_mock.user.create.assert_called_once_with(data=test_user_create)
 
 #Get all users from database
-@pytest.mark.asyncio
 def test_get_all_users(client, prisma_mock, test_user):
     prisma_mock.user.find_many.return_value = [test_user]
     response = client.get("/api/v1/users/")
@@ -221,14 +220,12 @@ def test_get_all_users(client, prisma_mock, test_user):
     assert response.json()[0]["email"] == test_user["email"]
 
 #Get specific user
-@pytest.mark.asyncio
 def test_get_user_by_id(client, prisma_mock, test_user):
     prisma_mock.user.find_unique.return_value = test_user
     response = client.get(f"/api/v1/users/{test_user['user_id']}")
     assert response.json()["user_id"] == test_user["user_id"]
 
 #Get non-existent user (exceptional behavior)
-@pytest.mark.asyncio
 def test_get_user_by_id_not_found(client, prisma_mock):
     prisma_mock.user.find_unique.return_value = None
     response = client.get("/api/v1/users/none_test")
@@ -236,7 +233,6 @@ def test_get_user_by_id_not_found(client, prisma_mock):
     assert response.json()["detail"] == "User not found"
 
 #Modify existing user
-@pytest.mark.asyncio
 def test_update_user(client, prisma_mock, test_user):
     updated_user = test_user.copy()
     updated_user["name"] = "Update from test"
@@ -247,7 +243,6 @@ def test_update_user(client, prisma_mock, test_user):
     assert response.json()["name"] == "Update from test"
 
 #Modify non-existent user (exceptional behavior)
-@pytest.mark.asyncio
 def test_update_user_not_found(client, prisma_mock):
     prisma_mock.user.find_unique.return_value = None
 
@@ -256,7 +251,6 @@ def test_update_user_not_found(client, prisma_mock):
     assert response.json()["detail"] == "User not found"
 
 #Delete a user
-@pytest.mark.asyncio
 def test_delete_user(client, prisma_mock, test_user):
     prisma_mock.user.find_unique.return_value = test_user
     prisma_mock.user.delete.return_value = None
@@ -266,7 +260,6 @@ def test_delete_user(client, prisma_mock, test_user):
     assert response.json()["message"] == "User deleted successfully"
 
 #Delete non-existent user (exceptional behavior)
-@pytest.mark.asyncio
 def test_delete_user_not_found(client, prisma_mock):
     prisma_mock.user.find_unique.return_value = None
 

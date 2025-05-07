@@ -5,11 +5,14 @@ import {
     ResponseCreateResponse,
     ResponseUpdatePayload,
     MergePreviewsPayload,
+    CategoryRead,
+    CategoryPatternUpdatePayload
 } from '@/types/response';
 
 export const getResponseByIdEndpoint = (responseId: string) => `/responses/${responseId}`;
 export const createResponseEndpoint = () => `/responses/`;
-export const updateResponseEndpoint = (responseId : string) => `/responses/update/${responseId}`; 
+export const updateResponseEndpoint = (responseId : string) => `/responses/update/${responseId}`;
+export const updatePatternEndpoint = (categoryId: string) => `/categories/${categoryId}/patterns`;
 export const mergePreviewsEndpoint = (responseId : string) => `/responses/merge/${responseId}`;
 
 export const getResponseById = async (responseId: string): Promise<AxiosResponse<ResponseCreateResponse>> => {
@@ -23,6 +26,11 @@ export const createResponse = async (payload: ResponseCreatePayload): Promise<Ax
 export const updateResponse = async (responseId: string, payload: ResponseUpdatePayload): Promise<AxiosResponse<ResponseCreateResponse>> => {
   return await backendAgent.put<ResponseCreateResponse>(updateResponseEndpoint(responseId),payload);
 } 
+
+
+export const updateCategoryPatterns = async (categoryId: string, payload: CategoryPatternUpdatePayload): Promise<AxiosResponse<CategoryRead>> => {
+  return await backendAgent.put<CategoryRead>(updatePatternEndpoint(categoryId), payload);
+};
 
 export const mergePreviews = async (responseId: string, payload: MergePreviewsPayload): Promise<AxiosResponse<ResponseCreateResponse>> => {
   return await backendAgent.put<ResponseCreateResponse>(mergePreviewsEndpoint(responseId),payload);
