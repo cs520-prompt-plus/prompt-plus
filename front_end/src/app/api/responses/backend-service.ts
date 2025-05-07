@@ -20,6 +20,8 @@ export const updatePatternEndpoint = (categoryId: string) =>
   `/categories/${categoryId}/patterns`;
 export const mergePreviewsEndpoint = (responseId: string) =>
   `${baseURL}/responses/merge/${responseId}`;
+export const updatePatternEndpoint = (categoryId: string) =>
+  `/categories/${categoryId}/patterns`;
 
 export const getResponseById = async (
   responseId: string
