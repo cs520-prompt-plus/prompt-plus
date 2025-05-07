@@ -1,15 +1,26 @@
 from fastapi import Depends, FastAPI, HTTPException
 from prisma import Prisma
 from typing import List
-
+import traceback
+import time
 from app.dependencies import use_logging
 from app.middleware import LoggingMiddleware
-from app.types.response import ResponseCreate, ResponseRead, UserRead, UserCreate, ResponseOutputUpdate, CategoryRead, CategoryPatternUpdate
-from app.generation_pipeline import improve_prompt, apply_category
+from app.types.response import ResponseCreate, ResponseRead, UserRead, UserCreate, ResponseOutputUpdate, CategoryRead, CategoryPatternUpdate, MergePreviewPrompts
+from app.generation_pipeline import improve_prompt, apply_category, merge_prompts
+
 from app.client import prisma_client as prisma, connect_db, disconnect_db
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(prefix="/api/v1")
 app.add_middleware(LoggingMiddleware, fastapi=app)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],            
+    allow_credentials=True,
+    allow_methods=["*"],              
+    allow_headers=["*"],
+)
 
 # prisma = Prisma(auto_register=True)
 
@@ -34,47 +45,11 @@ async def create_user(user: UserCreate):
 
 # Response CRUD
 
-# Endpoint to create Response
-@app.post("/api/v1/responses/", response_model=ResponseRead)
-async def create_response(response: ResponseCreate):
-    # Call AI service to improve the prompt
-    improvement = await improve_prompt(response.input)
-
-    # 1. Create the Response first
-    new_response = await prisma.response.create(
-        data={
-            "user_id": response.user_id,
-            "input": response.input,
-            "output": improvement["new_prompt"],
-        }
-    )
-
-    # 2. Loop through each Category in the result
-    for category_data in improvement["categories"]:
-        # Create Category
-        new_category = await prisma.category.create(
-            data={
-                "response_id": new_response.response_id,
-                "category": category_data["name"],
-                "input": improvement["original_prompt"],
-                "preview": category_data["new_prompt"],
-            }
-        )
-
-        # 3. Loop through each Pattern inside this Category
-        for pattern_data in category_data.get("patterns", []):
-            await prisma.pattern.create(
-                data={
-                    "category_id": new_category.category_id,
-                    "pattern": pattern_data["name"],
-                    "feedback": pattern_data.get("feedback", ""),
-                    "applied": pattern_data.get("applied", False),
-                }
-            )
-
-    # Fetch the full Response including Categories and Patterns
-    full_response = await prisma.response.find_unique(
-        where={"response_id": new_response.response_id},
+#Endpoint to get a response by id
+@app.get("/api/v1/responses/{response_id}", response_model=ResponseRead)
+async def get_response_by_id(response_id: str):
+    response = await prisma.response.find_unique(
+        where={"response_id": response_id},
         include={
             "categories": {
                 "include": {
@@ -84,10 +59,97 @@ async def create_response(response: ResponseCreate):
         }
     )
 
-    return full_response
+    if not response:
+        raise HTTPException(status_code=404, detail="Response not found")
 
-# Endpoint to update final Response output, to be called after finalized editing.
-@app.put("/api/v1/responses/{response_id}/output", response_model=ResponseRead)
+    return response
+
+# Endpoint to create Response
+@app.post("/api/v1/responses/", response_model=ResponseRead)
+async def create_response(response: ResponseCreate):
+    start = time.time()
+    try:
+        print("📥 Received input:", response.input)
+
+        # Call AI service
+        start_ai = time.time()
+        improvement = await improve_prompt(response.input)
+        print(f"🧠 AI call took {time.time() - start_ai:.2f}s")
+
+        new_response = await prisma.response.create(
+            data={
+                "user_id": response.user_id,
+                "input": response.input,
+                "output": improvement["output"],
+            }
+        )
+
+        for category_data in improvement["categories"]:
+            new_category = await prisma.category.create(
+                data={
+                    "response_id": new_response.response_id,
+                    "category": category_data["category"],
+                    "input": improvement["input"],
+                    "preview": category_data["preview"],
+                }
+            )
+
+            for pattern_data in category_data.get("patterns", []):
+                await prisma.pattern.create(
+                    data={
+                        "category_id": new_category.category_id,
+                        "pattern": pattern_data["pattern"],
+                        "feedback": pattern_data.get("feedback", ""),
+                        "applied": pattern_data.get("applied", False),
+                    }
+                )
+
+        full_response = await prisma.response.find_unique(
+            where={"response_id": new_response.response_id},
+            include={
+                "categories": {
+                    "include": {"patterns": True}
+                }
+            }
+        )
+
+        duration = time.time() - start
+        print(f"✅ Done in {duration:.2f}s")
+        return full_response
+
+    except Exception as e:
+        print("❌ Error in create_response:", str(e))
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail="Something went wrong while processing your request.")
+
+# Endpoint to update final Response output, merging 6 previews.
+@app.put("/api/v1/responses/merge/{response_id}", response_model=ResponseRead)
+async def merge_and_update_response(response_id: str, previews_input: MergePreviewPrompts):
+    # Validate that response exists
+    existing_response = await prisma.response.find_unique(where={"response_id": response_id})
+    if not existing_response:
+        raise HTTPException(status_code=404, detail="Response not found")
+
+    # Generate the merged prompt
+    merged_prompt = await merge_prompts(previews_input.previews)
+
+    # Update the response output field
+    updated_response = await prisma.response.update(
+        where={"response_id": response_id},
+        data={"output": merged_prompt},
+        include={
+            "categories": {
+                "include": {
+                    "patterns": True
+                }
+            }
+        }
+    )
+
+    return updated_response
+
+# Endpoint to update final Response output, to be called after finalized editing with live OpenAI model in FE.
+@app.put("/api/v1/responses/update/{response_id}", response_model=ResponseRead)
 async def update_response_output(response_id: str, output_update: ResponseOutputUpdate):
     # Check if response exists
     existing_response = await prisma.response.find_unique(where={"response_id": response_id})

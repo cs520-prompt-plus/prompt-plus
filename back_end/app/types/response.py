@@ -46,3 +46,6 @@ class PatternUpdate(BaseModel):
 
 class CategoryPatternUpdate(BaseModel):
     patterns: List[PatternUpdate]
+    
+class MergePreviewPrompts(BaseModel):
+    previews: List[str]

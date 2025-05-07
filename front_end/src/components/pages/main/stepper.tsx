@@ -7,14 +7,16 @@ import {
   eyeIcon,
   gearIcon,
   inheritedIcon,
+  sparklesIcon,
 } from "@progress/kendo-svg-icons";
 
 const items = [
-  { label: "Input Context", svgIcon: documentManagerIcon },
-  { label: "Motivation", svgIcon: gearIcon },
-  { label: "Structure", svgIcon: dataIcon },
-  { label: "Example", svgIcon: eyeIcon, optional: true },
-  { label: "Consequence", svgIcon: inheritedIcon },
+  { label: "Input Semantics", svgIcon: documentManagerIcon },
+  { label: "Output Customization", svgIcon: sparklesIcon },
+  { label: "Error Identification", svgIcon: dataIcon },
+  { label: "Prompt Improvement", svgIcon: eyeIcon },
+  { label: "Interaction", svgIcon: inheritedIcon },
+  { label: "Context Control", svgIcon: gearIcon },
 ];
 
 interface VerticalStepperProps {
