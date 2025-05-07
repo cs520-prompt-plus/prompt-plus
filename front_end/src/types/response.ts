@@ -1,35 +1,34 @@
 export interface ResponseCreatePayload {
-    user_id: string,
-    input: string,
+  input: string;
 }
 
 export interface ResponseCreateResponse {
-    response_id: string;
-    user_id: string;
+  response_id: string;
+  user_id: string;
+  input: string;
+  output: string;
+  created_at: string;
+  categories?: {
+    category_id: string;
+    category: string;
     input: string;
-    output: string;
-    created_at: string;
-    categories?: {
-      category_id: string;
-      category: string;
-      input: string;
-      preview: string;
-      patterns: {
-        pattern_id: string;
-        pattern: string;
-        description? : string;
-        feedback: string;
-        applied: boolean;
-      }[];
+    preview: string;
+    patterns: {
+      pattern_id: string;
+      pattern: string;
+      description?: string;
+      feedback: string;
+      applied: boolean;
     }[];
+  }[];
 }
 
 export interface ResponseUpdatePayload {
-    output: string;
+  output: string;
 }
 
 export interface MergePreviewsPayload {
-    previews: string[];
+  previews: string[];
 }
 
 export interface CategoryRead {

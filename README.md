@@ -10,15 +10,31 @@ they should include in future prompts.
 ## Running the Project
 
 1. Navigate to the back_end directory and start the services:
-   
+
 Create your `.env` file in the backend project directory, you can copy `.env.sample` as the base for this.
+
 ```sh
 cd back_end
 docker compose up -d
 ```
+
 2. Navigate to the front_end directory and start the services:
+
 ```sh
 cd front_end
 npm install
 npm run dev
 ```
+
+docker compose down -v
+docker compose up -d --build
+docker system prune --all --volumes
+
+Prompt Engineer Frontend
+Before and After Page (to show prompt input vs result/output comparison)
+Generate New Prompt
+Evaluate the Result to Refine the Prompt
+Multi-step Prompting
+Handle Edge Cases and Ambiguous Input
+Detect Vague, Ambiguous, or Typo-ridden Prompts
+add save response

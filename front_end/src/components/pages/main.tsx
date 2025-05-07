@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import { Model, models, types } from "@/components/data/models";
 import { presets } from "@/components/data/presets";
@@ -20,6 +21,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -44,9 +46,12 @@ import {
   TextCursorInput,
 } from "lucide-react";
 import { Metadata } from "next";
+import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
+import GoogleSignIn from "../auth/GoogleSignin";
 import { Checkbox } from "../ui/checkbox";
 import {
   Select,
@@ -62,7 +67,12 @@ import { Spinner } from "../ui/spinner";
 import { ChatDemo } from "./main/chatBot";
 import { VerticalStepper } from "./main/stepper";
 import type { Message as UIMessage } from "@ai-sdk/react";
-import { mergePreviews, updateResponse, createResponse, updateCategoryPatterns } from "@/app/api/responses/backend-service";
+import {
+  mergePreviews,
+  updateResponse,
+  createResponse,
+  updateCategoryPatterns,
+} from "@/app/api/responses/backend-service";
 import { patternDescriptions } from "@/app/constants/enum";
 
 export const metadata: Metadata = {
@@ -80,12 +90,21 @@ export default function PlaygroundPage() {
   const [data, setData] = React.useState<ResponseCreateResponse | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [style, setStyle] = React.useState("improve");
-  const [lastAIMessage, setLastAIMessage] = React.useState<UIMessage | null>(null);
+  const { data: session, status } = useSession();
+  const [isClient, setIsClient] = React.useState(false);
+  const currentPath = usePathname();
+  const [lastAIMessage, setLastAIMessage] = React.useState<UIMessage | null>(
+    null
+  );
   const [previewUpdated, setPreviewUpdated] = React.useState(false);
 
   const setDataImmer = (updater: (draft: ResponseCreateResponse) => void) => {
     setData((prev) => produce(prev, updater));
   };
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   React.useEffect(() => {
     if (data) {
@@ -94,19 +113,6 @@ export default function PlaygroundPage() {
     }
   }, [data]);
 
-  // const fetchData = async () => {
-  //   return mockData;
-  // };
-
-  // useEffect(() => {
-  //   const fetchDataAsync = async () => {
-  //     const response = await fetchData();
-  //     setData(response);
-  //     setInput(response.input);
-  //   };
-  //   fetchDataAsync();
-  // },[]);
-
   const handleApplyCategory = async (categoryIndex: number) => {
     setLoading(true);
     try {
@@ -114,7 +120,7 @@ export default function PlaygroundPage() {
         toast.error("Category data missing.");
         return;
       }
-  
+
       const category = data.categories[categoryIndex];
       const payload = {
         patterns: category.patterns.map((p) => ({
@@ -122,22 +128,24 @@ export default function PlaygroundPage() {
           applied: p.applied,
         })),
       };
-  
+
       console.log("Updating category with ID:", category.category_id);
-  
+
       const res = await updateCategoryPatterns(category.category_id, payload);
       const updatedCategory = res.data;
-  
+
       console.log("API response:", updatedCategory);
-  
+
       setDataImmer((draft) => {
         if (!draft.categories) return;
         draft.categories[categoryIndex] = updatedCategory;
       });
-  
+
       setOutputUnlock(categoryIndex >= 5);
-  
-      toast.success("Category applied successfully! You can now view the output.");
+
+      toast.success(
+        "Category applied successfully! You can now view the output."
+      );
     } catch (error) {
       toast.error("Failed to apply category. Try again.");
       console.error("Error updating category patterns:", error);
@@ -145,46 +153,40 @@ export default function PlaygroundPage() {
       setLoading(false);
     }
   };
-  
 
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      if (style == "generate"){
-        setInput("Generate an AI prompt with the following specifications: " + input);
+      if (style == "generate") {
+        setInput(
+          "Generate an AI prompt with the following specifications: " + input
+        );
       }
       console.log("Input submitted:", input);
 
-      // const payload = {
-      //   user_id: "9ac4cc47-b01b-4b68-ac01-6b6f4865bbf3", // dummy user;
-      //   input: input,
-      // };
+      const payload = {
+        input: input,
+      };
+      const res = await createResponse(payload);
+      console.log("Response received:", res);
 
-      // const res = await getResponseById("3d583ac5-2055-4384-ac73-ced31a8e1fcb"); // dummy response
-      // const res = await createResponse(payload);
+      const response = res.data;
+      const enhancedResponse: ResponseCreateResponse = {
+        ...response,
+        categories: (response.categories ?? []).map((category) => ({
+          ...category,
+          patterns: category.patterns.map((pattern) => ({
+            ...pattern,
+            description:
+              patternDescriptions[
+                pattern.pattern as keyof typeof patternDescriptions
+              ] || "",
+          })),
+        })),
+      };
 
-      // const response = res.data;
-      // const enhancedResponse: ResponseCreateResponse = {
-      //   ...response,
-      //   categories: (response.categories ?? []).map((category) => ({
-      //     ...category,
-      //     patterns: category.patterns.map((pattern) => ({
-      //       ...pattern,
-      //       description:
-      //         patternDescriptions[
-      //           pattern.pattern as keyof typeof patternDescriptions
-      //         ] || "",
-      //     })),
-      //   })),
-      // };
-
-      // setData(enhancedResponse);
-      // setInput(enhancedResponse.input);
-
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-      setData(mockData);
-      setInput(mockData.input);
-
+      setData(enhancedResponse);
+      setInput(enhancedResponse.input);
       toast.success("Response created successfully!");
     } catch (error) {
       toast.error("Error creating response. Please try again.");
@@ -203,7 +205,7 @@ export default function PlaygroundPage() {
 
         // await updateResponse(response_id, {output : final_output});
         await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-        toast.success("Final Prompt successfully saved.")
+        toast.success("Final Prompt successfully saved.");
         setLastAIMessage(null);
       }
     } catch (error) {
@@ -211,19 +213,19 @@ export default function PlaygroundPage() {
       console.error("Updating failed", error);
     }
     setLoading(false);
-  }
+  };
 
   const handleMerge = async () => {
     setLoading(true);
     try {
-      if (data && data.categories){
+      if (data && data.categories) {
         const previews = data.categories.map((category) => category.preview);
         const response_id = data.response_id;
         // const response_id = "3d583ac5-2055-4384-ac73-ced31a8e1fasc"; // dummy
 
         // await mergePreviews(response_id,{previews:previews});\
         await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-        toast.success("Successfully Merge Previews.")
+        toast.success("Successfully Merge Previews.");
         setPreviewUpdated(false);
         setOutputUnlock(true);
       }
@@ -232,7 +234,7 @@ export default function PlaygroundPage() {
       console.error("Merging failed", error);
     }
     setLoading(false);
-  }
+  };
 
   return (
     <div className="p-10 h-full w-full ">
@@ -261,6 +263,40 @@ export default function PlaygroundPage() {
               <PresetShare />
             </div>
             <PresetActions />
+            {isClient &&
+              (status === "loading" ? (
+                <Spinner />
+              ) : status === "authenticated" ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <Image
+                      src={(session.user?.image as string) ?? ""}
+                      alt="User Avatar"
+                      width={40}
+                      height={40}
+                      className="rounded-full border-2 border-primary-500 dark:border-primary-400"
+                    />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem>
+                        <p className="font-semibold">{session.user?.email}</p>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        color="danger"
+                        onClick={() => signOut({ callbackUrl: currentPath })}
+                      >
+                        Log Out
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <GoogleSignIn />
+              ))}
           </div>
         </div>
         <Separator />
@@ -372,25 +408,31 @@ export default function PlaygroundPage() {
                         <div className="flex flex-1 flex-col space-y-2">
                           <div className="flex items-center space-x-2 justify-between">
                             <Label htmlFor="input">Input</Label>{" "}
-                            <Select value={style} onValueChange={setStyle}>
-                              <SelectTrigger className="w-[20vw]">
-                                <SelectValue
-                                  placeholder="Select the style"
-                                  defaultValue={"improve"}
-                                />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  <SelectLabel>Style</SelectLabel>
-                                  <SelectItem value="improve">
-                                    Improve my current prompt
-                                  </SelectItem>
-                                  <SelectItem value="generate">
-                                    Generate a new prompt
-                                  </SelectItem>
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
+                            <div className="flex items-center space-x-2">
+                              <Label htmlFor="style">
+                                How we can help you?
+                              </Label>
+                              <Select value={style} onValueChange={setStyle}>
+                                <SelectTrigger className="w-[20vw]">
+                                  <SelectValue
+                                    placeholder="Select the style"
+                                    defaultValue={"improve"}
+                                  />
+                                </SelectTrigger>
+
+                                <SelectContent>
+                                  <SelectGroup>
+                                    <SelectLabel>Choose your style</SelectLabel>
+                                    <SelectItem value="improve">
+                                      Improve my current prompt
+                                    </SelectItem>
+                                    <SelectItem value="generate">
+                                      Generate a new prompt
+                                    </SelectItem>
+                                  </SelectGroup>
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
                           <Textarea
                             id="input"
@@ -528,7 +570,10 @@ export default function PlaygroundPage() {
                         </SkeletonWrapper>
                       </div>
                     </div>
-                    <Button onClick={() => handleMerge()} disabled={!previewUpdated}>
+                    <Button
+                      onClick={() => handleMerge()}
+                      disabled={!previewUpdated}
+                    >
                       Merge Previews
                     </Button>
                   </TabsContent>
@@ -551,7 +596,10 @@ export default function PlaygroundPage() {
                         onAssistantMessage={(msg) => setLastAIMessage(msg)}
                       />
                     </div>
-                    <Button onClick={handleSave} disabled={loading || lastAIMessage==null}>
+                    <Button
+                      onClick={handleSave}
+                      disabled={loading || lastAIMessage == null}
+                    >
                       {loading ? <Spinner /> : "Save Final Output from AI"}
                     </Button>
                   </TabsContent>
