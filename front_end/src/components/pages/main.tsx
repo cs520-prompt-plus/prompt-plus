@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import { createResponse } from "@/app/api/responses/backend-service";
-import { patternDescriptions } from "@/app/constants/enum";
+import {
+  mergePreviews,
+  updateCategoryPatterns,
+  updateResponse,
+  createResponse,
+} from "@/app/api/responses/backend-service";
 import { Model, models, types } from "@/components/data/models";
 import { presets } from "@/components/data/presets";
 import { MaxLengthSelector } from "@/components/pages/main/maxlength-selector";
@@ -28,6 +32,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { patternDescriptions } from "@/app/constants/enum";
 import {
   HoverCard,
   HoverCardContent,
@@ -69,14 +74,9 @@ import {
 import { SkeletonWrapper } from "../ui/skeleton-wrapper";
 import { Spinner } from "../ui/spinner";
 import { ChatDemo } from "./main/chatBot";
-import { VerticalStepper } from "./main/stepper";
 import { BeforeAfterPage } from "./main/comparison";
 import { PromptInput } from "./main/prompt-input";
-import {
-  updateResponse,
-  updateCategoryPatterns,
-} from "@/app/api/responses/backend-service";
-import { set } from "lodash";
+import { VerticalStepper } from "./main/stepper";
 
 export const metadata: Metadata = {
   title: "Playground",
@@ -173,31 +173,27 @@ export default function PlaygroundPage() {
       const payload = {
         input: input,
       };
-      // const res = await createResponse(payload);
-      // console.log("Response received:", res);
+      const res = await createResponse(payload);
+      console.log("Response received:", res);
 
-      // const response = res.data;
-      // const enhancedResponse: ResponseCreateResponse = {
-      //   ...response,
-      //   categories: (response.categories ?? []).map((category) => ({
-      //     ...category,
-      //     patterns: category.patterns.map((pattern) => ({
-      //       ...pattern,
-      //       description:
-      //         patternDescriptions[
-      //           pattern.pattern as keyof typeof patternDescriptions
-      //         ] || "",
-      //     })),
-      //   })),
-      // };
+      const response = res.data;
+      const enhancedResponse: ResponseCreateResponse = {
+        ...response,
+        categories: (response.categories ?? []).map((category) => ({
+          ...category,
+          patterns: category.patterns.map((pattern) => ({
+            ...pattern,
+            description:
+              patternDescriptions[
+                pattern.pattern as keyof typeof patternDescriptions
+              ] || "",
+          })),
+        })),
+      };
 
-      // setData(enhancedResponse);
-      // setInput(enhancedResponse.input);
-      // setRefinePrompt(enhancedResponse.output);
-      await new Promise((resolve) => setTimeout(resolve, 200)); // Simulate network delay
-      setData(mockData);
-      setInput(mockData.input);
-      setRefinePrompt(mockData.output);
+      setData(enhancedResponse);
+      setInput(enhancedResponse.input);
+      setRefinePrompt(enhancedResponse.output);
       toast.success("Response created successfully!");
     } catch (error) {
       toast.error("Error creating response. Please try again.");
@@ -231,10 +227,27 @@ export default function PlaygroundPage() {
       if (data && data.categories) {
         const previews = data.categories.map((category) => category.preview);
         const response_id = data.response_id;
-        // const response_id = "3d583ac5-2055-4384-ac73-ced31a8e1fasc"; // dummy
+        const res = await mergePreviews(response_id, {
+          previews: previews,
+        });
+        const response = res.data;
+        const enhancedResponse: ResponseCreateResponse = {
+          ...response,
+          categories: (response.categories ?? []).map((category) => ({
+            ...category,
+            patterns: category.patterns.map((pattern) => ({
+              ...pattern,
+              description:
+                patternDescriptions[
+                  pattern.pattern as keyof typeof patternDescriptions
+                ] || "",
+            })),
+          })),
+        };
 
-        // await mergePreviews(response_id,{previews:previews});
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+        setData(enhancedResponse);
+        setInput(enhancedResponse.input);
+        setRefinePrompt(enhancedResponse.output);
         toast.success("Successfully Merge Previews.");
         setPreviewUpdated(false);
         setOutputUnlock(true);
