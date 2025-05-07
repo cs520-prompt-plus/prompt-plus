@@ -39,5 +39,12 @@ class ResponseRead(BaseModel):
 class ResponseOutputUpdate(BaseModel):
     output: str
 
+class PatternUpdate(BaseModel):
+    pattern_id: str
+    applied: bool
+
+class CategoryPatternUpdate(BaseModel):
+    patterns: List[PatternUpdate]
+    
 class MergePreviewPrompts(BaseModel):
     previews: List[str]

@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import { createResponse } from "@/app/api/responses/backend-service";
-import { patternDescriptions } from "@/app/constants/enum";
 import { Model, models, types } from "@/components/data/models";
 import { presets } from "@/components/data/presets";
 import { MaxLengthSelector } from "@/components/pages/main/maxlength-selector";
@@ -39,7 +37,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { ResponseCreateResponse } from "@/types/response";
-import type { Message as UIMessage } from "@ai-sdk/react";
 import { produce } from "immer";
 import {
   BotMessageSquare,
@@ -69,11 +66,19 @@ import {
 import { SkeletonWrapper } from "../ui/skeleton-wrapper";
 import { Spinner } from "../ui/spinner";
 import { ChatDemo } from "./main/chatBot";
-import { VerticalStepper } from "./main/stepper";
 import { BeforeAfterPage } from "./main/comparison";
 import { PromptInput } from "./main/prompt-input";
 import { updateResponse } from "@/app/api/responses/backend-service";
 import { set } from "lodash";
+import { VerticalStepper } from "./main/stepper";
+import type { Message as UIMessage } from "@ai-sdk/react";
+import {
+  mergePreviews,
+  updateResponse,
+  createResponse,
+  updateCategoryPatterns,
+} from "@/app/api/responses/backend-service";
+import { patternDescriptions } from "@/app/constants/enum";
 
 export const metadata: Metadata = {
   title: "Playground",
@@ -118,20 +123,43 @@ export default function PlaygroundPage() {
 
   const handleApplyCategory = async (categoryIndex: number) => {
     setLoading(true);
-    console.log(
-      `Apply category ${categoryIndex} with patterns:`,
-      data?.categories?.[categoryIndex].patterns
-    );
-    const updatedCategories = data?.categories;
-    console.log("Updated categories:", updatedCategories);
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-    setData(mockData);
-    toast.success(
-      "Category applied successfully!, Please see your new preview."
-    );
-    setPreviewUpdated(true);
-    setOutputUnlock(false);
-    setLoading(false);
+    try {
+      if (!data?.categories || !data.categories[categoryIndex]) {
+        toast.error("Category data missing.");
+        return;
+      }
+
+      const category = data.categories[categoryIndex];
+      const payload = {
+        patterns: category.patterns.map((p) => ({
+          pattern_id: p.pattern_id,
+          applied: p.applied,
+        })),
+      };
+
+      console.log("Updating category with ID:", category.category_id);
+
+      const res = await updateCategoryPatterns(category.category_id, payload);
+      const updatedCategory = res.data;
+
+      console.log("API response:", updatedCategory);
+
+      setDataImmer((draft) => {
+        if (!draft.categories) return;
+        draft.categories[categoryIndex] = updatedCategory;
+      });
+
+      setOutputUnlock(categoryIndex >= 5);
+
+      toast.success(
+        "Category applied successfully! You can now view the output."
+      );
+    } catch (error) {
+      toast.error("Failed to apply category. Try again.");
+      console.error("Error updating category patterns:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async () => {

@@ -30,3 +30,24 @@ export interface ResponseUpdatePayload {
 export interface MergePreviewsPayload {
   previews: string[];
 }
+
+export interface CategoryRead {
+  category_id: string;
+  category: string;
+  input: string;
+  preview: string;
+  patterns: {
+    pattern_id: string;
+    pattern: string;
+    description?: string;
+    feedback: string;
+    applied: boolean;
+  }[];
+}
+
+export interface CategoryPatternUpdatePayload {
+  patterns: {
+    pattern_id: string;
+    applied: boolean;
+  }[];
+}
