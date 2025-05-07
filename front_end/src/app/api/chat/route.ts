@@ -5,20 +5,20 @@ import { streamText } from "ai";
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
-  const system_prompt = `Rewrite the prompt above with this added instruction: `
+  const { messages: userMessages } = await req.json();
 
-  for (const msg of messages) {
-    if (msg.role === "user") {
-      if (typeof msg.content === "string") {
-        msg.content = `${system_prompt}${msg.content}`;
-      } else if (Array.isArray(msg.parts)) {
-        msg.content = `${system_prompt}\n\n${msg.parts.map((p: any) => p?.text || "").join(" ")}`;
-        delete msg.parts;
-      }
-      break; // only modify the first user message
-    }
-  }
+  const systemMessage = {
+    role: "system",
+    content: [
+      "You are a prompt-refinement assistant.",
+      "When you reply, output *only* the improved prompt, as a single plain-text paragraph.",
+      "Keep the original idea and roughly the same length—unless the user specifically asks for it to be shorter or more concise.",
+      "Make the prompt as clear and precise as possible, adapting to any user‐stated preferences.",
+      "Do not include any explanations, quotes, bullets or metadata—just the new prompt itself.",
+    ].join(" "),
+  };
+
+  const messages = [systemMessage, ...userMessages];
 
   const result = streamText({
     model: openai("gpt-4o"),
@@ -29,6 +29,7 @@ export async function POST(req: Request) {
     getErrorMessage: errorHandler,
   });
 }
+
 export function errorHandler(error: unknown) {
   if (error == null) {
     return "unknown error";
