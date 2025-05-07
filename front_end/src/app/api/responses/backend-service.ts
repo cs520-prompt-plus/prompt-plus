@@ -16,6 +16,8 @@ export const getResponseByIdEndpoint = (responseId: string) =>
 export const createResponseEndpoint = () => `${baseURL}/responses/`;
 export const updateResponseEndpoint = (responseId: string) =>
   `${baseURL}/responses/update/${responseId}`;
+export const updatePatternEndpoint = (categoryId: string) =>
+  `/categories/${categoryId}/patterns`;
 export const mergePreviewsEndpoint = (responseId: string) =>
   `${baseURL}/responses/merge/${responseId}`;
 
@@ -50,7 +52,7 @@ export const updateCategoryPatterns = async (
   categoryId: string,
   payload: CategoryPatternUpdatePayload
 ): Promise<AxiosResponse<CategoryRead>> => {
-  return await backendAgent.put<CategoryRead>(
+  return await axios.put<CategoryRead>(
     updatePatternEndpoint(categoryId),
     payload
   );
