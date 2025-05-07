@@ -5,6 +5,8 @@ import {
   ResponseCreateResponse,
   ResponseUpdatePayload,
   MergePreviewsPayload,
+  CategoryRead,
+  CategoryPatternUpdatePayload,
 } from "@/types/response";
 
 const baseURL = "/api/proxy/api/v1";
@@ -16,6 +18,8 @@ export const updateResponseEndpoint = (responseId: string) =>
   `${baseURL}/responses/update/${responseId}`;
 export const mergePreviewsEndpoint = (responseId: string) =>
   `${baseURL}/responses/merge/${responseId}`;
+export const updatePatternEndpoint = (categoryId: string) =>
+  `/categories/${categoryId}/patterns`;
 
 export const getResponseById = async (
   responseId: string
@@ -40,6 +44,16 @@ export const updateResponse = async (
 ): Promise<AxiosResponse<ResponseCreateResponse>> => {
   return await axios.put<ResponseCreateResponse>(
     updateResponseEndpoint(responseId),
+    payload
+  );
+};
+
+export const updateCategoryPatterns = async (
+  categoryId: string,
+  payload: CategoryPatternUpdatePayload
+): Promise<AxiosResponse<CategoryRead>> => {
+  return await axios.put<CategoryRead>(
+    updatePatternEndpoint(categoryId),
     payload
   );
 };
