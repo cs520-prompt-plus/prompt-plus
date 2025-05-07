@@ -71,6 +71,7 @@ import {
   mergePreviews,
   updateResponse,
   createResponse,
+  updateCategoryPatterns,
 } from "@/app/api/responses/backend-service";
 import { patternDescriptions } from "@/app/constants/enum";
 
@@ -114,20 +115,43 @@ export default function PlaygroundPage() {
 
   const handleApplyCategory = async (categoryIndex: number) => {
     setLoading(true);
-    console.log(
-      `Apply category ${categoryIndex} with patterns:`,
-      data?.categories?.[categoryIndex].patterns
-    );
-    const updatedCategories = data?.categories;
-    console.log("Updated categories:", updatedCategories);
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-    setData(mockData);
-    toast.success(
-      "Category applied successfully!, Please see your new preview."
-    );
-    setPreviewUpdated(true);
-    setOutputUnlock(false);
-    setLoading(false);
+    try {
+      if (!data?.categories || !data.categories[categoryIndex]) {
+        toast.error("Category data missing.");
+        return;
+      }
+
+      const category = data.categories[categoryIndex];
+      const payload = {
+        patterns: category.patterns.map((p) => ({
+          pattern_id: p.pattern_id,
+          applied: p.applied,
+        })),
+      };
+
+      console.log("Updating category with ID:", category.category_id);
+
+      const res = await updateCategoryPatterns(category.category_id, payload);
+      const updatedCategory = res.data;
+
+      console.log("API response:", updatedCategory);
+
+      setDataImmer((draft) => {
+        if (!draft.categories) return;
+        draft.categories[categoryIndex] = updatedCategory;
+      });
+
+      setOutputUnlock(categoryIndex >= 5);
+
+      toast.success(
+        "Category applied successfully! You can now view the output."
+      );
+    } catch (error) {
+      toast.error("Failed to apply category. Try again.");
+      console.error("Error updating category patterns:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async () => {
