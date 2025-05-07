@@ -5,6 +5,8 @@ import {
   ResponseCreateResponse,
   ResponseUpdatePayload,
   MergePreviewsPayload,
+  CategoryRead,
+  CategoryPatternUpdatePayload,
 } from "@/types/response";
 
 const baseURL = "/api/proxy/api/v1";
@@ -40,6 +42,16 @@ export const updateResponse = async (
 ): Promise<AxiosResponse<ResponseCreateResponse>> => {
   return await axios.put<ResponseCreateResponse>(
     updateResponseEndpoint(responseId),
+    payload
+  );
+};
+
+export const updateCategoryPatterns = async (
+  categoryId: string,
+  payload: CategoryPatternUpdatePayload
+): Promise<AxiosResponse<CategoryRead>> => {
+  return await backendAgent.put<CategoryRead>(
+    updatePatternEndpoint(categoryId),
     payload
   );
 };
