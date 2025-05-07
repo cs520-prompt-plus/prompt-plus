@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
+import {
+  updateCategoryPatterns,
+  updateResponse,
+} from "@/app/api/responses/backend-service";
 import { Model, models, types } from "@/components/data/models";
 import { presets } from "@/components/data/presets";
 import { MaxLengthSelector } from "@/components/pages/main/maxlength-selector";
@@ -37,6 +41,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { ResponseCreateResponse } from "@/types/response";
+import type { Message as UIMessage } from "@ai-sdk/react";
 import { produce } from "immer";
 import {
   BotMessageSquare,
@@ -68,17 +73,7 @@ import { Spinner } from "../ui/spinner";
 import { ChatDemo } from "./main/chatBot";
 import { BeforeAfterPage } from "./main/comparison";
 import { PromptInput } from "./main/prompt-input";
-import { updateResponse } from "@/app/api/responses/backend-service";
-import { set } from "lodash";
 import { VerticalStepper } from "./main/stepper";
-import type { Message as UIMessage } from "@ai-sdk/react";
-import {
-  mergePreviews,
-  updateResponse,
-  createResponse,
-  updateCategoryPatterns,
-} from "@/app/api/responses/backend-service";
-import { patternDescriptions } from "@/app/constants/enum";
 
 export const metadata: Metadata = {
   title: "Playground",
