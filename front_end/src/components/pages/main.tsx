@@ -70,6 +70,14 @@ import { Spinner } from "../ui/spinner";
 import { ChatDemo } from "./main/chatBot";
 import { BeforeAfterPage } from "./main/comparison";
 import { VerticalStepper } from "./main/stepper";
+import type { Message as UIMessage } from "@ai-sdk/react";
+import {
+  mergePreviews,
+  updateResponse,
+  createResponse,
+  updateCategoryPatterns,
+} from "@/app/api/responses/backend-service";
+import { patternDescriptions } from "@/app/constants/enum";
 
 export const metadata: Metadata = {
   title: "Playground",
