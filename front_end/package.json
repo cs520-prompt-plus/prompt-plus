@@ -61,6 +61,8 @@
     "dotenv-cli": "^8.0.0",
     "framer-motion": "^11.18.2",
     "immer": "^10.1.1",
+    "lodash": "^4.17.21",
+    "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.484.0",
     "next": "15.2.4",
     "next-auth": "^4.24.7",
@@ -80,6 +82,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/lodash": "^4.17.16",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

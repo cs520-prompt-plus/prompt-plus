@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
+import {
+  updateCategoryPatterns,
+  updateResponse,
+} from "@/app/api/responses/backend-service";
 import { Model, models, types } from "@/components/data/models";
 import { presets } from "@/components/data/presets";
 import { MaxLengthSelector } from "@/components/pages/main/maxlength-selector";
@@ -37,6 +41,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { ResponseCreateResponse } from "@/types/response";
+import type { Message as UIMessage } from "@ai-sdk/react";
 import { produce } from "immer";
 import {
   BotMessageSquare,
@@ -67,15 +72,8 @@ import { SkeletonWrapper } from "../ui/skeleton-wrapper";
 import { Spinner } from "../ui/spinner";
 import { ChatDemo } from "./main/chatBot";
 import { BeforeAfterPage } from "./main/comparison";
+import { PromptInput } from "./main/prompt-input";
 import { VerticalStepper } from "./main/stepper";
-import type { Message as UIMessage } from "@ai-sdk/react";
-import {
-  mergePreviews,
-  updateResponse,
-  createResponse,
-  updateCategoryPatterns,
-} from "@/app/api/responses/backend-service";
-import { patternDescriptions } from "@/app/constants/enum";
 
 export const metadata: Metadata = {
   title: "Playground",
@@ -99,7 +97,9 @@ export default function PlaygroundPage() {
   const [lastAIMessage, setLastAIMessage] = React.useState<UIMessage | null>(
     null
   );
+  const [valid, setValid] = React.useState(false);
   const [previewUpdated, setPreviewUpdated] = React.useState(false);
+  const [refinePrompt, setRefinePrompt] = React.useState("");
 
   const setDataImmer = (updater: (draft: ResponseCreateResponse) => void) => {
     setData((prev) => produce(prev, updater));
@@ -190,9 +190,11 @@ export default function PlaygroundPage() {
 
       // setData(enhancedResponse);
       // setInput(enhancedResponse.input);
+      // setRefinePrompt(enhancedResponse.output);
       await new Promise((resolve) => setTimeout(resolve, 200)); // Simulate network delay
       setData(mockData);
       setInput(mockData.input);
+      setRefinePrompt(mockData.output);
       toast.success("Response created successfully!");
     } catch (error) {
       toast.error("Error creating response. Please try again.");
@@ -207,9 +209,8 @@ export default function PlaygroundPage() {
       if (lastAIMessage && data) {
         const final_output = lastAIMessage.content;
         const response_id = data.response_id;
-        // const response_id = "3d583ac5-2055-4384-ac73-ced31a8e1fasc"; // dummy
 
-        // await updateResponse(response_id, {output : final_output});
+        await updateResponse(response_id, { output: final_output });
         await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
         toast.success("Final Prompt successfully saved.");
         setLastAIMessage(null);
@@ -229,7 +230,7 @@ export default function PlaygroundPage() {
         const response_id = data.response_id;
         // const response_id = "3d583ac5-2055-4384-ac73-ced31a8e1fasc"; // dummy
 
-        // await mergePreviews(response_id,{previews:previews});\
+        // await mergePreviews(response_id,{previews:previews});
         await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
         toast.success("Successfully Merge Previews.");
         setPreviewUpdated(false);
@@ -413,8 +414,9 @@ export default function PlaygroundPage() {
                 </div>
                 <div className="md:order-1 h-full w-full flex flex-col gap-2 ">
                   <TabsContent
+                    forceMount
                     value="input"
-                    className="mt-0 border-0 p-0 flex gap-2"
+                    className=" data-[state=inactive]:hidden mt-0 border-0 p-0 flex gap-2"
                   >
                     <div className="flex flex-col w-full h-full space-y-4">
                       <SkeletonWrapper
@@ -450,12 +452,12 @@ export default function PlaygroundPage() {
                               </Select>
                             </div>
                           </div>
-                          <Textarea
-                            id="input"
-                            placeholder="Here is my prompt: I want to build a web application that allows users to create and share their own recipes."
-                            className="flex-1 min-h-[35vh] w-full"
-                            onChange={(e) => setInput(e.target.value)}
-                            value={input}
+                          <PromptInput
+                            onValidated={(valid, feedback) => {
+                              setValid(valid);
+                            }}
+                            input={input}
+                            setInput={setInput}
                           />
                           <Label htmlFor="instructions">System Prompt</Label>
                           <Textarea
@@ -467,7 +469,10 @@ export default function PlaygroundPage() {
                       </SkeletonWrapper>
                       <div className="w-full flex h-full items-center justify-between">
                         <div className="flex items-center h-full space-x-2 ">
-                          <Button onClick={handleSubmit} disabled={loading}>
+                          <Button
+                            onClick={handleSubmit}
+                            disabled={loading || !valid}
+                          >
                             {loading ? <Spinner /> : "Submit"}
                           </Button>
                         </div>
@@ -494,7 +499,8 @@ export default function PlaygroundPage() {
                   </TabsContent>
                   <TabsContent
                     value="edit"
-                    className="mt-0 border-0 p-0 flex gap-10 flex-col"
+                    forceMount
+                    className=" data-[state=inactive]:hidden mt-0 border-0 p-0 flex gap-10 flex-col"
                   >
                     <VerticalStepper step={step} handleStep={setStep} />
                     <div className="flex w-full space-x-9 h-full">
@@ -597,36 +603,63 @@ export default function PlaygroundPage() {
                   </TabsContent>
                   <TabsContent
                     value="output"
-                    className="mt-0 border-0 p-0 flex gap-4 flex-col"
+                    forceMount
+                    className=" data-[state=inactive]:hidden h-full w-full mt-0 border-0 p-0 flex gap-4 flex-col"
                   >
-                    <div className="flex flex-1 flex-col space-y-2 max-h-[60vh] p-10">
-                      <Label htmlFor="input">Output</Label>
+                    <div className="flex flex-1 flex-col space-y-2 max-h-[70vh] p-10">
+                      <div className="flex items-center justify-between h-full flex-1 w-full">
+                        <Label htmlFor="input">
+                          {" "}
+                          Refining your output: click save to take the latest
+                          one to be your final response
+                        </Label>
+                        <Button
+                          onClick={() => {
+                            setComparisonUnlock(true);
+                            setTab("compare");
+                          }}
+                          disabled={loading}
+                        >
+                          {loading ? <Spinner /> : "View Final Prompt"}
+                        </Button>
+                      </div>
+
                       <ChatDemo
                         model={selectedModel.name}
                         initialMessages={[
                           {
-                            id: "init-1",
+                            id: input + "id",
                             role: "assistant",
                             content: data?.output ?? "",
-                            parts: [{ type: "text", text: data?.output ?? "" }],
+                            parts: [{ type: "text", text: refinePrompt ?? "" }],
                           },
                         ]}
                         onAssistantMessage={(msg) => setLastAIMessage(msg)}
                       />
                     </div>
+
                     <Button
                       onClick={() => {
-                        setComparisonUnlock(true);
-                        setTab("compare");
+                        if (lastAIMessage?.role == "user") {
+                          toast.error(
+                            "Please customize your output before choosing."
+                          );
+                        }
+                        setDataImmer((draft) => {
+                          draft.output = lastAIMessage?.content ?? "";
+                          draft.input = input;
+                        });
+                        toast.success("Final output set successfully!");
                       }}
                       disabled={loading}
                     >
-                      {loading ? <Spinner /> : "View Final Prompt"}
+                      {loading ? <Spinner /> : "Choose as Final Output"}
                     </Button>
                   </TabsContent>
                   <TabsContent
                     value="compare"
-                    className="mt-0 border-0 p-0 flex gap-4 flex-col"
+                    forceMount
+                    className=" data-[state=inactive]:hidden mt-0 border-0 p-0 flex gap-4 flex-col"
                   >
                     <BeforeAfterPage
                       inputPrompt={data?.input ?? ""}
