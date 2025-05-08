@@ -19,6 +19,7 @@ import React, { useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "../ui/sidebar";
 import { Skeleton } from "../ui/skeleton";
 import { SkeletonWrapper } from "../ui/skeleton-wrapper";
+import { ThemeToggle } from "../ui/theme-toggle";
 
 export function SideBarWrapper({ children }: { children: React.ReactNode }) {
   const currentPath = usePathname();
@@ -80,6 +81,7 @@ export function SideBarWrapper({ children }: { children: React.ReactNode }) {
                   {links.map((link, idx) => (
                     <SidebarLink key={idx} link={link} />
                   ))}
+                  <ThemeToggle />
                 </div>
               </div>
               <div>
