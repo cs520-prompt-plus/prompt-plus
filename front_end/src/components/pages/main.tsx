@@ -176,7 +176,7 @@ export default function PlaygroundPage() {
       };
       // const res = await createResponse(payload);
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-      const res = await getResponseById("dd088c20-fa2b-4d5c-8388-daa1cb9f8669");
+      const res = await getResponseById("ed38e6f5-cb8e-4a57-950a-17fb95728acb");
 
       console.log("Response received:", res);
 
@@ -645,7 +645,7 @@ export default function PlaygroundPage() {
                           }}
                           disabled={loading}
                         >
-                          {loading ? <Spinner /> : "View Final Prompt"}
+                          {loading ? <Spinner /> : "Happy with Result? View Final Prompt"}
                         </Button>
                       </div>
 
@@ -676,9 +676,9 @@ export default function PlaygroundPage() {
                         });
                         toast.success("Final output set successfully!");
                       }}
-                      disabled={loading}
+                      disabled={loading || lastAIMessage==null}
                     >
-                      {loading ? <Spinner /> : "Choose as Final Output"}
+                      {loading ? <Spinner /> : "Replace Final Output as Latest Prompt"}
                     </Button>
                   </TabsContent>
                   <TabsContent value="compare">
