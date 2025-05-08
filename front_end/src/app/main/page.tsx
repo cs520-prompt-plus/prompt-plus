@@ -326,7 +326,7 @@ export default function PlaygroundPage() {
   };
 
   return (
-    <div className="p-10 h-full w-full ">
+    <div className="p-10 h-full w-full bg-white dark:bg-black">
       <div className="md:hidden">
         <Image
           src="/examples/playground-light.png"

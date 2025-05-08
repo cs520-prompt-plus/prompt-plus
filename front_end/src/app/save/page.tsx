@@ -44,7 +44,7 @@ export default function PromptHistoryPage() {
   };
 
   return (
-    <SkeletonWrapper loading={loading}>
+    <SkeletonWrapper loading={loading} className="h-screen w-screen bg-black">
       <PromptListPage
         promptPairs={responses}
         onEditPrompt={handleEditPrompt}
