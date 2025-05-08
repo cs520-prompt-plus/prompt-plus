@@ -1,6 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
+import {
+  getResponseById,
+  mergePreviews,
+  updateCategoryPatterns,
+  updateResponse,
+} from "@/app/api/responses/backend-service";
+import { patternDescriptions } from "@/app/constants/enum";
 import { Model, models, types } from "@/components/data/models";
-import { presets } from "@/components/data/presets";
+import { Preset, presets } from "@/components/data/presets";
 import { MaxLengthSelector } from "@/components/pages/main/maxlength-selector";
 import { ModelSelector } from "@/components/pages/main/model-selector";
 import { PresetActions } from "@/components/pages/main/preset-actions";
@@ -20,6 +28,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -35,18 +44,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { ResponseCreateResponse } from "@/types/response";
+import type { Message as UIMessage } from "@ai-sdk/react";
 import { produce } from "immer";
 import {
   BotMessageSquare,
+  ChevronsLeftRightEllipsisIcon,
   Edit,
   RotateCcw,
   Settings,
   TextCursorInput,
 } from "lucide-react";
 import { Metadata } from "next";
+import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
+import GoogleSignIn from "../auth/GoogleSignin";
 import { Checkbox } from "../ui/checkbox";
 import {
   Select,
@@ -60,10 +74,9 @@ import {
 import { SkeletonWrapper } from "../ui/skeleton-wrapper";
 import { Spinner } from "../ui/spinner";
 import { ChatDemo } from "./main/chatBot";
+import { BeforeAfterPage } from "./main/comparison";
+import { PromptInput } from "./main/prompt-input";
 import { VerticalStepper } from "./main/stepper";
-import type { Message as UIMessage } from "@ai-sdk/react";
-import { mergePreviews, updateResponse, createResponse } from "@/app/api/responses/backend-service";
-import { patternDescriptions } from "@/app/constants/enum";
 
 export const metadata: Metadata = {
   title: "Playground",
@@ -77,15 +90,28 @@ export default function PlaygroundPage() {
   const [tab, setTab] = React.useState("input");
   const [editUnlock, setEditUnLock] = React.useState(false);
   const [outputUnlock, setOutputUnlock] = React.useState(false);
+  const [comparisonUnlock, setComparisonUnlock] = React.useState(false);
   const [data, setData] = React.useState<ResponseCreateResponse | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [style, setStyle] = React.useState("improve");
-  const [lastAIMessage, setLastAIMessage] = React.useState<UIMessage | null>(null);
+  const { data: session, status } = useSession();
+  const [isClient, setIsClient] = React.useState(false);
+  const [selectedPreset, setSelectedPreset] = React.useState<Preset>();
+  const currentPath = usePathname();
+  const [lastAIMessage, setLastAIMessage] = React.useState<UIMessage | null>(
+    null
+  );
+  const [valid, setValid] = React.useState(false);
   const [previewUpdated, setPreviewUpdated] = React.useState(false);
+  const [refinePrompt, setRefinePrompt] = React.useState("");
 
   const setDataImmer = (updater: (draft: ResponseCreateResponse) => void) => {
     setData((prev) => produce(prev, updater));
   };
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   React.useEffect(() => {
     if (data) {
@@ -94,78 +120,84 @@ export default function PlaygroundPage() {
     }
   }, [data]);
 
-  // const fetchData = async () => {
-  //   return mockData;
-  // };
-
-  // useEffect(() => {
-  //   const fetchDataAsync = async () => {
-  //     const response = await fetchData();
-  //     setData(response);
-  //     setInput(response.input);
-  //   };
-  //   fetchDataAsync();
-  // },[]);
-
   const handleApplyCategory = async (categoryIndex: number) => {
     setLoading(true);
-    // if (categoryIndex < 5) {
-    //   setOutputUnlock(false);
-    // } else {
-    //   setOutputUnlock(true);
-    // }
-    console.log(
-      `Apply category ${categoryIndex} with patterns:`,
-      data?.categories?.[categoryIndex].patterns
-    );
-    const updatedCategories = data?.categories;
-    console.log("Updated categories:", updatedCategories);
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-    setData(mockData);
-    toast.success("Category applied successfully!, Please see your new preview.");
-    setPreviewUpdated(true);
-    setOutputUnlock(false);
-    setLoading(false);
+    try {
+      if (!data?.categories || !data.categories[categoryIndex]) {
+        toast.error("Category data missing.");
+        return;
+      }
+
+      const category = data.categories[categoryIndex];
+      const payload = {
+        patterns: category.patterns.map((p) => ({
+          pattern_id: p.pattern_id,
+          applied: p.applied,
+        })),
+      };
+
+      console.log("Updating category with ID:", category.category_id);
+
+      const res = await updateCategoryPatterns(category.category_id, payload);
+      const updatedCategory = res.data;
+
+      console.log("API response:", updatedCategory);
+
+      setDataImmer((draft) => {
+        if (!draft.categories) return;
+        draft.categories[categoryIndex] = updatedCategory;
+      });
+      setPreviewUpdated(true);
+      setOutputUnlock(false);
+
+      toast.success(
+        "Category applied successfully! You can now view the output."
+      );
+    } catch (error) {
+      toast.error("Failed to apply category. Try again.");
+      console.error("Error updating category patterns:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      if (style == "generate"){
-        setInput("Generate an AI prompt with the following specifications: " + input);
+      if (style == "generate") {
+        setInput(
+          "Generate an AI prompt with the following specifications: " + input
+        );
       }
       console.log("Input submitted:", input);
 
-      // const payload = {
-      //   user_id: "9ac4cc47-b01b-4b68-ac01-6b6f4865bbf3", // dummy user;
-      //   input: input,
-      // };
-
-      // const res = await getResponseById("3d583ac5-2055-4384-ac73-ced31a8e1fcb"); // dummy response
+      const payload = {
+        input: input,
+      };
       // const res = await createResponse(payload);
-
-      // const response = res.data;
-      // const enhancedResponse: ResponseCreateResponse = {
-      //   ...response,
-      //   categories: (response.categories ?? []).map((category) => ({
-      //     ...category,
-      //     patterns: category.patterns.map((pattern) => ({
-      //       ...pattern,
-      //       description:
-      //         patternDescriptions[
-      //           pattern.pattern as keyof typeof patternDescriptions
-      //         ] || "",
-      //     })),
-      //   })),
-      // };
-
-      // setData(enhancedResponse);
-      // setInput(enhancedResponse.input);
-
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-      setData(mockData);
-      setInput(mockData.input);
+      const res = await getResponseById("ed38e6f5-cb8e-4a57-950a-17fb95728acb");
 
+      console.log("Response received:", res);
+
+      const response = res.data;
+      const enhancedResponse: ResponseCreateResponse = {
+        ...response,
+        categories: (response.categories ?? []).map((category) => ({
+          ...category,
+          patterns: category.patterns.map((pattern) => ({
+            ...pattern,
+            description:
+              patternDescriptions[
+                pattern.pattern as keyof typeof patternDescriptions
+              ] || "",
+          })),
+        })),
+      };
+
+      setData(enhancedResponse);
+      setInput(enhancedResponse.input);
+      setRefinePrompt(enhancedResponse.output);
       toast.success("Response created successfully!");
     } catch (error) {
       toast.error("Error creating response. Please try again.");
@@ -180,11 +212,10 @@ export default function PlaygroundPage() {
       if (lastAIMessage && data) {
         const final_output = lastAIMessage.content;
         const response_id = data.response_id;
-        // const response_id = "3d583ac5-2055-4384-ac73-ced31a8e1fasc"; // dummy
 
-        // await updateResponse(response_id, {output : final_output});
+        await updateResponse(response_id, { output: final_output });
         await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-        toast.success("Final Prompt successfully saved.")
+        toast.success("Final Prompt successfully saved.");
         setLastAIMessage(null);
       }
     } catch (error) {
@@ -192,19 +223,36 @@ export default function PlaygroundPage() {
       console.error("Updating failed", error);
     }
     setLoading(false);
-  }
+  };
 
   const handleMerge = async () => {
     setLoading(true);
     try {
-      if (data && data.categories){
+      if (data && data.categories) {
         const previews = data.categories.map((category) => category.preview);
         const response_id = data.response_id;
-        // const response_id = "3d583ac5-2055-4384-ac73-ced31a8e1fasc"; // dummy
+        const res = await mergePreviews(response_id, {
+          previews: previews,
+        });
+        const response = res.data;
+        const enhancedResponse: ResponseCreateResponse = {
+          ...response,
+          categories: (response.categories ?? []).map((category) => ({
+            ...category,
+            patterns: category.patterns.map((pattern) => ({
+              ...pattern,
+              description:
+                patternDescriptions[
+                  pattern.pattern as keyof typeof patternDescriptions
+                ] || "",
+            })),
+          })),
+        };
 
-        // await mergePreviews(response_id,{previews:previews});\
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-        toast.success("Successfully Merge Previews.")
+        setData(enhancedResponse);
+        setInput(enhancedResponse.input);
+        setRefinePrompt(enhancedResponse.output);
+        toast.success("Successfully Merge Previews.");
         setPreviewUpdated(false);
         setOutputUnlock(true);
       }
@@ -213,7 +261,7 @@ export default function PlaygroundPage() {
       console.error("Merging failed", error);
     }
     setLoading(false);
-  }
+  };
 
   return (
     <div className="p-10 h-full w-full ">
@@ -237,11 +285,49 @@ export default function PlaygroundPage() {
         <div className="container flex flex-col items-start justify-between space-y-2 py-4 sm:flex-row sm:items-center sm:space-y-0 md:h-16">
           <h2 className="text-lg font-semibold">Playground</h2>
           <div className="ml-auto flex w-full space-x-2 sm:justify-end">
-            <PresetSelector presets={presets} />
+            <PresetSelector
+              presets={presets}
+              selectedPreset={selectedPreset}
+              setSelectedPreset={setSelectedPreset}
+            />
             <div className="hidden space-x-2 md:flex">
               <PresetShare />
             </div>
             <PresetActions />
+            {isClient &&
+              (status === "loading" ? (
+                <Spinner />
+              ) : status === "authenticated" ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <Image
+                      src={(session.user?.image as string) ?? ""}
+                      alt="User Avatar"
+                      width={40}
+                      height={40}
+                      className="rounded-full border-2 border-primary-500 dark:border-primary-400"
+                    />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem>
+                        <p className="font-semibold">{session.user?.email}</p>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        color="danger"
+                        onClick={() => signOut({ callbackUrl: currentPath })}
+                      >
+                        Log Out
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <GoogleSignIn />
+              ))}
           </div>
         </div>
         <Separator />
@@ -271,7 +357,7 @@ export default function PlaygroundPage() {
                         instructions to edit it through our multistep process.
                       </HoverCardContent>
                     </HoverCard>
-                    <TabsList className="grid grid-cols-3">
+                    <TabsList className="grid grid-cols-4">
                       <TabsTrigger value="input">
                         <span className="sr-only">Input</span>
                         <TextCursorInput />
@@ -296,6 +382,16 @@ export default function PlaygroundPage() {
                       >
                         <span className="sr-only">Output</span>
                         <BotMessageSquare />
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="compare"
+                        className={cn(
+                          !comparisonUnlock ? "bg-muted" : "bg-transparent"
+                        )}
+                        disabled={!comparisonUnlock}
+                      >
+                        <span className="sr-only">Comparison</span>
+                        <ChevronsLeftRightEllipsisIcon />
                       </TabsTrigger>
                     </TabsList>
                   </div>
@@ -342,8 +438,9 @@ export default function PlaygroundPage() {
                 </div>
                 <div className="md:order-1 h-full w-full flex flex-col gap-2 ">
                   <TabsContent
+                    forceMount
                     value="input"
-                    className="mt-0 border-0 p-0 flex gap-2"
+                    className=" data-[state=inactive]:hidden mt-0 border-0 p-0 flex gap-2"
                   >
                     <div className="flex flex-col w-full h-full space-y-4">
                       <SkeletonWrapper
@@ -353,44 +450,54 @@ export default function PlaygroundPage() {
                         <div className="flex flex-1 flex-col space-y-2">
                           <div className="flex items-center space-x-2 justify-between">
                             <Label htmlFor="input">Input</Label>{" "}
-                            <Select value={style} onValueChange={setStyle}>
-                              <SelectTrigger className="w-[20vw]">
-                                <SelectValue
-                                  placeholder="Select the style"
-                                  defaultValue={"improve"}
-                                />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  <SelectLabel>Style</SelectLabel>
-                                  <SelectItem value="improve">
-                                    Improve my current prompt
-                                  </SelectItem>
-                                  <SelectItem value="generate">
-                                    Generate a new prompt
-                                  </SelectItem>
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
+                            <div className="flex items-center space-x-2">
+                              <Label htmlFor="style">
+                                How we can help you?
+                              </Label>
+                              <Select value={style} onValueChange={setStyle}>
+                                <SelectTrigger className="w-[20vw]">
+                                  <SelectValue
+                                    placeholder="Select the style"
+                                    defaultValue={"improve"}
+                                  />
+                                </SelectTrigger>
+
+                                <SelectContent>
+                                  <SelectGroup>
+                                    <SelectLabel>Choose your style</SelectLabel>
+                                    <SelectItem value="improve">
+                                      Improve my current prompt
+                                    </SelectItem>
+                                    <SelectItem value="generate">
+                                      Generate a new prompt
+                                    </SelectItem>
+                                  </SelectGroup>
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
-                          <Textarea
-                            id="input"
-                            placeholder="Here is my prompt: I want to build a web application that allows users to create and share their own recipes."
-                            className="flex-1 min-h-[35vh] w-full"
-                            onChange={(e) => setInput(e.target.value)}
-                            value={input}
+                          <PromptInput
+                            onValidated={(valid, feedback) => {
+                              setValid(valid);
+                            }}
+                            input={input}
+                            setInput={setInput}
                           />
                           <Label htmlFor="instructions">System Prompt</Label>
                           <Textarea
                             id="instructions"
                             className="flex-1 min-h-[10vh] w-full"
                             placeholder="Fix the grammar."
+                            value={selectedPreset?.systemPrompt}
                           />
                         </div>
                       </SkeletonWrapper>
                       <div className="w-full flex h-full items-center justify-between">
                         <div className="flex items-center h-full space-x-2 ">
-                          <Button onClick={handleSubmit} disabled={loading}>
+                          <Button
+                            onClick={handleSubmit}
+                            disabled={loading || !valid}
+                          >
                             {loading ? <Spinner /> : "Submit"}
                           </Button>
                         </div>
@@ -417,7 +524,8 @@ export default function PlaygroundPage() {
                   </TabsContent>
                   <TabsContent
                     value="edit"
-                    className="mt-0 border-0 p-0 flex gap-10 flex-col"
+                    forceMount
+                    className=" data-[state=inactive]:hidden mt-0 border-0 p-0 flex gap-10 flex-col"
                   >
                     <VerticalStepper step={step} handleStep={setStep} />
                     <div className="flex w-full space-x-9 h-full">
@@ -509,31 +617,81 @@ export default function PlaygroundPage() {
                         </SkeletonWrapper>
                       </div>
                     </div>
-                    <Button onClick={() => handleMerge()} disabled={!previewUpdated}>
-                      Merge Previews
-                    </Button>
+                    {step == 5 && (
+                      <Button
+                        onClick={() => handleMerge()}
+                        disabled={!previewUpdated}
+                      >
+                        Merge Previews
+                      </Button>
+                    )}
                   </TabsContent>
                   <TabsContent
                     value="output"
-                    className="mt-0 border-0 p-0 flex gap-4 flex-col"
+                    forceMount
+                    className=" data-[state=inactive]:hidden h-full w-full mt-0 border-0 p-0 flex gap-4 flex-col"
                   >
-                    <div className="flex flex-1 flex-col space-y-2 max-h-[60vh] p-10">
-                      <Label htmlFor="input">Output</Label>
+                    <div className="flex flex-1 flex-col space-y-2 max-h-[70vh] p-10">
+                      <div className="flex items-center justify-between h-full flex-1 w-full">
+                        <Label htmlFor="input">
+                          {" "}
+                          Refining your output: click save to take the latest
+                          one to be your final response
+                        </Label>
+                        <Button
+                          onClick={() => {
+                            setComparisonUnlock(true);
+                            setTab("compare");
+                          }}
+                          disabled={loading}
+                        >
+                          {loading ? <Spinner /> : "Happy with Result? View Final Prompt"}
+                        </Button>
+                      </div>
+
                       <ChatDemo
                         model={selectedModel.name}
                         initialMessages={[
                           {
-                            id: "init-1",
+                            id: input + "id",
                             role: "assistant",
                             content: data?.output ?? "",
-                            parts: [{ type: "text", text: data?.output ?? "" }],
+                            parts: [{ type: "text", text: refinePrompt ?? "" }],
                           },
                         ]}
                         onAssistantMessage={(msg) => setLastAIMessage(msg)}
                       />
                     </div>
-                    <Button onClick={handleSave} disabled={loading || lastAIMessage==null}>
-                      {loading ? <Spinner /> : "Save Final Output from AI"}
+
+                    <Button
+                      onClick={() => {
+                        if (lastAIMessage?.role == "user") {
+                          toast.error(
+                            "Please customize your output before choosing."
+                          );
+                        }
+                        setDataImmer((draft) => {
+                          draft.output = lastAIMessage?.content ?? "";
+                          draft.input = input;
+                        });
+                        toast.success("Final output set successfully!");
+                      }}
+                      disabled={loading || lastAIMessage==null}
+                    >
+                      {loading ? <Spinner /> : "Replace Final Output as Latest Prompt"}
+                    </Button>
+                  </TabsContent>
+                  <TabsContent value="compare">
+                    <BeforeAfterPage
+                      inputPrompt={data?.input ?? ""}
+                      outputResult={data?.output ?? ""}
+                      onCopyOutput={() => {
+                        navigator.clipboard.writeText(data?.output ?? "");
+                        toast.success("Output copied to clipboard!");
+                      }}
+                    />
+                    <Button onClick={handleSave} disabled={loading}>
+                      {loading ? <Spinner /> : "Save Final Output"}
                     </Button>
                   </TabsContent>
                 </div>

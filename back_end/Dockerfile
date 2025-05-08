@@ -1,11 +1,11 @@
 FROM ghcr.io/owl-corp/python-poetry-base:3.11-slim
 
-ADD poetry.lock pyproject.toml prisma/schema.prisma ./
+ADD back_end/poetry.lock back_end/pyproject.toml prisma/schema.prisma ./
 RUN poetry install --no-root
-RUN poetry run prisma generate
+RUN poetry run prisma generate --generator python
 
 WORKDIR /app
-ADD ./app ./app
+ADD back_end/app ./app
 ADD ./prisma ./prisma
 
 EXPOSE 80

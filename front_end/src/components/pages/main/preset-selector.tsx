@@ -23,11 +23,17 @@ import { Preset } from "@/components/data/presets";
 
 interface PresetSelectorProps extends PopoverProps {
   presets: Preset[];
+  selectedPreset: Preset | undefined;
+  setSelectedPreset: (preset: Preset) => void;
 }
 
-export function PresetSelector({ presets, ...props }: PresetSelectorProps) {
+export function PresetSelector({
+  presets,
+  selectedPreset,
+  setSelectedPreset,
+  ...props
+}: PresetSelectorProps) {
   const [open, setOpen] = React.useState(false);
-  const [selectedPreset, setSelectedPreset] = React.useState<Preset>();
   const router = useRouter();
 
   return (

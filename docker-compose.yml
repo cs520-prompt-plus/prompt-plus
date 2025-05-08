@@ -1,0 +1,69 @@
+services:
+  postgres_db:
+    image: postgres:15
+    env_file:
+      - ./.env
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 2s
+      retries: 20
+    networks:
+      - prisma-network
+
+  back_end:
+    build:
+      context: .
+      dockerfile: back_end/Dockerfile
+      args:
+        - uvicorn_extras=--reload --use-colors --log-level debug
+    env_file:
+      - ./.env
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    ports:
+      - "8000:80"
+    volumes:
+      - "./back_end/app:/app/app:ro"
+      - "./prisma:/app/prisma:ro"
+    networks:
+      - prisma-network
+
+  front_end:
+    build:
+      context: .
+      dockerfile: front_end/Dockerfile
+    env_file:
+      - ./.env
+    depends_on:
+      - postgres_db
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./front_end/src:/app/src:rw"
+    networks:
+      - prisma-network
+
+  prisma-studio:
+    build:
+      context: prisma
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    depends_on:
+      - postgres_db
+    entrypoint:
+      - sh
+      - -c
+      - prisma studio --schema=./schema.prisma --port=5555 --browser none
+    ports:
+      - "5555:5555"
+    networks:
+      - prisma-network
+
+networks:
+  prisma-network:
+    driver: bridge

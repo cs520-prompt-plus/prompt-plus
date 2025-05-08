@@ -13,7 +13,6 @@ class UserRead(BaseModel):
     email: str
 
 class ResponseCreate(BaseModel):
-    user_id: str
     input: str
 
 class PatternRead(BaseModel):
@@ -40,5 +39,12 @@ class ResponseRead(BaseModel):
 class ResponseOutputUpdate(BaseModel):
     output: str
 
+class PatternUpdate(BaseModel):
+    pattern_id: str
+    applied: bool
+
+class CategoryPatternUpdate(BaseModel):
+    patterns: List[PatternUpdate]
+    
 class MergePreviewPrompts(BaseModel):
     previews: List[str]

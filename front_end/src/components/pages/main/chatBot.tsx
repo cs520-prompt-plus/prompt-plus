@@ -58,12 +58,6 @@ export function ChatDemo(props: ChatDemoProps) {
         stop={stop}
         append={append}
         setMessages={setMessages}
-        // transcribeAudio={transcribeAudio}
-        // suggestions={[
-        //   "Refine to be more specific",
-        //   "Make it more concise",
-        //   "Add more context",
-        // ]}
       />
     </div>
   );
