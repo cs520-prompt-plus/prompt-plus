@@ -7,6 +7,7 @@ import {
   updateResponse,
   createResponse,
   getResponses,
+  createResponse,
 } from "@/app/api/responses/backend-service";
 import { patternDescriptions } from "@/app/constants/enum";
 import { Model, models, types } from "@/components/data/models";
@@ -154,11 +155,8 @@ export default function PlaygroundPage() {
   };
 
   React.useEffect(() => {
-    if (data) {
-      setEditUnLock(true);
-      setOutputUnlock(true);
-    }
-  }, [data]);
+    setIsClient(true);
+  }, []);
 
   const handleApplyCategory = async (categoryIndex: number) => {
     setLoading(true);
@@ -191,7 +189,7 @@ export default function PlaygroundPage() {
       setOutputUnlock(false);
 
       toast.success(
-        "Category applied successfully! You can now view the output."
+        "Category applied successfully! New Preview is ready. To view final Prompt, please merge Previews."
       );
     } catch (error) {
       toast.error("Failed to apply category. Try again.");
@@ -237,6 +235,8 @@ export default function PlaygroundPage() {
 
       setData(enhancedResponse);
       setInput(enhancedResponse.input);
+      setEditUnLock(true);
+      setOutputUnlock(true);
       setEditUnLock(true);
       setOutputUnlock(true);
       setRefinePrompt(enhancedResponse.output);
