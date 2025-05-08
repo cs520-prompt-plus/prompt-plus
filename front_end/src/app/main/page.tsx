@@ -5,6 +5,7 @@ import {
   mergePreviews,
   updateCategoryPatterns,
   updateResponse,
+  createResponse,
 } from "@/app/api/responses/backend-service";
 import { patternDescriptions } from "@/app/constants/enum";
 import { Model, models, types } from "@/components/data/models";
@@ -158,9 +159,9 @@ export default function PlaygroundPage() {
       const payload = {
         input: input,
       };
-      // const res = await createResponse(payload);
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-      const res = await getResponseById("dd088c20-fa2b-4d5c-8388-daa1cb9f8669");
+      const res = await createResponse(payload);
+      // await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+      // const res = await getResponseById("dd088c20-fa2b-4d5c-8388-daa1cb9f8669");
 
       console.log("Response received:", res);
 
@@ -493,7 +494,7 @@ export default function PlaygroundPage() {
                   </TabsContent>
                   <TabsContent
                     value="edit"
-                    className=" mt-0 border-0 p-0 flex gap-10 flex-col"
+                    className=" mt-0 border-0 p-0 flex gap-10 flex-col justify-start"
                   >
                     <VerticalStepper step={step} handleStep={setStep} />
                     <div className="flex w-full space-x-9 h-full">
@@ -572,18 +573,19 @@ export default function PlaygroundPage() {
                           </Button>
                         </div>
                       </div>
-                      <div className="flex w-full h-full flex-col space-y-2">
-                        <SkeletonWrapper loading={loading}>
+
+                      <SkeletonWrapper loading={loading}>
+                        <div className="flex w-full h-[50vh] flex-col gap-4">
                           <Label htmlFor="input">Preview</Label>
                           <Textarea
                             id="preview"
                             placeholder="Here is the preview of the output for this step."
-                            className="flex-1 min-h-[40vh] h-full w-full"
+                            className="flex-1 h-full w-full"
                             value={data?.categories![step].preview}
                             readOnly
                           />
-                        </SkeletonWrapper>
-                      </div>
+                        </div>
+                      </SkeletonWrapper>
                     </div>
                     {step == 5 && (
                       <Button

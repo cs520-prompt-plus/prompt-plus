@@ -9,16 +9,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { IconBrandTabler, IconUserBolt } from "@tabler/icons-react";
+import { IconBrandTabler } from "@tabler/icons-react";
+import { History } from "lucide-react";
 import { motion } from "motion/react";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "../ui/sidebar";
 import { Skeleton } from "../ui/skeleton";
 import { SkeletonWrapper } from "../ui/skeleton-wrapper";
-import { useRouter } from "next/navigation"; // ✅ App Router version
 
 export function SideBarWrapper({ children }: { children: React.ReactNode }) {
   const currentPath = usePathname();
@@ -37,10 +37,10 @@ export function SideBarWrapper({ children }: { children: React.ReactNode }) {
       ),
     },
     {
-      label: "Saved Presets",
-      href: "#",
+      label: "Saved",
+      href: "save",
       icon: (
-        <IconUserBolt className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+        <History className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
   ];
@@ -50,9 +50,11 @@ export function SideBarWrapper({ children }: { children: React.ReactNode }) {
     if (status === "unauthenticated") {
       router.push("/");
     } else if (status === "authenticated") {
-      router.push("/main");
+      if (currentPath === "/") {
+        router.push("/main");
+      }
     }
-  }, [status, router]);
+  }, [status, router, currentPath]);
   if (status === "loading") {
     return <Skeleton className="h-screen w-screen" />;
   }
@@ -143,15 +145,5 @@ export const Logo = () => {
         Prompt plus
       </motion.span>
     </div>
-  );
-};
-export const LogoIcon = () => {
-  return (
-    <a
-      href="#"
-      className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
-    >
-      <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
-    </a>
   );
 };

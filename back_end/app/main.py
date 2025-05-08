@@ -105,6 +105,27 @@ async def get_response_by_id(request: Request, response_id: str):
 
     return response
 
+@app.get("/api/v1/responses/", response_model=List[ResponseRead])
+async def get_all_responses(request: Request):
+    responses = await prisma.response.find_many(
+        where={"user_id": request.state.userId},
+        include={
+            "categories": {
+                "include": {
+                    "patterns": True
+                }
+            }
+        }
+    )
+
+    # Sort each response's categories and patterns
+    for response in responses:
+        response.categories.sort(key=lambda c: category_priority.get(c.category, float('inf')))
+        for category in response.categories:
+            category.patterns.sort(key=lambda p: p.pattern.lower())
+
+    return responses
+
 @app.post("/api/v1/responses/", response_model=ResponseRead)
 async def create_response(request: Request, response: ResponseCreate):
     print("Creating response...")

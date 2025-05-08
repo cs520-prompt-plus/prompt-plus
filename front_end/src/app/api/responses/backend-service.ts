@@ -11,6 +11,7 @@ import {
 
 const baseURL = "/api/proxy/api/v1";
 
+export const getResponsesEndpoint = () => `${baseURL}/responses/`;
 export const getResponseByIdEndpoint = (responseId: string) =>
   `${baseURL}/responses/${responseId}`;
 export const createResponseEndpoint = () => `${baseURL}/responses/`;
@@ -20,6 +21,12 @@ export const updatePatternEndpoint = (categoryId: string) =>
   `${baseURL}/categories/${categoryId}/patterns`;
 export const mergePreviewsEndpoint = (responseId: string) =>
   `${baseURL}/responses/merge/${responseId}`;
+
+export const getResponses = async (): Promise<
+  AxiosResponse<ResponseCreateResponse[]>
+> => {
+  return await axios.get<ResponseCreateResponse[]>(getResponsesEndpoint());
+};
 
 export const getResponseById = async (
   responseId: string
