@@ -36,7 +36,7 @@ export function BeforeAfterPage({
             <Textarea
               readOnly
               value={inputPrompt}
-              className="h-full max-h-[60vh] resize-none bg-secondary text-foreground"
+              className="h-[40vh] resize-none bg-secondary text-foreground"
             />
             {onEditPrompt && (
               <Button
