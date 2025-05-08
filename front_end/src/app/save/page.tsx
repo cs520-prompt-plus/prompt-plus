@@ -4,9 +4,11 @@ import { PromptListPage } from "@/components/pages/save/prompt-list";
 import { PromptPair } from "@/components/pages/save/prompt-list";
 import { deleteResponse, getResponses } from "../api/responses/backend-service";
 import { SkeletonWrapper } from "@/components/ui/skeleton-wrapper";
+import { useRouter } from "next/navigation";
 
 export default function PromptHistoryPage() {
   const [responses, setResponses] = React.useState<PromptPair[]>([]);
+  const router = useRouter();
   const [loading, setLoading] = React.useState(false);
   const fetch = async () => {
     setLoading(true);
@@ -33,6 +35,7 @@ export default function PromptHistoryPage() {
 
   const handleEditPrompt = (index: number) => {
     console.log("Edit prompt at index:", index);
+    router.push(`/main?id=${responses[index].id}`);
   };
 
   const handleDeletePrompt = async (index: number) => {

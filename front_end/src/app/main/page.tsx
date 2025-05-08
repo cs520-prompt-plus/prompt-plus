@@ -6,6 +6,7 @@ import {
   updateCategoryPatterns,
   updateResponse,
   createResponse,
+  getResponses,
 } from "@/app/api/responses/backend-service";
 import { patternDescriptions } from "@/app/constants/enum";
 import { Model, models, types } from "@/components/data/models";
@@ -21,6 +22,7 @@ import { PromptInput } from "@/components/pages/main/prompt-input";
 import { VerticalStepper } from "@/components/pages/main/stepper";
 import { TemperatureSelector } from "@/components/pages/main/temperature-selector";
 import { TopPSelector } from "@/components/pages/main/top-p-selector";
+import { useSearchParams } from "next/navigation";
 import {
   Accordion,
   AccordionContent,
@@ -76,6 +78,8 @@ import React from "react";
 import { toast } from "sonner";
 
 export default function PlaygroundPage() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
   const [step, setStep] = React.useState(0);
   const [selectedModel, setSelectedModel] = React.useState<Model>(models[0]);
   const [input, setInput] = React.useState("");
@@ -93,6 +97,57 @@ export default function PlaygroundPage() {
   const [valid, setValid] = React.useState(false);
   const [previewUpdated, setPreviewUpdated] = React.useState(false);
   const [refinePrompt, setRefinePrompt] = React.useState("");
+  const [currentReponseId, setCurrentResponseId] = React.useState<
+    string | undefined
+  >(id ?? undefined);
+  const [pastResponse, setPastResponse] = React.useState<
+    ResponseCreateResponse[]
+  >([]);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getResponses();
+        const response = res.data;
+        const enhancedResponses: ResponseCreateResponse[] = response.map(
+          (res) => ({
+            ...res,
+            categories: (res.categories ?? []).map((category) => ({
+              ...category,
+              patterns: category.patterns.map((pattern) => ({
+                ...pattern,
+                description:
+                  patternDescriptions[
+                    pattern.pattern as keyof typeof patternDescriptions
+                  ] || "",
+              })),
+            })),
+          })
+        );
+        setPastResponse(enhancedResponses);
+      } catch (error) {
+        console.error("Error fetching past response:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  React.useEffect(() => {
+    if (currentReponseId === "create-new-response") {
+      return;
+    }
+    const selectedResponse = pastResponse.find(
+      (res) => res.response_id === currentReponseId
+    );
+    if (selectedResponse) {
+      setData(selectedResponse);
+      setInput(selectedResponse.input);
+      setRefinePrompt(selectedResponse.output);
+      setEditUnLock(true);
+      setOutputUnlock(true);
+      setComparisonUnlock(true);
+    }
+  }, [currentReponseId, pastResponse]);
 
   const setDataImmer = (updater: (draft: ResponseCreateResponse) => void) => {
     setData((prev) => produce(prev, updater));
@@ -159,9 +214,9 @@ export default function PlaygroundPage() {
       const payload = {
         input: input,
       };
-      // const res = await createResponse(payload);
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-      const res = await getResponseById("25e67ebf-e2a9-4094-9f4d-30a061229416");
+      const res = await createResponse(payload);
+      // await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+      // const res = await getResponseById("25e67ebf-e2a9-4094-9f4d-30a061229416");
 
       console.log("Response received:", res);
 
@@ -272,11 +327,41 @@ export default function PlaygroundPage() {
         <div className="container flex flex-col items-start justify-between space-y-2 py-4 sm:flex-row sm:items-center sm:space-y-0 md:h-16">
           <h2 className="text-lg font-semibold">Playground</h2>
           <div className="ml-auto flex w-full space-x-2 sm:justify-end">
-            <PresetSelector
-              presets={presets}
-              selectedPreset={selectedPreset}
-              setSelectedPreset={setSelectedPreset}
-            />
+            <Select
+              value={currentReponseId}
+              onValueChange={setCurrentResponseId}
+            >
+              <SelectTrigger className="w-[20vw]">
+                <SelectValue
+                  placeholder="Select the past response or create a new one"
+                  defaultValue={"improve"}
+                />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Choose your past response</SelectLabel>
+                  {pastResponse.map((response) => (
+                    <SelectItem
+                      key={response.response_id}
+                      value={response.response_id}
+                    >
+                      {response.input.slice(0, 50) + "..."}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+
+                <SelectGroup>
+                  <SelectLabel>Or</SelectLabel>
+                  <SelectItem
+                    key={"create-new-response"}
+                    value={"create-new-response"}
+                  >
+                    Create a new response
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
             <div className="hidden space-x-2 md:flex">
               <PresetShare />
             </div>
@@ -453,7 +538,18 @@ export default function PlaygroundPage() {
                             input={input}
                             setInput={setInput}
                           />
-                          <Label htmlFor="instructions">System Prompt</Label>
+                          <div className="flex items-center space-x-2 justify-between">
+                            <Label htmlFor="instructions">System Prompt</Label>{" "}
+                            <div className="flex items-center space-x-2">
+                              <Label htmlFor="style">Want a Quick Setup?</Label>
+                              <PresetSelector
+                                presets={presets}
+                                selectedPreset={selectedPreset}
+                                setSelectedPreset={setSelectedPreset}
+                              />
+                            </div>
+                          </div>
+
                           <Textarea
                             id="instructions"
                             className="flex-1 min-h-[10vh] w-full"
