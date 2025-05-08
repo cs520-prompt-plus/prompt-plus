@@ -10,17 +10,20 @@ const BACKEND = (() => {
   return `http://${host}:${port}`;
 })();
 
-// Core proxy handler for all HTTP methods
+// Core proxy logic
 async function proxy(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  context: { params: { path: string[] } }
 ) {
-  // reconstruct path: params.path = ["api", "v1", "responses"] etc.
-  const forwardPath = "/" + params.path.join("/");
+  const { params } = await context;
+  const { path } = await params;
+  console.log("Proxying request:", request.method, path);
+
+  const forwardPath = "/" + path.join("/");
   const search = request.nextUrl.search;
   const targetUrl = `${BACKEND}${forwardPath}${search}`;
 
-  // Prepare headers: clone + remove hop-by-hop
+  // Clone headers and strip hop-by-hop
   const headers = new Headers(request.headers);
   [
     "connection",
@@ -33,13 +36,12 @@ async function proxy(
     "upgrade",
   ].forEach((h) => headers.delete(h));
 
-  // Read and forward body for POST/PUT/PATCH
-  let body: any = undefined;
+  // Handle body for non-GET/HEAD
+  let body: string | undefined;
   if (!["GET", "HEAD"].includes(request.method)) {
-    const contentType = headers.get("content-type") || "";
-    if (contentType.includes("application/json")) {
-      const json = await request.json();
-      body = JSON.stringify(json);
+    const ct = headers.get("content-type") || "";
+    if (ct.includes("application/json")) {
+      body = JSON.stringify(await request.json());
     } else {
       body = await request.text();
     }
@@ -62,9 +64,8 @@ async function proxy(
     const resHeaders = new Headers(upstream.headers);
     resHeaders.delete("transfer-encoding");
 
-    // Read full body
-    const arrayBuffer = await upstream.arrayBuffer();
-    return new NextResponse(arrayBuffer, {
+    const buf = await upstream.arrayBuffer();
+    return new NextResponse(buf, {
       status: upstream.status,
       headers: resHeaders,
     });
@@ -78,11 +79,38 @@ async function proxy(
   }
 }
 
-// Export for all methods
-export {
-  proxy as GET,
-  proxy as POST,
-  proxy as PUT,
-  proxy as PATCH,
-  proxy as DELETE,
-};
+// Export each method as an async handler so path is ready
+export async function GET(
+  request: NextRequest,
+  context: { params: { path: string[] } }
+) {
+  return proxy(request, context);
+}
+
+export async function POST(
+  request: NextRequest,
+  context: { params: { path: string[] } }
+) {
+  return proxy(request, context);
+}
+
+export async function PUT(
+  request: NextRequest,
+  context: { params: { path: string[] } }
+) {
+  return proxy(request, context);
+}
+
+export async function PATCH(
+  request: NextRequest,
+  context: { params: { path: string[] } }
+) {
+  return proxy(request, context);
+}
+
+export async function DELETE(
+  request: NextRequest,
+  context: { params: { path: string[] } }
+) {
+  return proxy(request, context);
+}

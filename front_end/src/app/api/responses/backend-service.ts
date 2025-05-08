@@ -17,7 +17,7 @@ export const createResponseEndpoint = () => `${baseURL}/responses/`;
 export const updateResponseEndpoint = (responseId: string) =>
   `${baseURL}/responses/update/${responseId}`;
 export const updatePatternEndpoint = (categoryId: string) =>
-  `/categories/${categoryId}/patterns`;
+  `${baseURL}/categories/${categoryId}/patterns`;
 export const mergePreviewsEndpoint = (responseId: string) =>
   `${baseURL}/responses/merge/${responseId}`;
 
