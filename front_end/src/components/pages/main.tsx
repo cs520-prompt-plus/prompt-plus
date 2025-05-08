@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import {
+  mergePreviews,
   updateCategoryPatterns,
   updateResponse,
+  createResponse,
 } from "@/app/api/responses/backend-service";
 import { Model, models, types } from "@/components/data/models";
 import { presets } from "@/components/data/presets";
@@ -30,6 +32,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { patternDescriptions } from "@/app/constants/enum";
 import {
   HoverCard,
   HoverCardContent,
@@ -143,8 +146,8 @@ export default function PlaygroundPage() {
         if (!draft.categories) return;
         draft.categories[categoryIndex] = updatedCategory;
       });
-
-      setOutputUnlock(categoryIndex >= 5);
+      setPreviewUpdated(true);
+      setOutputUnlock(false);
 
       toast.success(
         "Category applied successfully! You can now view the output."
@@ -170,31 +173,27 @@ export default function PlaygroundPage() {
       const payload = {
         input: input,
       };
-      // const res = await createResponse(payload);
-      // console.log("Response received:", res);
+      const res = await createResponse(payload);
+      console.log("Response received:", res);
 
-      // const response = res.data;
-      // const enhancedResponse: ResponseCreateResponse = {
-      //   ...response,
-      //   categories: (response.categories ?? []).map((category) => ({
-      //     ...category,
-      //     patterns: category.patterns.map((pattern) => ({
-      //       ...pattern,
-      //       description:
-      //         patternDescriptions[
-      //           pattern.pattern as keyof typeof patternDescriptions
-      //         ] || "",
-      //     })),
-      //   })),
-      // };
+      const response = res.data;
+      const enhancedResponse: ResponseCreateResponse = {
+        ...response,
+        categories: (response.categories ?? []).map((category) => ({
+          ...category,
+          patterns: category.patterns.map((pattern) => ({
+            ...pattern,
+            description:
+              patternDescriptions[
+                pattern.pattern as keyof typeof patternDescriptions
+              ] || "",
+          })),
+        })),
+      };
 
-      // setData(enhancedResponse);
-      // setInput(enhancedResponse.input);
-      // setRefinePrompt(enhancedResponse.output);
-      await new Promise((resolve) => setTimeout(resolve, 200)); // Simulate network delay
-      setData(mockData);
-      setInput(mockData.input);
-      setRefinePrompt(mockData.output);
+      setData(enhancedResponse);
+      setInput(enhancedResponse.input);
+      setRefinePrompt(enhancedResponse.output);
       toast.success("Response created successfully!");
     } catch (error) {
       toast.error("Error creating response. Please try again.");
@@ -228,10 +227,27 @@ export default function PlaygroundPage() {
       if (data && data.categories) {
         const previews = data.categories.map((category) => category.preview);
         const response_id = data.response_id;
-        // const response_id = "3d583ac5-2055-4384-ac73-ced31a8e1fasc"; // dummy
+        const res = await mergePreviews(response_id, {
+          previews: previews,
+        });
+        const response = res.data;
+        const enhancedResponse: ResponseCreateResponse = {
+          ...response,
+          categories: (response.categories ?? []).map((category) => ({
+            ...category,
+            patterns: category.patterns.map((pattern) => ({
+              ...pattern,
+              description:
+                patternDescriptions[
+                  pattern.pattern as keyof typeof patternDescriptions
+                ] || "",
+            })),
+          })),
+        };
 
-        // await mergePreviews(response_id,{previews:previews});
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+        setData(enhancedResponse);
+        setInput(enhancedResponse.input);
+        setRefinePrompt(enhancedResponse.output);
         toast.success("Successfully Merge Previews.");
         setPreviewUpdated(false);
         setOutputUnlock(true);
