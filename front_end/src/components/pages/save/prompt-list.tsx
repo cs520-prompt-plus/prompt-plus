@@ -1,27 +1,28 @@
 "use client";
-import React, { useState } from "react";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Copy,
-  Edit,
-  Search,
-  ChevronUp,
-  ChevronDown,
-  Calendar,
-  Clock,
-  Filter,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Copy,
+  Edit,
+  Filter,
+  Search,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export interface PromptPair {
   id: string;
@@ -34,13 +35,13 @@ export interface PromptPair {
 interface PromptListPageProps {
   promptPairs: PromptPair[];
   onEditPrompt?: (index: number) => void;
-  onCopyOutput?: (index: number) => void;
+  onDeletePrompt?: (index: number) => void;
 }
 
 export function PromptListPage({
   promptPairs,
   onEditPrompt,
-  onCopyOutput,
+  onDeletePrompt,
 }: PromptListPageProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>(
@@ -134,7 +135,7 @@ export function PromptListPage({
                       isExpanded={!!expandedCards[pair.id]}
                       onToggleExpansion={() => toggleCardExpansion(pair.id)}
                       onEditPrompt={onEditPrompt}
-                      onCopyOutput={onCopyOutput}
+                      onDeletePrompt={onDeletePrompt}
                     />
                   ))}
                 </div>
@@ -158,14 +159,14 @@ function PromptCard({
   isExpanded,
   onToggleExpansion,
   onEditPrompt,
-  onCopyOutput,
+  onDeletePrompt,
 }: {
   pair: PromptPair;
   index: number;
   isExpanded: boolean;
   onToggleExpansion: () => void;
   onEditPrompt?: (index: number) => void;
-  onCopyOutput?: (index: number) => void;
+  onDeletePrompt?: (index: number) => void;
 }) {
   return (
     <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
@@ -260,16 +261,18 @@ function PromptCard({
                   isExpanded ? "h-48" : "h-20"
                 }`}
               />
-              {onCopyOutput && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onCopyOutput(index)}
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              )}
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  navigator.clipboard.writeText(pair.outputResult);
+                  toast.success("Output copied to clipboard!");
+                }}
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         )}
@@ -288,17 +291,31 @@ function PromptCard({
               Edit Prompt
             </Button>
           )}
-          {onCopyOutput && (
+
+          {onDeletePrompt && (
             <Button
-              variant="default"
+              variant="destructive"
               size="sm"
-              onClick={() => onCopyOutput(index)}
+              onClick={() => onDeletePrompt(index)}
               className="flex items-center gap-2"
             >
-              <Copy className="h-4 w-4" />
-              Copy Output
+              <Edit className="h-4 w-4" />
+              Delete Prompt
             </Button>
           )}
+
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => {
+              navigator.clipboard.writeText(pair.outputResult);
+              toast.success("Output copied to clipboard!");
+            }}
+            className="flex items-center gap-2"
+          >
+            <Copy className="h-4 w-4" />
+            Copy Output
+          </Button>
         </CardFooter>
       )}
     </Card>

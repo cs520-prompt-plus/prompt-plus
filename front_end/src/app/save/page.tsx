@@ -2,7 +2,7 @@
 import React from "react";
 import { PromptListPage } from "@/components/pages/save/prompt-list";
 import { PromptPair } from "@/components/pages/save/prompt-list";
-import { getResponses } from "../api/responses/backend-service";
+import { deleteResponse, getResponses } from "../api/responses/backend-service";
 import { SkeletonWrapper } from "@/components/ui/skeleton-wrapper";
 
 export default function PromptHistoryPage() {
@@ -35,8 +35,9 @@ export default function PromptHistoryPage() {
     console.log("Edit prompt at index:", index);
   };
 
-  const handleCopyOutput = (index: number) => {
-    console.log("Copy output at index:", index);
+  const handleDeletePrompt = async (index: number) => {
+    await deleteResponse(responses[index].id);
+    fetch();
   };
 
   return (
@@ -44,7 +45,7 @@ export default function PromptHistoryPage() {
       <PromptListPage
         promptPairs={responses}
         onEditPrompt={handleEditPrompt}
-        onCopyOutput={handleCopyOutput}
+        onDeletePrompt={handleDeletePrompt}
       />
     </SkeletonWrapper>
   );

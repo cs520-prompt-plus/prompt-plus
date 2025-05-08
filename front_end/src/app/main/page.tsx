@@ -159,9 +159,9 @@ export default function PlaygroundPage() {
       const payload = {
         input: input,
       };
-      const res = await createResponse(payload);
-      // await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-      // const res = await getResponseById("dd088c20-fa2b-4d5c-8388-daa1cb9f8669");
+      // const res = await createResponse(payload);
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+      const res = await getResponseById("25e67ebf-e2a9-4094-9f4d-30a061229416");
 
       console.log("Response received:", res);
 
@@ -603,11 +603,15 @@ export default function PlaygroundPage() {
                   >
                     <div className="flex flex-1 flex-col space-y-2 max-h-[70vh] p-10">
                       <div className="flex items-center justify-between h-full flex-1 w-full">
-                        <Label htmlFor="input">
-                          {" "}
-                          Refining your output: click save to take the latest
-                          one to be your final response
-                        </Label>
+                        <HoverCard>
+                          <HoverCardTrigger>
+                            <Label htmlFor="input"> Refining your output</Label>
+                          </HoverCardTrigger>
+                          <HoverCardContent>
+                            click save to take the latest one to be your final
+                            response
+                          </HoverCardContent>
+                        </HoverCard>
                         <Button
                           onClick={() => {
                             setComparisonUnlock(true);
@@ -618,7 +622,15 @@ export default function PlaygroundPage() {
                           {loading ? (
                             <Spinner />
                           ) : (
-                            "Happy with Result? View Final Prompt"
+                            <HoverCard>
+                              <HoverCardTrigger>
+                                <Label htmlFor="input">View Comparison</Label>
+                              </HoverCardTrigger>
+                              <HoverCardContent>
+                                Happy with the output? Click to view the final
+                                output
+                              </HoverCardContent>
+                            </HoverCard>
                           )}
                         </Button>
                       </div>

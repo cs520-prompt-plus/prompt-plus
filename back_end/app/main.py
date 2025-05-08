@@ -11,6 +11,7 @@ from app.client import prisma_client as prisma
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi import HTTPException, Request, status
 import logging
 
 
@@ -104,6 +105,22 @@ async def get_response_by_id(request: Request, response_id: str):
         category.patterns.sort(key=lambda p: p.pattern.lower())
 
     return response
+
+@app.delete("/api/v1/responses/{response_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_response_by_id(request: Request, response_id: str):
+    existing = await prisma.response.find_unique(
+        where={"response_id": response_id}
+    )
+
+    if not existing:
+        raise HTTPException(status_code=404, detail="Response not found")
+
+    await prisma.response.delete(
+        where={"response_id": response_id}
+    )
+
+    # 204 No Content implies success without a response body
+    return
 
 @app.get("/api/v1/responses/", response_model=List[ResponseRead])
 async def get_all_responses(request: Request):
