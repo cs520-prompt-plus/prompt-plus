@@ -17,6 +17,16 @@ import logging
 logging.basicConfig(level=logging.ERROR)
 app = FastAPI()
 
+# Define desired order for categories
+category_priority = {
+    "Input Semantics": 0,
+    "Output Customization": 1,
+    "Error Identification": 2,
+    "Prompt Improvement": 3,
+    "Interaction": 4,
+    "Context Control": 5,
+}
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     # read the raw body (you can only do this once, so be careful)
@@ -86,6 +96,13 @@ async def get_response_by_id(request: Request, response_id: str):
     if not response:
         raise HTTPException(status_code=404, detail="Response not found")
 
+    # Sort categories by category priority
+    response.categories.sort(key=lambda c: category_priority.get(c.category, float('inf')))
+
+    # Sort patterns within each category
+    for category in response.categories:
+        category.patterns.sort(key=lambda p: p.pattern.lower())
+
     return response
 
 @app.post("/api/v1/responses/", response_model=ResponseRead)
@@ -138,6 +155,13 @@ async def create_response(request: Request, response: ResponseCreate):
                 }
             }
         )
+        
+        # Sort categories using custom priority
+        full_response.categories.sort(key=lambda c: category_priority.get(c.category, float('inf')))
+
+        # Sort patterns within each category
+        for category in full_response.categories:
+            category.patterns.sort(key=lambda p: p.pattern.lower())
 
         duration = time.time() - start
         print(f"✅ Done in {duration:.2f}s")
@@ -168,6 +192,13 @@ async def merge_and_update_response(request: Request, response_id: str, previews
         }
     )
 
+    # Sort categories by category priority
+    updated_response.categories.sort(key=lambda c: category_priority.get(c.category, float('inf')))
+
+    # Sort patterns within each category
+    for category in updated_response.categories:
+        category.patterns.sort(key=lambda p: p.pattern.lower())
+
     return updated_response
 
 @app.put("/api/v1/responses/update/{response_id}", response_model=ResponseRead)
@@ -187,9 +218,17 @@ async def update_response_output(request: Request, response_id: str, output_upda
             }
         }
     )
+
+    # Sort categories by category priority
+    updated_response.categories.sort(key=lambda c: category_priority.get(c.category, float('inf')))
+
+    # Sort patterns within each category
+    for category in updated_response.categories:
+        category.patterns.sort(key=lambda p: p.pattern.lower())
+
     return updated_response
 
-#endpoint for updating active patterns for cateogry
+#endpoint for updating active patterns for category
 @app.put("/api/v1/categories/{category_id}/patterns", response_model=CategoryRead)
 async def update_category_patterns(category_id: str, update_data: CategoryPatternUpdate):
     #get active patterns for current category
@@ -225,6 +264,9 @@ async def update_category_patterns(category_id: str, update_data: CategoryPatter
         data={"preview": new_preview["preview"]},
         include={"patterns": True}
     )
+    
+    # Sort patterns
+    updated_category.patterns.sort(key=lambda p: p.pattern.lower())
 
     return updated_category
 
