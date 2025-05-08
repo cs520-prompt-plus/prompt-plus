@@ -242,9 +242,6 @@ export default function PlaygroundPage() {
         input: userInput,
       };
       const res = await createResponse(payload);
-      // await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-      // const res = await getResponseById("25e67ebf-e2a9-4094-9f4d-30a061229416");
-
       console.log("Response received:", res);
 
       const response = res.data;
@@ -335,7 +332,7 @@ export default function PlaygroundPage() {
   };
 
   return (
-    <div className="p-10 h-full w-full ">
+    <div className="p-10 h-full w-full bg-white dark:bg-black">
       <div className="md:hidden">
         <Image
           src="/examples/playground-light.png"
@@ -606,7 +603,11 @@ export default function PlaygroundPage() {
                     <VerticalStepper step={step} handleStep={setStep} />
                     <div className="flex w-full space-x-9 h-full">
                       <div className="flex h-full w-full flex-col space-y-4 justify-between">
-                        <Accordion type="single" collapsible className="w-full">
+                        <Accordion
+                          type="single"
+                          collapsible
+                          className="w-full max-h-[70vh] overflow-auto"
+                        >
                           {data &&
                             data?.categories?.[step]?.patterns?.map(
                               (pattern, index) => {

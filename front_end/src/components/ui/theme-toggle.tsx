@@ -11,7 +11,7 @@ export function ThemeToggle() {
 
   useEffect(() => {
     setMounted(true);
-   }, []);
+  }, []);
 
   if (!mounted) return null;
 

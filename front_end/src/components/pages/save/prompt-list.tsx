@@ -56,7 +56,7 @@ export function PromptListPage({
   };
 
   return (
-    <div className="p-6 bg-background overflow-auto">
+    <div className="p-6 bg-black h-full w-full overflow-auto">
       <div className="max-w-7xl mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold mb-4">Prompt History</h1>
@@ -96,7 +96,10 @@ export function PromptListPage({
             </div>
           </div>
 
-          <Tabs defaultValue="all" className="w-full">
+          <Tabs
+            defaultValue="all"
+            className="w-full max-h-[80vh] overflow-auto"
+          >
             <TabsList className="mb-4">
               <TabsTrigger value="all">All Prompts</TabsTrigger>
               <TabsTrigger value="recent">Recent</TabsTrigger>

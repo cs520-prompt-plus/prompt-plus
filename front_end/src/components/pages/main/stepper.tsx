@@ -37,13 +37,13 @@ export const VerticalStepper: React.FC<VerticalStepperProps> = ({
   handleStep,
 }) => {
   return (
-    <div className="flex flex-col items-center justify-center w-full h-full gap-4 bg-background">
+    <div className="flex flex-col items-center justify-center w-full h-[11vh] gap-4 bg-background">
       <Stepper
         value={step}
         onChange={(event: StepperChangeEvent) => handleStep(event.value)}
         items={items}
         orientation="horizontal"
-        style={{ width: "100%" }}
+        style={{ width: "100%", backgroundColor: "transparent" }}
       />
       <h1 className="text-xl font-bold">{labels[step]}</h1>
     </div>
