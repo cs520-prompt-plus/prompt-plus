@@ -178,10 +178,13 @@ export default function PlaygroundPage() {
       console.log("API response:", updatedCategory);
       const enrichedPatterns = updatedCategory.patterns.map((pattern) => ({
         ...pattern,
-        description: patternDescriptions[pattern.pattern as keyof typeof patternDescriptions] || "",
+        description:
+          patternDescriptions[
+            pattern.pattern as keyof typeof patternDescriptions
+          ] || "",
       }));
-      updatedCategory['patterns'] = enrichedPatterns
-      console.log(updatedCategory)
+      updatedCategory["patterns"] = enrichedPatterns;
+      console.log(updatedCategory);
 
       setDataImmer((draft) => {
         if (!draft.categories) return;
@@ -606,7 +609,7 @@ export default function PlaygroundPage() {
                         <Accordion
                           type="single"
                           collapsible
-                          className="w-full max-h-[70vh] overflow-auto"
+                          className="w-full max-h-[55vh] overflow-auto"
                         >
                           {data &&
                             data?.categories?.[step]?.patterns?.map(
@@ -682,7 +685,10 @@ export default function PlaygroundPage() {
                         </div>
                       </div>
 
-                      <SkeletonWrapper loading={loading}>
+                      <SkeletonWrapper
+                        loading={loading}
+                        outerClassName="h-[50vh]"
+                      >
                         <div className="flex w-full h-[50vh] flex-col gap-4">
                           <Label htmlFor="input">Preview</Label>
                           <Textarea
