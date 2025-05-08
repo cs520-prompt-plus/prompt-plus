@@ -5,6 +5,7 @@ import {
   mergePreviews,
   updateCategoryPatterns,
   updateResponse,
+  createResponse,
 } from "@/app/api/responses/backend-service";
 import { patternDescriptions } from "@/app/constants/enum";
 import { Model, models, types } from "@/components/data/models";
@@ -113,13 +114,6 @@ export default function PlaygroundPage() {
     setIsClient(true);
   }, []);
 
-  React.useEffect(() => {
-    if (data) {
-      setEditUnLock(true);
-      setOutputUnlock(true);
-    }
-  }, [data]);
-
   const handleApplyCategory = async (categoryIndex: number) => {
     setLoading(true);
     try {
@@ -151,7 +145,7 @@ export default function PlaygroundPage() {
       setOutputUnlock(false);
 
       toast.success(
-        "Category applied successfully! You can now view the output."
+        "Category applied successfully! New Preview is ready. To view final Prompt, please merge Previews."
       );
     } catch (error) {
       toast.error("Failed to apply category. Try again.");
@@ -174,9 +168,8 @@ export default function PlaygroundPage() {
       const payload = {
         input: input,
       };
-      // const res = await createResponse(payload);
+      const res = await createResponse(payload);
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-      const res = await getResponseById("ed38e6f5-cb8e-4a57-950a-17fb95728acb");
 
       console.log("Response received:", res);
 
@@ -197,6 +190,8 @@ export default function PlaygroundPage() {
 
       setData(enhancedResponse);
       setInput(enhancedResponse.input);
+      setEditUnLock(true);
+      setOutputUnlock(true);
       setRefinePrompt(enhancedResponse.output);
       toast.success("Response created successfully!");
     } catch (error) {
