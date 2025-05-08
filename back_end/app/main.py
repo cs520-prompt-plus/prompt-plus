@@ -193,6 +193,7 @@ async def update_response_output(request: Request, response_id: str, output_upda
 @app.put("/api/v1/categories/{category_id}/patterns", response_model=CategoryRead)
 async def update_category_patterns(category_id: str, update_data: CategoryPatternUpdate):
     #get active patterns for current category
+    logging.info("category_id", category_id)
     category = await prisma.category.find_unique(
         where={"category_id": category_id},
         include={"patterns": True, "response": True}
@@ -214,13 +215,14 @@ async def update_category_patterns(category_id: str, update_data: CategoryPatter
     )
 
     new_preview = await apply_category(
-        original_prompt=category.input,
-        patterns=[pattern.pattern for pattern in updated_patterns]
+        user_input=category.input,
+        category=category.category,
+        force_patterns=[pattern.pattern for pattern in updated_patterns]
     )
 
     updated_category = await prisma.category.update(
         where={"category_id": category_id},
-        data={"preview": new_preview},
+        data={"preview": new_preview["preview"]},
         include={"patterns": True}
     )
 

@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import {
+  getResponseById,
   mergePreviews,
   updateCategoryPatterns,
   updateResponse,
-  createResponse,
 } from "@/app/api/responses/backend-service";
+import { patternDescriptions } from "@/app/constants/enum";
 import { Model, models, types } from "@/components/data/models";
-import { presets } from "@/components/data/presets";
+import { Preset, presets } from "@/components/data/presets";
 import { MaxLengthSelector } from "@/components/pages/main/maxlength-selector";
 import { ModelSelector } from "@/components/pages/main/model-selector";
 import { PresetActions } from "@/components/pages/main/preset-actions";
@@ -32,7 +33,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { patternDescriptions } from "@/app/constants/enum";
 import {
   HoverCard,
   HoverCardContent,
@@ -91,6 +91,7 @@ export default function PlaygroundPage() {
   const [style, setStyle] = React.useState("improve");
   const { data: session, status } = useSession();
   const [isClient, setIsClient] = React.useState(false);
+  const [selectedPreset, setSelectedPreset] = React.useState<Preset>();
   const currentPath = usePathname();
   const [lastAIMessage, setLastAIMessage] = React.useState<UIMessage | null>(
     null
@@ -168,7 +169,10 @@ export default function PlaygroundPage() {
       const payload = {
         input: input,
       };
-      const res = await createResponse(payload);
+      // const res = await createResponse(payload);
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+      const res = await getResponseById("dd088c20-fa2b-4d5c-8388-daa1cb9f8669");
+
       console.log("Response received:", res);
 
       const response = res.data;
@@ -276,7 +280,11 @@ export default function PlaygroundPage() {
         <div className="container flex flex-col items-start justify-between space-y-2 py-4 sm:flex-row sm:items-center sm:space-y-0 md:h-16">
           <h2 className="text-lg font-semibold">Playground</h2>
           <div className="ml-auto flex w-full space-x-2 sm:justify-end">
-            <PresetSelector presets={presets} />
+            <PresetSelector
+              presets={presets}
+              selectedPreset={selectedPreset}
+              setSelectedPreset={setSelectedPreset}
+            />
             <div className="hidden space-x-2 md:flex">
               <PresetShare />
             </div>
@@ -475,6 +483,7 @@ export default function PlaygroundPage() {
                             id="instructions"
                             className="flex-1 min-h-[10vh] w-full"
                             placeholder="Fix the grammar."
+                            value={selectedPreset?.systemPrompt}
                           />
                         </div>
                       </SkeletonWrapper>
@@ -667,11 +676,7 @@ export default function PlaygroundPage() {
                       {loading ? <Spinner /> : "Choose as Final Output"}
                     </Button>
                   </TabsContent>
-                  <TabsContent
-                    value="compare"
-                    forceMount
-                    className=" data-[state=inactive]:hidden mt-0 border-0 p-0 flex gap-4 flex-col"
-                  >
+                  <TabsContent value="compare">
                     <BeforeAfterPage
                       inputPrompt={data?.input ?? ""}
                       outputResult={data?.output ?? ""}
