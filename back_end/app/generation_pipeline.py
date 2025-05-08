@@ -1,5 +1,6 @@
 import os
 import re
+import asyncio
 from typing import List
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
@@ -28,12 +29,8 @@ async def merge_prompts(prompts: List[str]):
     return merged_prompt 
 
 async def improve_prompt(user_input: str):
-    output = []
-    print("Beginning prompt improvement...")
-
-    for category in CATEGORY_TO_PATTERNS.keys():
-        print(f"Applying category: {category}")
-        output.append(await apply_category(user_input, category))
+    tasks = [apply_category(user_input, category) for category in CATEGORY_TO_PATTERNS.keys()]
+    output = await asyncio.gather(*tasks)
 
     return await _standardize_category_outputs(output)
 
@@ -52,11 +49,8 @@ async def apply_category(user_input: str, category: str, force_patterns=[]):
 
         patterns = force_patterns
 
-    output = []
-
-    for pattern in patterns:
-        print(f"Applying pattern: {pattern}")
-        output.append(await _apply_pattern(user_input, category, pattern, force_applied=force_applied))
+    tasks = [_apply_pattern(user_input, category, pattern, force_applied=force_applied) for pattern in patterns]
+    output = await asyncio.gather(*tasks)
 
     return await _standardize_pattern_outputs(output, category)
 

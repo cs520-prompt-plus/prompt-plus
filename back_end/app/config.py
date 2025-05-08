@@ -35,7 +35,7 @@ class Pattern(Enum):
 #################################
 
 TEMPLATE_PROMPT = "Given a prompt, evaluate its {category} based on the {pattern} Pattern. Evaluate the prompt only based on the context for the {pattern} Pattern.\n\nPrompt: \"\"\"{prompt}\"\"\"\n\nContext: \"\"\"{context}\"\"\"\n\nYour Response:"
-EVALUATION_PROMPT = "Should changes be made to the prompt? If the pattern is not already applied, consider whether or not it should be applied at all. Start your answer with \"yes\" or \"no\"."
+EVALUATION_PROMPT = "Should changes be made to the prompt? If the pattern is not already applied, consider whether or not it should be applied at all. When making your decision, consider the intent behind the prompt and the user's end goal. Start your answer with \"yes\" or \"no\". Your Decision:"
 IMPROVEMENT_PROMPT = "Improve the prompt based on the pattern while preserving the original use case of the prompt. Output only the prompt and surround the prompt with <PROMPT></PROMPT> tags."
 STANDARDIZATION_PROMPT = "Combine all the prompts below into one prompt while preserving the original use cases of each prompt. Output only the combined prompt and surround the combined prompt with <PROMPT></PROMPT> tags.\n\nPrompts: \n\n{prompts}\n\nYour Response:"
 MANUAL_IMPROVEMENT_PROMPT = "Improve the Original Prompt based on the Feedback. Output only your improved prompt and surround the improved prompt with <PROMPT></PROMPT> tags.\n\nOriginal Prompt: \"\"\"{prompt}\"\"\"\n\nFeedback: \"\"\"{feedback}\"\"\"\n\nYour Response:"
