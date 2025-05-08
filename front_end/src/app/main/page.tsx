@@ -134,6 +134,7 @@ export default function PlaygroundPage() {
 
   React.useEffect(() => {
     if (currentReponseId === "create-new-response") {
+      clearPreset();
       return;
     }
     const selectedResponse = pastResponse.find(
@@ -194,6 +195,24 @@ export default function PlaygroundPage() {
     }
   };
 
+  const clearPreset = () => {
+    setStep(0);
+    setSelectedModel(models[0]);
+    setInput("");
+    setTab("input");
+    setEditUnLock(false);
+    setOutputUnlock(false);
+    setComparisonUnlock(false);
+    setData(null);
+    setLoading(false);
+    setStyle("improve");
+    setSelectedPreset(undefined);
+    setLastAIMessage(null);
+    setValid(false);
+    setPreviewUpdated(false);
+    setRefinePrompt("");
+  };
+
   const handleSubmit = async () => {
     setLoading(true);
     try {
@@ -203,9 +222,18 @@ export default function PlaygroundPage() {
         );
       }
       console.log("Input submitted:", input);
-
+      let userInput = input;
+      if (style == "generate") {
+        userInput = await fetch("/api/gen", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userInput }),
+        })
+          .then((res) => res.json())
+          .then((data) => data);
+      }
       const payload = {
-        input: input,
+        input: userInput,
       };
       const res = await createResponse(payload);
       // await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
@@ -360,25 +388,7 @@ export default function PlaygroundPage() {
             <div className="hidden space-x-2 md:flex">
               <PresetShare />
             </div>
-            <PresetActions
-              clearPreset={() => {
-                setStep(0);
-                setSelectedModel(models[0]);
-                setInput("");
-                setTab("input");
-                setEditUnLock(false);
-                setOutputUnlock(false);
-                setComparisonUnlock(false);
-                setData(null);
-                setLoading(false);
-                setStyle("improve");
-                setSelectedPreset(undefined);
-                setLastAIMessage(null);
-                setValid(false);
-                setPreviewUpdated(false);
-                setRefinePrompt("");
-              }}
-            />
+            <PresetActions clearPreset={clearPreset} />
           </div>
         </div>
         <Separator />

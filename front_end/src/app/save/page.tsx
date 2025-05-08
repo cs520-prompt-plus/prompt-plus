@@ -13,7 +13,7 @@ export default function PromptHistoryPage() {
   const fetch = async () => {
     setLoading(true);
     const res = await getResponses();
-    const data = await res.data;
+    const data = res.data;
 
     setResponses(
       data.map(
