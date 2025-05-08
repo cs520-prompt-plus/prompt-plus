@@ -7,7 +7,6 @@ import {
   updateResponse,
   createResponse,
   getResponses,
-  createResponse,
 } from "@/app/api/responses/backend-service";
 import { patternDescriptions } from "@/app/constants/enum";
 import { Model, models, types } from "@/components/data/models";
@@ -153,10 +152,6 @@ export default function PlaygroundPage() {
   const setDataImmer = (updater: (draft: ResponseCreateResponse) => void) => {
     setData((prev) => produce(prev, updater));
   };
-
-  React.useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const handleApplyCategory = async (categoryIndex: number) => {
     setLoading(true);
