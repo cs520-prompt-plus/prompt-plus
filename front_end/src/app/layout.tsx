@@ -1,10 +1,12 @@
 "use client";
+import { ThemeProvider } from "@/components/provider/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import "@progress/kendo-theme-default/dist/all.css";
 import { SessionProvider } from "next-auth/react";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Suspense } from "react";
+import React, { Suspense } from "react";
 import "./globals.css";
+import { SideBarWrapper } from "@/components/layout/side-bar-wrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,9 +30,17 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Toaster />
-        <SessionProvider>
-          <Suspense fallback="loading">{children}</Suspense>
-        </SessionProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          disableTransitionOnChange
+        >
+          <SessionProvider>
+            <Suspense fallback="loading">
+              <SideBarWrapper>{children}</SideBarWrapper>
+            </Suspense>
+          </SessionProvider>{" "}
+        </ThemeProvider>
       </body>
     </html>
   );

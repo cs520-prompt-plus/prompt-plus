@@ -9,25 +9,11 @@ they should include in future prompts.
 
 ## Running the Project
 
-1. Navigate to the back_end directory and start the services:
-
-Create your `.env` file in the backend project directory, you can copy `.env.sample` as the base for this.
-
-```sh
-cd back_end
-docker compose up -d
-```
-
-2. Navigate to the front_end directory and start the services:
+1. Create your `.env` file in the backend project directory, you can copy `.env.sample` as the base for this.
+2. Run the following command to start the services
 
 ```sh
-cd front_end
-npm install
-npm run dev
-```
-
-docker compose down -v
 docker compose up -d --build
-docker system prune --all --volumes
+```
 
-Generate New Prompt
+3. Access frontend at localhost:3000 and Prisma Studio at localhost:5555

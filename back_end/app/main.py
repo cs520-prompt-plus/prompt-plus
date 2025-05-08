@@ -11,11 +11,22 @@ from app.client import prisma_client as prisma
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi import HTTPException, Request, status
 import logging
 
 
 logging.basicConfig(level=logging.ERROR)
 app = FastAPI()
+
+# Define desired order for categories
+category_priority = {
+    "Input Semantics": 0,
+    "Output Customization": 1,
+    "Error Identification": 2,
+    "Prompt Improvement": 3,
+    "Interaction": 4,
+    "Context Control": 5,
+}
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -86,7 +97,51 @@ async def get_response_by_id(request: Request, response_id: str):
     if not response:
         raise HTTPException(status_code=404, detail="Response not found")
 
+    # Sort categories by category priority
+    response.categories.sort(key=lambda c: category_priority.get(c.category, float('inf')))
+
+    # Sort patterns within each category
+    for category in response.categories:
+        category.patterns.sort(key=lambda p: p.pattern.lower())
+
     return response
+
+@app.delete("/api/v1/responses/{response_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_response_by_id(request: Request, response_id: str):
+    existing = await prisma.response.find_unique(
+        where={"response_id": response_id}
+    )
+
+    if not existing:
+        raise HTTPException(status_code=404, detail="Response not found")
+
+    await prisma.response.delete(
+        where={"response_id": response_id}
+    )
+
+    # 204 No Content implies success without a response body
+    return
+
+@app.get("/api/v1/responses/", response_model=List[ResponseRead])
+async def get_all_responses(request: Request):
+    responses = await prisma.response.find_many(
+        where={"user_id": request.state.userId},
+        include={
+            "categories": {
+                "include": {
+                    "patterns": True
+                }
+            }
+        }
+    )
+
+    # Sort each response's categories and patterns
+    for response in responses:
+        response.categories.sort(key=lambda c: category_priority.get(c.category, float('inf')))
+        for category in response.categories:
+            category.patterns.sort(key=lambda p: p.pattern.lower())
+
+    return responses
 
 @app.post("/api/v1/responses/", response_model=ResponseRead)
 async def create_response(request: Request, response: ResponseCreate):
@@ -138,6 +193,13 @@ async def create_response(request: Request, response: ResponseCreate):
                 }
             }
         )
+        
+        # Sort categories using custom priority
+        full_response.categories.sort(key=lambda c: category_priority.get(c.category, float('inf')))
+
+        # Sort patterns within each category
+        for category in full_response.categories:
+            category.patterns.sort(key=lambda p: p.pattern.lower())
 
         duration = time.time() - start
         print(f"✅ Done in {duration:.2f}s")
@@ -168,6 +230,13 @@ async def merge_and_update_response(request: Request, response_id: str, previews
         }
     )
 
+    # Sort categories by category priority
+    updated_response.categories.sort(key=lambda c: category_priority.get(c.category, float('inf')))
+
+    # Sort patterns within each category
+    for category in updated_response.categories:
+        category.patterns.sort(key=lambda p: p.pattern.lower())
+
     return updated_response
 
 @app.put("/api/v1/responses/update/{response_id}", response_model=ResponseRead)
@@ -187,12 +256,21 @@ async def update_response_output(request: Request, response_id: str, output_upda
             }
         }
     )
+
+    # Sort categories by category priority
+    updated_response.categories.sort(key=lambda c: category_priority.get(c.category, float('inf')))
+
+    # Sort patterns within each category
+    for category in updated_response.categories:
+        category.patterns.sort(key=lambda p: p.pattern.lower())
+
     return updated_response
 
-#endpoint for updating active patterns for cateogry
+#endpoint for updating active patterns for category
 @app.put("/api/v1/categories/{category_id}/patterns", response_model=CategoryRead)
 async def update_category_patterns(category_id: str, update_data: CategoryPatternUpdate):
     #get active patterns for current category
+    logging.info("category_id", category_id)
     category = await prisma.category.find_unique(
         where={"category_id": category_id},
         include={"patterns": True, "response": True}
@@ -214,15 +292,19 @@ async def update_category_patterns(category_id: str, update_data: CategoryPatter
     )
 
     new_preview = await apply_category(
-        original_prompt=category.input,
-        patterns=[pattern.pattern for pattern in updated_patterns]
+        user_input=category.input,
+        category=category.category,
+        force_patterns=[pattern.pattern for pattern in updated_patterns]
     )
 
     updated_category = await prisma.category.update(
         where={"category_id": category_id},
-        data={"preview": new_preview},
+        data={"preview": new_preview["preview"]},
         include={"patterns": True}
     )
+    
+    # Sort patterns
+    updated_category.patterns.sort(key=lambda p: p.pattern.lower())
 
     return updated_category
 
