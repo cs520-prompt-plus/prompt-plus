@@ -15,10 +15,5 @@ they should include in future prompts.
 ```sh
 docker compose up -d --build
 ```
+
 3. Access frontend at localhost:3000 and Prisma Studio at localhost:5555
-
-docker compose down -v
-docker compose up -d --build
-docker system prune --all --volumes
-
-Generate New Prompt

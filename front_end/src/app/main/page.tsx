@@ -6,17 +6,23 @@ import {
   updateCategoryPatterns,
   updateResponse,
   createResponse,
+  getResponses,
 } from "@/app/api/responses/backend-service";
 import { patternDescriptions } from "@/app/constants/enum";
 import { Model, models, types } from "@/components/data/models";
 import { Preset, presets } from "@/components/data/presets";
+import { ChatDemo } from "@/components/pages/main/chatBot";
+import { BeforeAfterPage } from "@/components/pages/main/comparison";
 import { MaxLengthSelector } from "@/components/pages/main/maxlength-selector";
 import { ModelSelector } from "@/components/pages/main/model-selector";
 import { PresetActions } from "@/components/pages/main/preset-actions";
 import { PresetSelector } from "@/components/pages/main/preset-selector";
 import { PresetShare } from "@/components/pages/main/preset-share";
+import { PromptInput } from "@/components/pages/main/prompt-input";
+import { VerticalStepper } from "@/components/pages/main/stepper";
 import { TemperatureSelector } from "@/components/pages/main/temperature-selector";
 import { TopPSelector } from "@/components/pages/main/top-p-selector";
+import { useSearchParams } from "next/navigation";
 import {
   Accordion,
   AccordionContent,
@@ -25,11 +31,11 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -40,7 +46,18 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { SkeletonWrapper } from "@/components/ui/skeleton-wrapper";
+import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -55,36 +72,14 @@ import {
   Settings,
   TextCursorInput,
 } from "lucide-react";
-import { Metadata } from "next";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
-import GoogleSignIn from "../auth/GoogleSignin";
-import { Checkbox } from "../ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
-import { SkeletonWrapper } from "../ui/skeleton-wrapper";
-import { Spinner } from "../ui/spinner";
-import { ChatDemo } from "./main/chatBot";
-import { BeforeAfterPage } from "./main/comparison";
-import { PromptInput } from "./main/prompt-input";
-import { VerticalStepper } from "./main/stepper";
-
-export const metadata: Metadata = {
-  title: "Playground",
-  description: "The OpenAI Playground built using the components.",
-};
 
 export default function PlaygroundPage() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
   const [step, setStep] = React.useState(0);
   const [selectedModel, setSelectedModel] = React.useState<Model>(models[0]);
   const [input, setInput] = React.useState("");
@@ -95,24 +90,69 @@ export default function PlaygroundPage() {
   const [data, setData] = React.useState<ResponseCreateResponse | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [style, setStyle] = React.useState("improve");
-  const { data: session, status } = useSession();
-  const [isClient, setIsClient] = React.useState(false);
   const [selectedPreset, setSelectedPreset] = React.useState<Preset>();
-  const currentPath = usePathname();
   const [lastAIMessage, setLastAIMessage] = React.useState<UIMessage | null>(
     null
   );
   const [valid, setValid] = React.useState(false);
   const [previewUpdated, setPreviewUpdated] = React.useState(false);
   const [refinePrompt, setRefinePrompt] = React.useState("");
+  const [currentReponseId, setCurrentResponseId] = React.useState<
+    string | undefined
+  >(id ?? undefined);
+  const [pastResponse, setPastResponse] = React.useState<
+    ResponseCreateResponse[]
+  >([]);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getResponses();
+        const response = res.data;
+        const enhancedResponses: ResponseCreateResponse[] = response.map(
+          (res) => ({
+            ...res,
+            categories: (res.categories ?? []).map((category) => ({
+              ...category,
+              patterns: category.patterns.map((pattern) => ({
+                ...pattern,
+                description:
+                  patternDescriptions[
+                    pattern.pattern as keyof typeof patternDescriptions
+                  ] || "",
+              })),
+            })),
+          })
+        );
+        setPastResponse(enhancedResponses);
+      } catch (error) {
+        console.error("Error fetching past response:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  React.useEffect(() => {
+    if (currentReponseId === "create-new-response") {
+      clearPreset();
+      return;
+    }
+    const selectedResponse = pastResponse.find(
+      (res) => res.response_id === currentReponseId
+    );
+    if (selectedResponse) {
+      setData(selectedResponse);
+      setInput(selectedResponse.input);
+      setRefinePrompt(selectedResponse.output);
+      setEditUnLock(true);
+      setOutputUnlock(true);
+      setComparisonUnlock(true);
+    }
+  }, [currentReponseId, pastResponse]);
 
   const setDataImmer = (updater: (draft: ResponseCreateResponse) => void) => {
     setData((prev) => produce(prev, updater));
   };
-
-  React.useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const handleApplyCategory = async (categoryIndex: number) => {
     setLoading(true);
@@ -155,6 +195,24 @@ export default function PlaygroundPage() {
     }
   };
 
+  const clearPreset = () => {
+    setStep(0);
+    setSelectedModel(models[0]);
+    setInput("");
+    setTab("input");
+    setEditUnLock(false);
+    setOutputUnlock(false);
+    setComparisonUnlock(false);
+    setData(null);
+    setLoading(false);
+    setStyle("improve");
+    setSelectedPreset(undefined);
+    setLastAIMessage(null);
+    setValid(false);
+    setPreviewUpdated(false);
+    setRefinePrompt("");
+  };
+
   const handleSubmit = async () => {
     setLoading(true);
     try {
@@ -164,12 +222,22 @@ export default function PlaygroundPage() {
         );
       }
       console.log("Input submitted:", input);
-
+      let userInput = input;
+      if (style == "generate") {
+        userInput = await fetch("/api/gen", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userInput }),
+        })
+          .then((res) => res.json())
+          .then((data) => data);
+      }
       const payload = {
-        input: input,
+        input: userInput,
       };
       const res = await createResponse(payload);
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+      // await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+      // const res = await getResponseById("25e67ebf-e2a9-4094-9f4d-30a061229416");
 
       console.log("Response received:", res);
 
@@ -190,6 +258,8 @@ export default function PlaygroundPage() {
 
       setData(enhancedResponse);
       setInput(enhancedResponse.input);
+      setEditUnLock(true);
+      setOutputUnlock(true);
       setEditUnLock(true);
       setOutputUnlock(true);
       setRefinePrompt(enhancedResponse.output);
@@ -280,49 +350,45 @@ export default function PlaygroundPage() {
         <div className="container flex flex-col items-start justify-between space-y-2 py-4 sm:flex-row sm:items-center sm:space-y-0 md:h-16">
           <h2 className="text-lg font-semibold">Playground</h2>
           <div className="ml-auto flex w-full space-x-2 sm:justify-end">
-            <PresetSelector
-              presets={presets}
-              selectedPreset={selectedPreset}
-              setSelectedPreset={setSelectedPreset}
-            />
+            <Select
+              value={currentReponseId}
+              onValueChange={setCurrentResponseId}
+            >
+              <SelectTrigger className="w-[20vw]">
+                <SelectValue
+                  placeholder="Select the past response or create a new one"
+                  defaultValue={"improve"}
+                />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Choose your past response</SelectLabel>
+                  {pastResponse.map((response) => (
+                    <SelectItem
+                      key={response.response_id}
+                      value={response.response_id}
+                    >
+                      {response.input.slice(0, 50) + "..."}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+
+                <SelectGroup>
+                  <SelectLabel>Or</SelectLabel>
+                  <SelectItem
+                    key={"create-new-response"}
+                    value={"create-new-response"}
+                  >
+                    Create a new response
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
             <div className="hidden space-x-2 md:flex">
               <PresetShare />
             </div>
-            <PresetActions />
-            {isClient &&
-              (status === "loading" ? (
-                <Spinner />
-              ) : status === "authenticated" ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger>
-                    <Image
-                      src={(session.user?.image as string) ?? ""}
-                      alt="User Avatar"
-                      width={40}
-                      height={40}
-                      className="rounded-full border-2 border-primary-500 dark:border-primary-400"
-                    />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem>
-                        <p className="font-semibold">{session.user?.email}</p>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        color="danger"
-                        onClick={() => signOut({ callbackUrl: currentPath })}
-                      >
-                        Log Out
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                    <DropdownMenuSeparator />
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <GoogleSignIn />
-              ))}
+            <PresetActions clearPreset={clearPreset} />
           </div>
         </div>
         <Separator />
@@ -433,9 +499,8 @@ export default function PlaygroundPage() {
                 </div>
                 <div className="md:order-1 h-full w-full flex flex-col gap-2 ">
                   <TabsContent
-                    forceMount
                     value="input"
-                    className=" data-[state=inactive]:hidden mt-0 border-0 p-0 flex gap-2"
+                    className="mt-0 border-0 p-0 flex gap-2"
                   >
                     <div className="flex flex-col w-full h-full space-y-4">
                       <SkeletonWrapper
@@ -478,7 +543,18 @@ export default function PlaygroundPage() {
                             input={input}
                             setInput={setInput}
                           />
-                          <Label htmlFor="instructions">System Prompt</Label>
+                          <div className="flex items-center space-x-2 justify-between">
+                            <Label htmlFor="instructions">System Prompt</Label>{" "}
+                            <div className="flex items-center space-x-2">
+                              <Label htmlFor="style">Want a Quick Setup?</Label>
+                              <PresetSelector
+                                presets={presets}
+                                selectedPreset={selectedPreset}
+                                setSelectedPreset={setSelectedPreset}
+                              />
+                            </div>
+                          </div>
+
                           <Textarea
                             id="instructions"
                             className="flex-1 min-h-[10vh] w-full"
@@ -519,8 +595,7 @@ export default function PlaygroundPage() {
                   </TabsContent>
                   <TabsContent
                     value="edit"
-                    forceMount
-                    className=" data-[state=inactive]:hidden mt-0 border-0 p-0 flex gap-10 flex-col"
+                    className=" mt-0 border-0 p-0 flex gap-10 flex-col justify-start"
                   >
                     <VerticalStepper step={step} handleStep={setStep} />
                     <div className="flex w-full space-x-9 h-full">
@@ -599,18 +674,19 @@ export default function PlaygroundPage() {
                           </Button>
                         </div>
                       </div>
-                      <div className="flex w-full h-full flex-col space-y-2">
-                        <SkeletonWrapper loading={loading}>
+
+                      <SkeletonWrapper loading={loading}>
+                        <div className="flex w-full h-[50vh] flex-col gap-4">
                           <Label htmlFor="input">Preview</Label>
                           <Textarea
                             id="preview"
                             placeholder="Here is the preview of the output for this step."
-                            className="flex-1 min-h-[40vh] h-full w-full"
+                            className="flex-1 h-full w-full"
                             value={data?.categories![step].preview}
                             readOnly
                           />
-                        </SkeletonWrapper>
-                      </div>
+                        </div>
+                      </SkeletonWrapper>
                     </div>
                     {step == 5 && (
                       <Button
@@ -628,11 +704,15 @@ export default function PlaygroundPage() {
                   >
                     <div className="flex flex-1 flex-col space-y-2 max-h-[70vh] p-10">
                       <div className="flex items-center justify-between h-full flex-1 w-full">
-                        <Label htmlFor="input">
-                          {" "}
-                          Refining your output: click save to take the latest
-                          one to be your final response
-                        </Label>
+                        <HoverCard>
+                          <HoverCardTrigger>
+                            <Label htmlFor="input"> Refining your output</Label>
+                          </HoverCardTrigger>
+                          <HoverCardContent>
+                            click save to take the latest one to be your final
+                            response
+                          </HoverCardContent>
+                        </HoverCard>
                         <Button
                           onClick={() => {
                             setComparisonUnlock(true);
@@ -640,7 +720,19 @@ export default function PlaygroundPage() {
                           }}
                           disabled={loading}
                         >
-                          {loading ? <Spinner /> : "Happy with Result? View Final Prompt"}
+                          {loading ? (
+                            <Spinner />
+                          ) : (
+                            <HoverCard>
+                              <HoverCardTrigger>
+                                <Label htmlFor="input">View Comparison</Label>
+                              </HoverCardTrigger>
+                              <HoverCardContent>
+                                Happy with the output? Click to view the final
+                                output
+                              </HoverCardContent>
+                            </HoverCard>
+                          )}
                         </Button>
                       </div>
 
@@ -671,9 +763,13 @@ export default function PlaygroundPage() {
                         });
                         toast.success("Final output set successfully!");
                       }}
-                      disabled={loading || lastAIMessage==null}
+                      disabled={loading || lastAIMessage == null}
                     >
-                      {loading ? <Spinner /> : "Replace Final Output as Latest Prompt"}
+                      {loading ? (
+                        <Spinner />
+                      ) : (
+                        "Replace Final Output as Latest Prompt"
+                      )}
                     </Button>
                   </TabsContent>
                   <TabsContent value="compare">

@@ -36,7 +36,7 @@ export function BeforeAfterPage({
             <Textarea
               readOnly
               value={inputPrompt}
-              className="h-full max-h-[60vh] resize-none bg-secondary text-foreground"
+              className="h-[40vh] resize-none bg-secondary text-foreground"
             />
             {onEditPrompt && (
               <Button
@@ -59,7 +59,7 @@ export function BeforeAfterPage({
             <Textarea
               readOnly
               value={outputResult}
-              className="h-full max-h-[60vh] resize-none bg-secondary text-foreground"
+              className="h-[40vh] resize-none bg-secondary text-foreground"
             />
             {onCopyOutput && (
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">

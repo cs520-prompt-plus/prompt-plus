@@ -1,10 +1,10 @@
 "use client";
 import googleLogo from "@/public/google.png";
-import { Button } from "../ui/button";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
-import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+import { HoverBorderGradient } from "../ui/hover-border-gradient";
 
 function GoogleSignIn() {
   const searchParams = useSearchParams();
@@ -17,10 +17,17 @@ function GoogleSignIn() {
 
   return (
     <Suspense>
-      <Button color="primary" onClick={handleClick} variant="ghost">
-        <Image src={googleLogo} alt="Google Logo" width={20} height={20} />
-        Login
-      </Button>
+      <div className="m-40 flex justify-center text-center">
+        <HoverBorderGradient
+          containerClassName="rounded-full"
+          as="button"
+          className="dark:bg-black bg-white text-black dark:text-white flex items-center space-x-2"
+          onClick={handleClick}
+        >
+          <Image src={googleLogo} alt="Google Logo" width={20} height={20} />
+          <span>Sign in</span>
+        </HoverBorderGradient>
+      </div>
     </Suspense>
   );
 }

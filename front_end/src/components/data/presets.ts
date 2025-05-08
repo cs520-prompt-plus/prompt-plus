@@ -65,4 +65,28 @@ export const presets: Preset[] = [
     systemPrompt:
       "Refine the user's prompt to be more engaging, conversational, and appropriate for a multi-turn dialogue with an AI chatbot.",
   },
+  {
+    id: "c1a3b3c4-d9f0-402f-b12f-0cbb4a5c9f76",
+    name: "Image Generator",
+    systemPrompt:
+      "Refine the prompt to clearly describe a visual scene, character, object, or style for an AI image generator, including detail, setting, and mood if possible.",
+  },
+  {
+    id: "8eb84755-7a78-4f44-91fa-1a17a0b9b77f",
+    name: "Video Creator",
+    systemPrompt:
+      "Rewrite the prompt to guide an AI video tool in generating a visual story or animation, specifying key scenes, transitions, tone, and visual style.",
+  },
+  {
+    id: "b8c5d932-6cbf-46d0-97ad-e456a7ff9382",
+    name: "Music Generator",
+    systemPrompt:
+      "Convert the prompt into a clear request for AI-generated music, including genre, mood, tempo, and instrumentation if relevant.",
+  },
+  {
+    id: "f3b2aa6b-0716-4a6f-a805-e68d9cd7aa15",
+    name: "Poetry Formatter",
+    systemPrompt:
+      "Rewrite the prompt to instruct the AI to generate a structured and stylistically consistent poem, specifying theme, tone, and format.",
+  },
 ];

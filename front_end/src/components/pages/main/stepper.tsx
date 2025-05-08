@@ -11,12 +11,20 @@ import {
 } from "@progress/kendo-svg-icons";
 
 const items = [
-  { label: "Input Semantics", svgIcon: documentManagerIcon },
-  { label: "Output Customization", svgIcon: sparklesIcon },
-  { label: "Error Identification", svgIcon: dataIcon },
-  { label: "Prompt Improvement", svgIcon: eyeIcon },
-  { label: "Interaction", svgIcon: inheritedIcon },
-  { label: "Context Control", svgIcon: gearIcon },
+  { label: "", svgIcon: documentManagerIcon },
+  { label: "", svgIcon: sparklesIcon },
+  { label: "", svgIcon: dataIcon },
+  { label: "", svgIcon: eyeIcon },
+  { label: "", svgIcon: inheritedIcon },
+  { label: "", svgIcon: gearIcon },
+];
+const labels = [
+  "Input Semantics",
+  "Output Customization",
+  "Error Identification",
+  "Improvement",
+  "Interaction",
+  "Context Control",
 ];
 
 interface VerticalStepperProps {
@@ -29,12 +37,15 @@ export const VerticalStepper: React.FC<VerticalStepperProps> = ({
   handleStep,
 }) => {
   return (
-    <Stepper
-      value={step}
-      onChange={(event: StepperChangeEvent) => handleStep(event.value)}
-      items={items}
-      orientation="horizontal"
-      style={{ width: "100%" }}
-    />
+    <div className="flex flex-col items-center justify-center w-full h-full gap-4 bg-background">
+      <Stepper
+        value={step}
+        onChange={(event: StepperChangeEvent) => handleStep(event.value)}
+        items={items}
+        orientation="horizontal"
+        style={{ width: "100%" }}
+      />
+      <h1 className="text-xl font-bold">{labels[step]}</h1>
+    </div>
   );
 };
