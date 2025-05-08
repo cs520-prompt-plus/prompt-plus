@@ -60,8 +60,8 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
-import GoogleSignIn from "../auth/GoogleSignin";
-import { Checkbox } from "../ui/checkbox";
+import GoogleSignIn from "@/components/auth/GoogleSignin";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -70,18 +70,13 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { SkeletonWrapper } from "../ui/skeleton-wrapper";
-import { Spinner } from "../ui/spinner";
-import { ChatDemo } from "./main/chatBot";
-import { BeforeAfterPage } from "./main/comparison";
-import { PromptInput } from "./main/prompt-input";
-import { VerticalStepper } from "./main/stepper";
-
-export const metadata: Metadata = {
-  title: "Playground",
-  description: "The OpenAI Playground built using the components.",
-};
+} from "@/components/ui/select";
+import { SkeletonWrapper } from "@/components/ui/skeleton-wrapper";
+import { Spinner } from "@/components/ui/spinner";
+import { ChatDemo } from "@/components/pages/main/chatBot";
+import { BeforeAfterPage } from "@/components/pages/main/comparison";
+import { PromptInput } from "@/components/pages/main/prompt-input";
+import { VerticalStepper } from "@/components/pages/main/stepper";
 
 export default function PlaygroundPage() {
   const [step, setStep] = React.useState(0);
@@ -289,36 +284,36 @@ export default function PlaygroundPage() {
             {isClient &&
               (status === "loading" ? (
                 <Spinner />
-              ) : status === "authenticated" ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger>
-                    <Image
-                      src={(session.user?.image as string) ?? ""}
-                      alt="User Avatar"
-                      width={40}
-                      height={40}
-                      className="rounded-full border-2 border-primary-500 dark:border-primary-400"
-                    />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem>
-                        <p className="font-semibold">{session.user?.email}</p>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        color="danger"
-                        onClick={() => signOut({ callbackUrl: currentPath })}
-                      >
-                        Log Out
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                    <DropdownMenuSeparator />
-                  </DropdownMenuContent>
-                </DropdownMenu>
               ) : (
-                <GoogleSignIn />
+                status === "authenticated" && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <Image
+                        src={(session.user?.image as string) ?? ""}
+                        alt="User Avatar"
+                        width={40}
+                        height={40}
+                        className="rounded-full border-2 border-primary-500 dark:border-primary-400"
+                      />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                      <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem>
+                          <p className="font-semibold">{session.user?.email}</p>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          color="danger"
+                          onClick={() => signOut({ callbackUrl: currentPath })}
+                        >
+                          Log Out
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                      <DropdownMenuSeparator />
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )
               ))}
           </div>
         </div>
