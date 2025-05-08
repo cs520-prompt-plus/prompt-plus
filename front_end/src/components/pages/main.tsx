@@ -151,7 +151,7 @@ export default function PlaygroundPage() {
       setOutputUnlock(false);
 
       toast.success(
-        "Category applied successfully! You can now view the output."
+        "Category applied successfully! You can now view the new preview for this category. Previews need to be merged to view final output."
       );
     } catch (error) {
       toast.error("Failed to apply category. Try again.");
