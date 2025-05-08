@@ -14,7 +14,7 @@ const items = [
   { label: "Input Semantics", svgIcon: documentManagerIcon },
   { label: "Output Customization", svgIcon: sparklesIcon },
   { label: "Error Identification", svgIcon: dataIcon },
-  { label: "Prompt Improvement", svgIcon: eyeIcon },
+  { label: "Improvement", svgIcon: eyeIcon },
   { label: "Interaction", svgIcon: inheritedIcon },
   { label: "Context Control", svgIcon: gearIcon },
 ];

@@ -9,11 +9,15 @@ import {
 import { patternDescriptions } from "@/app/constants/enum";
 import { Model, models, types } from "@/components/data/models";
 import { Preset, presets } from "@/components/data/presets";
+import { ChatDemo } from "@/components/pages/main/chatBot";
+import { BeforeAfterPage } from "@/components/pages/main/comparison";
 import { MaxLengthSelector } from "@/components/pages/main/maxlength-selector";
 import { ModelSelector } from "@/components/pages/main/model-selector";
 import { PresetActions } from "@/components/pages/main/preset-actions";
 import { PresetSelector } from "@/components/pages/main/preset-selector";
 import { PresetShare } from "@/components/pages/main/preset-share";
+import { PromptInput } from "@/components/pages/main/prompt-input";
+import { VerticalStepper } from "@/components/pages/main/stepper";
 import { TemperatureSelector } from "@/components/pages/main/temperature-selector";
 import { TopPSelector } from "@/components/pages/main/top-p-selector";
 import {
@@ -24,11 +28,11 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -39,7 +43,18 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { SkeletonWrapper } from "@/components/ui/skeleton-wrapper";
+import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -54,29 +69,10 @@ import {
   Settings,
   TextCursorInput,
 } from "lucide-react";
-import { Metadata } from "next";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
-import GoogleSignIn from "@/components/auth/GoogleSignin";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { SkeletonWrapper } from "@/components/ui/skeleton-wrapper";
-import { Spinner } from "@/components/ui/spinner";
-import { ChatDemo } from "@/components/pages/main/chatBot";
-import { BeforeAfterPage } from "@/components/pages/main/comparison";
-import { PromptInput } from "@/components/pages/main/prompt-input";
-import { VerticalStepper } from "@/components/pages/main/stepper";
 
 export default function PlaygroundPage() {
   const [step, setStep] = React.useState(0);
@@ -89,10 +85,7 @@ export default function PlaygroundPage() {
   const [data, setData] = React.useState<ResponseCreateResponse | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [style, setStyle] = React.useState("improve");
-  const { data: session, status } = useSession();
-  const [isClient, setIsClient] = React.useState(false);
   const [selectedPreset, setSelectedPreset] = React.useState<Preset>();
-  const currentPath = usePathname();
   const [lastAIMessage, setLastAIMessage] = React.useState<UIMessage | null>(
     null
   );
@@ -103,10 +96,6 @@ export default function PlaygroundPage() {
   const setDataImmer = (updater: (draft: ResponseCreateResponse) => void) => {
     setData((prev) => produce(prev, updater));
   };
-
-  React.useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   React.useEffect(() => {
     if (data) {
@@ -192,6 +181,8 @@ export default function PlaygroundPage() {
 
       setData(enhancedResponse);
       setInput(enhancedResponse.input);
+      setEditUnLock(true);
+      setOutputUnlock(true);
       setRefinePrompt(enhancedResponse.output);
       toast.success("Response created successfully!");
     } catch (error) {
@@ -288,41 +279,25 @@ export default function PlaygroundPage() {
             <div className="hidden space-x-2 md:flex">
               <PresetShare />
             </div>
-            <PresetActions />
-            {isClient &&
-              (status === "loading" ? (
-                <Spinner />
-              ) : (
-                status === "authenticated" && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger>
-                      <Image
-                        src={(session.user?.image as string) ?? ""}
-                        alt="User Avatar"
-                        width={40}
-                        height={40}
-                        className="rounded-full border-2 border-primary-500 dark:border-primary-400"
-                      />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
-                      <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem>
-                          <p className="font-semibold">{session.user?.email}</p>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          color="danger"
-                          onClick={() => signOut({ callbackUrl: currentPath })}
-                        >
-                          Log Out
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                      <DropdownMenuSeparator />
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )
-              ))}
+            <PresetActions
+              clearPreset={() => {
+                setStep(0);
+                setSelectedModel(models[0]);
+                setInput("");
+                setTab("input");
+                setEditUnLock(false);
+                setOutputUnlock(false);
+                setComparisonUnlock(false);
+                setData(null);
+                setLoading(false);
+                setStyle("improve");
+                setSelectedPreset(undefined);
+                setLastAIMessage(null);
+                setValid(false);
+                setPreviewUpdated(false);
+                setRefinePrompt("");
+              }}
+            />
           </div>
         </div>
         <Separator />
@@ -433,9 +408,8 @@ export default function PlaygroundPage() {
                 </div>
                 <div className="md:order-1 h-full w-full flex flex-col gap-2 ">
                   <TabsContent
-                    forceMount
                     value="input"
-                    className=" data-[state=inactive]:hidden mt-0 border-0 p-0 flex gap-2"
+                    className="mt-0 border-0 p-0 flex gap-2"
                   >
                     <div className="flex flex-col w-full h-full space-y-4">
                       <SkeletonWrapper
@@ -519,8 +493,7 @@ export default function PlaygroundPage() {
                   </TabsContent>
                   <TabsContent
                     value="edit"
-                    forceMount
-                    className=" data-[state=inactive]:hidden mt-0 border-0 p-0 flex gap-10 flex-col"
+                    className=" mt-0 border-0 p-0 flex gap-10 flex-col"
                   >
                     <VerticalStepper step={step} handleStep={setStep} />
                     <div className="flex w-full space-x-9 h-full">

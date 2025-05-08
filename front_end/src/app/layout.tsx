@@ -1,12 +1,12 @@
 "use client";
 import { ThemeProvider } from "@/components/provider/theme-provider";
-import { Navbar } from "@/components/ui/navbar";
 import { Toaster } from "@/components/ui/sonner";
 import "@progress/kendo-theme-default/dist/all.css";
 import { SessionProvider } from "next-auth/react";
 import { Geist, Geist_Mono } from "next/font/google";
 import React, { Suspense } from "react";
 import "./globals.css";
+import { SideBarWrapper } from "@/components/layout/side-bar-wrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,8 +37,7 @@ export default function RootLayout({
         >
           <SessionProvider>
             <Suspense fallback="loading">
-              {children}
-              <Navbar />
+              <SideBarWrapper>{children}</SideBarWrapper>
             </Suspense>
           </SessionProvider>{" "}
         </ThemeProvider>

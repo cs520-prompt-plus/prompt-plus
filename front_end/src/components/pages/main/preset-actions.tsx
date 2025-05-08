@@ -31,7 +31,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
-export function PresetActions() {
+export function PresetActions({ clearPreset }: { clearPreset: () => void }) {
   const [open, setIsOpen] = React.useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
 
@@ -53,7 +53,7 @@ export function PresetActions() {
             onSelect={() => setShowDeleteDialog(true)}
             className="text-red-600"
           >
-            Delete preset
+            Clear preset
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -96,8 +96,8 @@ export function PresetActions() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This preset will no longer be
-              accessible by you or others you&apos;ve shared it with.
+              This action cannot be undone. This will clear all of existing
+              results and input
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -105,14 +105,15 @@ export function PresetActions() {
             <Button
               variant="destructive"
               onClick={() => {
+                clearPreset();
                 setShowDeleteDialog(false);
-                toast("Preset deleted successfully.", {
-                  description: "This preset has been deleted.",
+                toast("Preset clear successfully.", {
+                  description: "This preset has been cleared.",
                   duration: 3000,
                 });
               }}
             >
-              Delete
+              Clear
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
