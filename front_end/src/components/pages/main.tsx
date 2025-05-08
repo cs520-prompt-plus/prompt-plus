@@ -5,6 +5,7 @@ import {
   updateCategoryPatterns,
   updateResponse,
   createResponse,
+  getResponseById,
 } from "@/app/api/responses/backend-service";
 import { Model, models, types } from "@/components/data/models";
 import { presets } from "@/components/data/presets";
@@ -173,7 +174,10 @@ export default function PlaygroundPage() {
       const payload = {
         input: input,
       };
-      const res = await createResponse(payload);
+      // const res = await createResponse(payload);
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+      const res = await getResponseById("dd088c20-fa2b-4d5c-8388-daa1cb9f8669");
+
       console.log("Response received:", res);
 
       const response = res.data;
@@ -672,11 +676,7 @@ export default function PlaygroundPage() {
                       {loading ? <Spinner /> : "Choose as Final Output"}
                     </Button>
                   </TabsContent>
-                  <TabsContent
-                    value="compare"
-                    forceMount
-                    className=" data-[state=inactive]:hidden mt-0 border-0 p-0 flex gap-4 flex-col"
-                  >
+                  <TabsContent value="compare">
                     <BeforeAfterPage
                       inputPrompt={data?.input ?? ""}
                       outputResult={data?.output ?? ""}
