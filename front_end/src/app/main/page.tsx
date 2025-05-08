@@ -176,6 +176,12 @@ export default function PlaygroundPage() {
       const updatedCategory = res.data;
 
       console.log("API response:", updatedCategory);
+      const enrichedPatterns = updatedCategory.patterns.map((pattern) => ({
+        ...pattern,
+        description: patternDescriptions[pattern.pattern as keyof typeof patternDescriptions] || "",
+      }));
+      updatedCategory['patterns'] = enrichedPatterns
+      console.log(updatedCategory)
 
       setDataImmer((draft) => {
         if (!draft.categories) return;
