@@ -9,11 +9,36 @@ they should include in future prompts.
 
 ## Running the Project
 
-1. Create your `.env` file in the backend project directory, you can copy `.env.sample` as the base for this.
-2. Run the following command to start the services
+1. Create your `.env` file in the root project directory, you can copy `.env.sample` as the base for this.
+- Retrieve your Google Client ID and Secret via this instructions: https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid
+- Retrieve your OpenAI API Key via this instructions: https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key
+- Retrieve your NextAuth Secret via this instructions: https://next-auth.js.org/configuration/options
 
+2. Run the following command to start the services
 ```sh
 docker compose up -d --build
 ```
 
-3. Access frontend at localhost:3000 and Prisma Studio at localhost:5555
+3. Access 
+- Frontend at localhost:3000
+- Prisma Studio at localhost:5555 
+- Backend API Documentations at localhost:8000/docs
+
+---
+
+## File Structure
+
+```
+prompt-plus/
+├── backend/
+│   ├── app/
+│   ├── prisma/
+│   └── Dockerfile
+├── frontend/
+│   ├── src/
+│   └── Dockerfile
+├── .env
+├── docker-compose.yml
+├── docker-compose.prod.yml
+└── BUILD.md
+```
