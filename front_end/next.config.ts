@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
     config.externals = [...config.externals, { canvas: "canvas" }];
     return config;
   },
-
+  devIndicators: false,
   images: {
     remotePatterns: [
       {
