@@ -43,23 +43,21 @@ def get_token(token: str) -> dict[str, Any]:
 
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        
-        
+        # Allow access to OpenAPI and docs without auth
+        if request.url.path in ["/docs", "/openapi.json", "/redoc"]:
+            return await call_next(request)
+
         session_token = request.cookies.get("next-auth.session-token")
         if session_token:
-            
-            session = get_token(session_token)
-
-
-            if session:
-                email = session.get("email")
-                user = await prisma.user.find_unique(
-                    where={'email': email},
-                )
-
-                if user:
-                    # Store the user in the request state
-                    request.state.userId = user.id
-                    return await call_next(request)
+            try:
+                session = get_token(session_token)
+                if session:
+                    email = session.get("email")
+                    user = await prisma.user.find_unique(where={'email': email})
+                    if user:
+                        request.state.userId = user.id
+                        return await call_next(request)
+            except Exception:
+                pass  # Optional: log the error for debugging
 
         return JSONResponse({"message": "Unauthorized"}, status_code=401)

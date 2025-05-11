@@ -1,13 +1,18 @@
 import pytest
 from fastapi import HTTPException
 
-# The `client` and `prisma_mock` fixtures come from conftest.py
+# The `client` and `prisma_mock` fixtures are defined in conftest.py
 
 @pytest.mark.asyncio
 async def test_root(client):
-    r = client.get("/")
-    assert r.status_code == 200
-    assert r.json() == {"message": "Your app is working!"}
+    """
+    Test the root endpoint to ensure it returns a 200 OK status
+    and the expected JSON message.
+    """
+    response = client.get("/")
+    
+    assert response.status_code == 200
+    assert response.json() == {"message": "Your app is working!"}
 
 # def test_create_user(client, prisma_mock):
 #     sample = {"name":"Alice","email":"a@x.com","password":"pw"}
